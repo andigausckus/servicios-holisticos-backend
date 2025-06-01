@@ -1,25 +1,31 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+const router = express.Router();
+const Terapeuta = require("../models/Terapeuta");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// ✅ Middleware necesario para que funcione el formulario HTML
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // <-- ESTA LÍNEA ES CLAVE
-
-// Conexión a MongoDB
-mongoose.connect("mongodb+srv://AndiUser:Andiog34_@<tu-cluster>.mongodb.net/servicios-holisticos?retryWrites=true&w=majority")
-  .then(() => console.log("Conectado a MongoDB"))
-  .catch(err => console.error("Error de conexión:", err));
-
-// Rutas
-const terapeutasRoutes = require("./routes/terapeutas");
-app.use("/terapeutas", terapeutasRoutes);
-
-// Inicio del servidor
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en puerto ${PORT}`);
+// Obtener todos los terapeutas
+router.get("/", async (req, res) => {
+  try {
+    const terapeutas = await Terapeuta.find();
+    res.json(terapeutas);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
+
+// Crear un nuevo terapeuta (ruta POST)
+router.post("/", async (req, res) => {
+  try {
+    const nuevoTerapeuta = new Terapeuta({
+      nombre: req.body.nombre,
+      descripcion: req.body.descripcion,
+      especialidad: req.body.especialidad
+    });
+
+    const terapeutaGuardado = await nuevoTerapeuta.save();
+    res.status(201).json(terapeutaGuardado);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+module.exports = router;
