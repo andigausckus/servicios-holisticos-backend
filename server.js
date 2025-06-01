@@ -1,15 +1,18 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const app = express();
-app.use(cors());
-const cors = require("cors");
+const cors = require("cors");       // <-- acá
 
+const app = express();
+
+app.use(cors());                   // <-- acá
 app.use(express.json());
 
 // Rutas
 const terapeutasRoutes = require("./routes/terapeutas");
 app.use("/api/terapeutas", terapeutasRoutes);
+
+// Otros endpoints, conexión, puerto, etc.
 
 app.get("/api/test", (req, res) => {
   res.json({ mensaje: "✅ API funcionando correctamente" });
