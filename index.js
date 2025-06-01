@@ -5,10 +5,10 @@ const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// ✅ Middleware necesario para que funcione el formulario HTML
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true })); // <-- ESTA LÍNEA ES CLAVE
 
 // Conexión a MongoDB
 mongoose.connect("mongodb+srv://AndiUser:Andiog34_@<tu-cluster>.mongodb.net/servicios-holisticos?retryWrites=true&w=majority")
