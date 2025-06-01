@@ -12,6 +12,22 @@ router.get("/", async (req, res) => {
   }
 });
 
+// Crear nuevo terapeuta
+router.post("/", async (req, res) => {
+  try {
+    const nuevoTerapeuta = new Terapeuta({
+      nombre: req.body.nombre,
+      descripcion: req.body.descripcion,
+      especialidad: req.body.especialidad,
+    });
+
+    const terapeutaGuardado = await nuevoTerapeuta.save();
+    res.status(201).json(terapeutaGuardado);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
 // Crear un nuevo terapeuta
 router.post("/", async (req, res) => {
   const { nombre, descripcion, especialidad } = req.body;
