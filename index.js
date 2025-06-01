@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Conexión a MongoDB
 mongoose.connect("mongodb+srv://AndiUser:Andiog34_@<tu-cluster>.mongodb.net/servicios-holisticos?retryWrites=true&w=majority")
