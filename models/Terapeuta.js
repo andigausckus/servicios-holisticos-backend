@@ -2,10 +2,8 @@ const mongoose = require("mongoose");
 
 const terapeutaSchema = new mongoose.Schema({
   nombre: String,
-  especialidad: String,
   descripcion: String,
-  email: String,
-  telefono: String,
+  especialidad: String  // <-- Campo agregado
 });
 
 module.exports = mongoose.model("Terapeuta", terapeutaSchema);
