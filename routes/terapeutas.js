@@ -15,31 +15,29 @@ router.get("/", async (req, res) => {
 
 // Crear un nuevo terapeuta (ruta POST)
 router.post("/", async (req, res) => {
-  const { nombre, email, password, especialidad, modalidad, ubicacion } = req.body;
-
-  const nuevoTerapeuta = new Terapeuta({
-    nombre,
+  const {
+    nombreCompleto,
     email,
-    password,
-    especialidad,
+    contraseña,
+    especialidades,
     modalidad,
-    ubicacion,
-  });
-
-const saltRounds = 10;
-
-const hashedPassword = await bcrypt.hash(contraseña, saltRounds);
-
-const nuevoTerapeuta = new Terapeuta({
-  nombreCompleto,
-  email,
-  contraseña: hashedPassword,
-  especialidades,
-  modalidad,
-  ubicacion
-});
+    ubicacion
+  } = req.body;
 
   try {
+    // Encriptar la contraseña antes de guardar
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(contraseña, saltRounds);
+
+    const nuevoTerapeuta = new Terapeuta({
+      nombreCompleto,
+      email,
+      contraseña: hashedPassword,
+      especialidades,
+      modalidad,
+      ubicacion
+    });
+
     const terapeutaGuardado = await nuevoTerapeuta.save();
     res.status(201).json(terapeutaGuardado);
   } catch (err) {
