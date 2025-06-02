@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken"); // ✅ Agregado
 const Terapeuta = require("../models/Terapeuta");
+
+const secret = process.env.JWT_SECRET; // ✅ Se toma el secreto desde .env
 
 // Obtener todos los terapeutas
 router.get("/", async (req, res) => {
@@ -25,7 +28,6 @@ router.post("/", async (req, res) => {
   } = req.body;
 
   try {
-    // Encriptar la contraseña antes de guardar
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(contraseña, saltRounds);
 
@@ -45,7 +47,35 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ NUEVO: Obtener un terapeuta por ID
+// ✅ NUEVO: Ruta de login
+router.post("/login", async (req, res) => {
+  const { email, contraseña } = req.body;
+
+  try {
+    const terapeuta = await Terapeuta.findOne({ email });
+    if (!terapeuta) {
+      return res.status(401).json({ message: "Credenciales inválidas" });
+    }
+
+    const passwordOk = await bcrypt.compare(contraseña, terapeuta.contraseña);
+    if (!passwordOk) {
+      return res.status(401).json({ message: "Credenciales inválidas" });
+    }
+
+    // ✅ Generar token JWT
+    const token = jwt.sign(
+      { id: terapeuta._id, email: terapeuta.email },
+      secret,
+      { expiresIn: "2h" }
+    );
+
+    res.json({ token, terapeuta: { id: terapeuta._id, nombre: terapeuta.nombreCompleto } });
+  } catch (err) {
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+});
+
+// Obtener terapeuta por ID
 router.get("/:id", async (req, res) => {
   try {
     const terapeuta = await Terapeuta.findById(req.params.id);
