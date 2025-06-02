@@ -10,7 +10,7 @@ function auth(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.terapeuta = decoded; // El objeto con el _id y email
+    req.user = decoded; // ✅ CAMBIO AQUÍ
     next();
   } catch (err) {
     res.status(401).json({ message: "Token inválido." });
