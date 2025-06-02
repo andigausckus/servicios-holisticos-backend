@@ -1,11 +1,11 @@
-const auth = require("../auth"); // si está en el mismo nivel que /routes
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken"); // ✅ Agregado
+const jwt = require("jsonwebtoken");
 const Terapeuta = require("../models/Terapeuta");
+const auth = require("../auth"); // ✅ Asegurate que el archivo auth.js esté en la raíz del proyecto
 
-const secret = process.env.JWT_SECRET; // ✅ Se toma el secreto desde .env
+const secret = process.env.JWT_SECRET;
 
 // Obtener todos los terapeutas
 router.get("/", async (req, res) => {
@@ -48,7 +48,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ NUEVO: Ruta de login
+// ✅ Ruta de login
 router.post("/login", async (req, res) => {
   const { email, contraseña } = req.body;
 
@@ -63,7 +63,6 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    // ✅ Generar token JWT
     const token = jwt.sign(
       { id: terapeuta._id, email: terapeuta.email },
       secret,
@@ -73,6 +72,19 @@ router.post("/login", async (req, res) => {
     res.json({ token, terapeuta: { id: terapeuta._id, nombre: terapeuta.nombreCompleto } });
   } catch (err) {
     res.status(500).json({ message: "Error en el servidor" });
+  }
+});
+
+// ✅ Ruta protegida para obtener perfil
+router.get("/perfil", auth, async (req, res) => {
+  try {
+    const terapeuta = await Terapeuta.findById(req.terapeuta._id).select("-contraseña");
+    if (!terapeuta) {
+      return res.status(404).json({ message: "Terapeuta no encontrado" });
+    }
+    res.json(terapeuta);
+  } catch (err) {
+    res.status(500).json({ message: "Error al obtener perfil" });
   }
 });
 
