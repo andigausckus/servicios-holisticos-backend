@@ -25,6 +25,9 @@ app.use("/api/terapeutas", terapeutasRoutes);
 const reservasRoutes = require("./routes/reservas.routes");
 app.use("/api/reservas", reservasRoutes);
 
+const loginRouter = require("./routes/login");
+app.use("/api/login", loginRouter);
+
 // Ruta de test
 app.get("/api/test", (req, res) => {
   res.json({ mensaje: "✅ API funcionando correctamente" });
