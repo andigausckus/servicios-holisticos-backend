@@ -25,6 +25,20 @@ router.post("/", async (req, res) => {
     ubicacion,
   });
 
+  const bcrypt = require("bcrypt");
+const saltRounds = 10;
+
+const hashedPassword = await bcrypt.hash(contraseña, saltRounds);
+
+const nuevoTerapeuta = new Terapeuta({
+  nombreCompleto,
+  email,
+  contraseña: hashedPassword,
+  especialidades,
+  modalidad,
+  ubicacion
+});
+
   try {
     const terapeutaGuardado = await nuevoTerapeuta.save();
     res.status(201).json(terapeutaGuardado);
