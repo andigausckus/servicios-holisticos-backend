@@ -10,7 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // Conexión a MongoDB
-mongoose.connect("tu_cadena_de_conexión")
+mongoose.connect("mongodb+srv://AndiUser:Andiog34_@cluster0.mongodb.net/servicios-holisticos?retryWrites=true&w=majority")
   .then(() => console.log("Conectado a MongoDB"))
   .catch(err => console.error("Error de conexión:", err));
 
@@ -20,8 +20,6 @@ app.use("/terapeutas", terapeutasRoutes);
 
 const reservasRoutes = require('./routes/reservas.routes');
 app.use('/api/reservas', reservasRoutes);
-
-app.use('/api/reservas', require('./routes/reservas.routes'));
 
 // Inicio del servidor
 app.listen(PORT, () => {
