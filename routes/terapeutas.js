@@ -1,3 +1,4 @@
+const auth = require("../auth"); // si está en el mismo nivel que /routes
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
