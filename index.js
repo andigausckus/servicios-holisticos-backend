@@ -17,6 +17,8 @@ mongoose.connect("tu_cadena_de_conexión")
 // Rutas
 const terapeutasRoutes = require("./routes/terapeutas");
 app.use("/terapeutas", terapeutasRoutes);
+const reservasRoutes = require('./routes/reservas.routes');
+app.use('/api/reservas', reservasRoutes);
 
 // Inicio del servidor
 app.listen(PORT, () => {
