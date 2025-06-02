@@ -75,10 +75,10 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ✅ Ruta protegida para obtener perfil
+// ✅ Ruta protegida para obtener perfil (corregido req.user.id)
 router.get("/perfil", auth, async (req, res) => {
   try {
-    const terapeuta = await Terapeuta.findById(req.terapeuta._id).select("-contraseña");
+    const terapeuta = await Terapeuta.findById(req.user.id).select("-contraseña");
     if (!terapeuta) {
       return res.status(404).json({ message: "Terapeuta no encontrado" });
     }
