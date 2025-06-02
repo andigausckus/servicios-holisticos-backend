@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 const Terapeuta = require("../models/Terapeuta");
 
 // Obtener todos los terapeutas
@@ -25,7 +26,6 @@ router.post("/", async (req, res) => {
     ubicacion,
   });
 
-  const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 const hashedPassword = await bcrypt.hash(contraseña, saltRounds);
