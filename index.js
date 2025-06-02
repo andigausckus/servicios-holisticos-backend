@@ -21,6 +21,8 @@ app.use("/terapeutas", terapeutasRoutes);
 const reservasRoutes = require('./routes/reservas.routes');
 app.use('/api/reservas', reservasRoutes);
 
+app.use('/api/reservas', require('./routes/reservas.routes'));
+
 // Inicio del servidor
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
