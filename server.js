@@ -28,6 +28,9 @@ app.use("/api/reservas", reservasRoutes);
 const loginRouter = require("./routes/login");
 app.use("/api/login", loginRouter);
 
+const resenasRoutes = require("./routes/resenas");
+app.use("/api/resenas", resenasRoutes);
+
 // Ruta de test
 app.get("/api/test", (req, res) => {
   res.json({ mensaje: "✅ API funcionando correctamente" });
