@@ -16,12 +16,12 @@ const TerapeutaSchema = new mongoose.Schema({
     minlength: [6, "La contraseña debe tener al menos 6 caracteres"]
   },
   fechaNacimiento: {
-    type: Date,
-    required: true
+    type: String,
+    required: [true, "La fecha de nacimiento es obligatoria"]
   },
   telefono: {
     type: String,
-    required: true,
+    required: [true, "El teléfono es obligatorio"],
     match: [/^\d{10}$/, "El número debe tener 10 dígitos"]
   },
   ubicacion: {
