@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Terapeuta = require("../models/Terapeuta");
-const auth = require("../auth"); // ✅ Asegurate que el archivo auth.js esté en la raíz del proyecto
+const auth = require("../auth");
 
 const secret = process.env.JWT_SECRET;
 
@@ -17,27 +17,29 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Crear un nuevo terapeuta (ruta POST)
+// Crear un nuevo terapeuta
 router.post("/", async (req, res) => {
   const {
-  nombreCompleto,
-  email,
-  password, // ✅ Cambiar "contraseña" por "password"
-  especialidades,
-  modalidad,
-  ubicacion
-} = req.body;
+    nombreCompleto,
+    email,
+    password,
+    especialidades,
+    modalidad,
+    ubicacion
+  } = req.body;
 
-const hashedPassword = await bcrypt.hash(password, saltRounds);
+  try {
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-const nuevoTerapeuta = new Terapeuta({
-  nombreCompleto,
-  email,
-  password: hashedPassword, // ✅ Guardar como password en la DB
-  especialidades,
-  modalidad,
-  ubicacion
-});
+    const nuevoTerapeuta = new Terapeuta({
+      nombreCompleto,
+      email,
+      password: hashedPassword,
+      especialidades,
+      modalidad,
+      ubicacion
+    });
 
     const terapeutaGuardado = await nuevoTerapeuta.save();
     res.status(201).json(terapeutaGuardado);
@@ -46,9 +48,9 @@ const nuevoTerapeuta = new Terapeuta({
   }
 });
 
-// ✅ Ruta de login
+// Login de terapeuta
 router.post("/login", async (req, res) => {
-  const { email, contraseña } = req.body;
+  const { email, password } = req.body;
 
   try {
     const terapeuta = await Terapeuta.findOne({ email });
@@ -56,7 +58,7 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    const passwordOk = await bcrypt.compare(contraseña, terapeuta.contraseña);
+    const passwordOk = await bcrypt.compare(password, terapeuta.password);
     if (!passwordOk) {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
@@ -73,10 +75,10 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ✅ Ruta protegida para obtener perfil (corregido req.user.id)
+// Ruta protegida para obtener perfil
 router.get("/perfil", auth, async (req, res) => {
   try {
-    const terapeuta = await Terapeuta.findById(req.user.id).select("-contraseña");
+    const terapeuta = await Terapeuta.findById(req.user.id).select("-password");
     if (!terapeuta) {
       return res.status(404).json({ message: "Terapeuta no encontrado" });
     }
