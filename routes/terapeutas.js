@@ -8,23 +8,13 @@ const auth = require("../auth");
 const secret = process.env.JWT_SECRET;
 
 // Obtener todos los terapeutas
-router.get("/", async (req, res) => {
-  try {
-    const terapeutas = await Terapeuta.find();
-    res.json(terapeutas);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-// Crear un nuevo terapeuta
 router.post("/", async (req, res) => {
   const {
     nombreCompleto,
     email,
     password,
-    especialidades,
-    modalidad,
+    fechaNacimiento,
+    telefono,
     ubicacion
   } = req.body;
 
@@ -36,14 +26,15 @@ router.post("/", async (req, res) => {
       nombreCompleto,
       email,
       password: hashedPassword,
-      especialidades,
-      modalidad,
+      fechaNacimiento,
+      telefono,
       ubicacion
     });
 
     const terapeutaGuardado = await nuevoTerapeuta.save();
     res.status(201).json(terapeutaGuardado);
   } catch (err) {
+    console.error("Error al registrar terapeuta:", err);
     res.status(400).json({ message: err.message });
   }
 });
