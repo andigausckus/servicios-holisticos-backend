@@ -15,7 +15,7 @@ const TerapeutaSchema = new mongoose.Schema({
     lowercase: true,
     match: [/.+@.+\..+/, "Ingrese un email válido"]
   },
-  contraseña: {
+  password: {
     type: String,
     required: [true, "La contraseña es obligatoria"],
     minlength: [6, "La contraseña debe tener al menos 6 caracteres"]
