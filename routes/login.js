@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const Terapeuta = require("../models/Terapeuta");
 
 router.post("/", async (req, res) => {
-  const { email, contraseña } = req.body;
+  const { email, password } = req.body;
 
   try {
     const terapeuta = await Terapeuta.findOne({ email });
@@ -12,7 +12,7 @@ router.post("/", async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    const contraseñaValida = await bcrypt.compare(contraseña, terapeuta.contraseña);
+    const contraseñaValida = await bcrypt.compare(password, terapeuta.password);
     if (!contraseñaValida) {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
