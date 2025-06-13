@@ -33,11 +33,16 @@ const TerapeutaSchema = new mongoose.Schema({
     trim: true
   },
   disponibilidad: [
-    {
-      dia: { type: String, required: true },
-      horas: { type: [String], required: true }
-    }
-  ]
+  {
+    dia: { type: String },
+    rangos: [
+      {
+        desde: { type: String },  // Ej: "10:00"
+        hasta: { type: String }   // Ej: "11:30"
+      }
+    ]
+  }
+]
 });
 
 module.exports = mongoose.model("Terapeuta", TerapeutaSchema);
