@@ -82,6 +82,7 @@ router.get("/perfil", auth, async (req, res) => {
 // Ruta protegida para actualizar disponibilidad
 router.put("/disponibilidad", auth, async (req, res) => {
   try {
+    console.log("REQ.BODY:", req.body);
     const { disponibilidad } = req.body;
 
     const terapeuta = await Terapeuta.findByIdAndUpdate(
