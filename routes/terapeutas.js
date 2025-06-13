@@ -79,6 +79,23 @@ router.get("/perfil", auth, async (req, res) => {
   }
 });
 
+// routes/terapeutas.js
+router.post("/disponibilidad", auth, async (req, res) => {
+  try {
+    const { disponibilidad } = req.body;
+
+    const terapeuta = await Terapeuta.findByIdAndUpdate(
+      req.user.id,
+      { disponibilidad },
+      { new: true }
+    );
+
+    res.json({ message: "Disponibilidad guardada", terapeuta });
+  } catch (error) {
+    res.status(500).json({ message: "Error al guardar disponibilidad" });
+  }
+});
+
 // Obtener terapeuta por ID
 router.get("/:id", async (req, res) => {
   try {
