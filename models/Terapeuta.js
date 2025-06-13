@@ -25,9 +25,15 @@ const TerapeutaSchema = new mongoose.Schema({
     match: [/^\d{10}$/, "El número debe tener 10 dígitos"]
   },
   ubicacion: {
-    type: String,
-    required: true
+  type: String,
+  required: true
+},
+disponibilidad: [
+  {
+    dia: { type: String },
+    horas: [String]
   }
+]
 });
 
 module.exports = mongoose.model("Terapeuta", TerapeutaSchema);
