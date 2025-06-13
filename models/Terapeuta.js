@@ -3,12 +3,15 @@ const mongoose = require("mongoose");
 const TerapeutaSchema = new mongoose.Schema({
   nombreCompleto: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    lowercase: true,
+    trim: true
   },
   password: {
     type: String,
@@ -25,15 +28,16 @@ const TerapeutaSchema = new mongoose.Schema({
     match: [/^\d{10}$/, "El número debe tener 10 dígitos"]
   },
   ubicacion: {
-  type: String,
-  required: true
-},
-disponibilidad: [
-  {
-    dia: { type: String },
-    horas: [String]
-  }
-]
+    type: String,
+    required: true,
+    trim: true
+  },
+  disponibilidad: [
+    {
+      dia: { type: String, required: true },
+      horas: { type: [String], required: true }
+    }
+  ]
 });
 
 module.exports = mongoose.model("Terapeuta", TerapeutaSchema);
