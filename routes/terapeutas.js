@@ -82,6 +82,7 @@ router.get("/perfil", auth, async (req, res) => {
 // Ruta protegida para actualizar disponibilidad
 router.put("/disponibilidad", auth, async (req, res) => {
   try {
+    console.log("📦 Disponibilidad recibida:", JSON.stringify(req.body, null, 2));
     console.log("REQ.BODY:", req.body);
     const { disponibilidad } = req.body;
 
