@@ -79,8 +79,8 @@ router.get("/perfil", auth, async (req, res) => {
   }
 });
 
-// routes/terapeutas.js
-router.post("/disponibilidad", auth, async (req, res) => {
+// Ruta protegida para actualizar disponibilidad
+router.put("/disponibilidad", auth, async (req, res) => {
   try {
     const { disponibilidad } = req.body;
 
@@ -90,8 +90,9 @@ router.post("/disponibilidad", auth, async (req, res) => {
       { new: true }
     );
 
-    res.json({ message: "Disponibilidad guardada", terapeuta });
-  } catch (error) {
+    res.json({ message: "Disponibilidad actualizada", disponibilidad: terapeuta.disponibilidad });
+  } catch (err) {
+    console.error("Error al guardar disponibilidad:", err);
     res.status(500).json({ message: "Error al guardar disponibilidad" });
   }
 });
