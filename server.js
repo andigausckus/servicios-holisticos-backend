@@ -25,9 +25,6 @@ app.use("/api/terapeutas", terapeutasRoutes);
 const reservasRoutes = require("./routes/reservas.routes");
 app.use("/api/reservas", reservasRoutes);
 
-const loginRouter = require("./routes/login");
-app.use("/api/login", loginRouter);
-
 const resenasRoutes = require("./routes/resenas");
 app.use("/api/resenas", resenasRoutes);
 
