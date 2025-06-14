@@ -112,7 +112,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-const auth = require("../middlewares/auth");
+const authMiddleware = require("../middlewares/auth");
 const Terapeuta = require("../models/Terapeuta");
 
 // Ruta protegida para obtener el perfil del terapeuta
