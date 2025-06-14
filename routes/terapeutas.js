@@ -112,4 +112,23 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+const auth = require("../middlewares/auth");
+const Terapeuta = require("../models/Terapeuta");
+
+// Ruta protegida para obtener el perfil del terapeuta
+router.get("/perfil", auth, async (req, res) => {
+  try {
+    const terapeuta = await Terapeuta.findById(req.user.id).select("-password");
+
+    if (!terapeuta) {
+      return res.status(404).json({ message: "Terapeuta no encontrado" });
+    }
+
+    res.json(terapeuta);
+  } catch (error) {
+    console.error("❌ Error al obtener perfil:", error);
+    res.status(500).json({ message: "Error al obtener perfil del terapeuta" });
+  }
+});
+
 module.exports = router;
