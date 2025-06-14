@@ -7,7 +7,7 @@ const auth = require("../auth");
 
 const secret = process.env.JWT_SECRET;
 
-// Obtener todos los terapeutas
+// Registrar nuevo terapeuta
 router.post("/", async (req, res) => {
   const {
     nombreCompleto,
@@ -66,24 +66,26 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// Ruta protegida para obtener perfil
+// Obtener perfil del terapeuta (protegido)
 router.get("/perfil", auth, async (req, res) => {
   try {
     const terapeuta = await Terapeuta.findById(req.user.id).select("-password");
+
     if (!terapeuta) {
       return res.status(404).json({ message: "Terapeuta no encontrado" });
     }
+
     res.json(terapeuta);
-  } catch (err) {
-    res.status(500).json({ message: "Error al obtener perfil" });
+  } catch (error) {
+    console.error("❌ Error al obtener perfil:", error);
+    res.status(500).json({ message: "Error al obtener perfil del terapeuta" });
   }
 });
 
-// Ruta protegida para actualizar disponibilidad
+// Actualizar disponibilidad horaria (protegido)
 router.put("/disponibilidad", auth, async (req, res) => {
   try {
     console.log("📦 Disponibilidad recibida:", JSON.stringify(req.body, null, 2));
-    console.log("REQ.BODY:", req.body);
     const { disponibilidad } = req.body;
 
     const terapeuta = await Terapeuta.findByIdAndUpdate(
@@ -109,25 +111,6 @@ router.get("/:id", async (req, res) => {
     res.json(terapeuta);
   } catch (err) {
     res.status(500).json({ message: "Error al obtener terapeuta" });
-  }
-});
-
-const authMiddleware = require("../middlewares/auth");
-const Terapeuta = require("../models/Terapeuta");
-
-// Ruta protegida para obtener el perfil del terapeuta
-router.get("/perfil", auth, async (req, res) => {
-  try {
-    const terapeuta = await Terapeuta.findById(req.user.id).select("-password");
-
-    if (!terapeuta) {
-      return res.status(404).json({ message: "Terapeuta no encontrado" });
-    }
-
-    res.json(terapeuta);
-  } catch (error) {
-    console.error("❌ Error al obtener perfil:", error);
-    res.status(500).json({ message: "Error al obtener perfil del terapeuta" });
   }
 });
 
