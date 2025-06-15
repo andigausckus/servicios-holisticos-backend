@@ -18,6 +18,11 @@ mongoose.connect("tu_cadena_de_conexión")
   .then(() => console.log("Conectado a MongoDB"))
   .catch(err => console.error("Error de conexión:", err));
 
+// Ruta directa para testear /api/servicios sin usar el router
+app.get("/api/servicios", (req, res) => {
+  res.send("✅ Ruta GET directa de /api/servicios funcionando");
+});
+
 // Rutas
 app.use("/api/terapeutas", terapeutasRoutes);
 app.use("/api/resenas", resenasRoutes);
