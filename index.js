@@ -4,7 +4,7 @@ const cors = require("cors");
 
 const resenasRoutes = require('./routes/resenas');
 const terapeutasRoutes = require("./routes/terapeutas");
-const serviciosRoutes = require("./routes/servicios");
+const serviciosRoutes = require("./routes/servicios"); // ✅ Habilitás la ruta real
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,21 +21,9 @@ mongoose.connect("tu_cadena_de_conexión")
 // Rutas
 app.use("/api/terapeutas", terapeutasRoutes);
 app.use("/api/resenas", resenasRoutes);
-app.use("/api/servicios", serviciosRoutes);
+app.use("/api/servicios", serviciosRoutes); // ✅ Ruta real de servicios
 
-// Ruta POST para crear un servicio (simple, sin base de datos, para test)
-  const { titulo } = req.body;
-
-  if (!titulo) {
-    return res.status(400).json({ error: "El título es obligatorio" });
-  }
-
-  // Aquí puedes agregar la lógica para guardar en BD
-  // Por ahora, solo respondo con el dato recibido:
-  res.status(201).json({ mensaje: "Servicio creado", titulo });
-});
-
-// Ruta de prueba (opcional)
+// Ruta de prueba para ver que el backend responde
 app.get("/", (req, res) => {
   res.send("🚀 Bienvenido a la API de Servicios Holísticos");
 });
