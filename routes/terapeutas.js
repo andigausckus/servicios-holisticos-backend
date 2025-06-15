@@ -3,7 +3,6 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Terapeuta = require("../models/Terapeuta");
-const auth = require("../auth");
 
 const secret = process.env.JWT_SECRET;
 
@@ -63,54 +62,6 @@ router.post("/login", async (req, res) => {
     res.json({ token, terapeuta: { id: terapeuta._id, nombre: terapeuta.nombreCompleto } });
   } catch (err) {
     res.status(500).json({ message: "Error en el servidor" });
-  }
-});
-
-// Obtener perfil del terapeuta (protegido)
-router.get("/perfil", auth, async (req, res) => {
-  try {
-    const terapeuta = await Terapeuta.findById(req.user.id).select("-password");
-
-    if (!terapeuta) {
-      return res.status(404).json({ message: "Terapeuta no encontrado" });
-    }
-
-    res.json(terapeuta);
-  } catch (error) {
-    console.error("❌ Error al obtener perfil:", error);
-    res.status(500).json({ message: "Error al obtener perfil del terapeuta" });
-  }
-});
-
-// Actualizar disponibilidad horaria (protegido)
-router.put("/disponibilidad", auth, async (req, res) => {
-  try {
-    console.log("📦 Disponibilidad recibida:", JSON.stringify(req.body, null, 2));
-    const { disponibilidad } = req.body;
-
-    const terapeuta = await Terapeuta.findByIdAndUpdate(
-      req.user.id,
-      { disponibilidad },
-      { new: true }
-    );
-
-    res.json({ message: "Disponibilidad actualizada", disponibilidad: terapeuta.disponibilidad });
-  } catch (err) {
-    console.error("Error al guardar disponibilidad:", err);
-    res.status(500).json({ message: "Error al guardar disponibilidad" });
-  }
-});
-
-// Obtener terapeuta por ID
-router.get("/:id", async (req, res) => {
-  try {
-    const terapeuta = await Terapeuta.findById(req.params.id);
-    if (!terapeuta) {
-      return res.status(404).json({ message: "Terapeuta no encontrado" });
-    }
-    res.json(terapeuta);
-  } catch (err) {
-    res.status(500).json({ message: "Error al obtener terapeuta" });
   }
 });
 
