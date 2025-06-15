@@ -5,6 +5,8 @@ exports.crearServicio = async (req, res) => {
     console.log("✅ Entrando al controlador crearServicio");
     console.log("Body recibido:", req.body);
     console.log("Archivo recibido:", req.file);
+    console.log("Usuario en request:", req.user);
+
 
     const nuevoServicio = new Servicio({
       titulo: req.body.titulo,
@@ -14,7 +16,7 @@ exports.crearServicio = async (req, res) => {
       duracion: req.body.duracion,
       precio: req.body.precio,
       categoria: req.body.categoria,
-      terapeuta: req.usuarioId, // viene del auth middleware
+      terapeuta: req.user.id,
       imagen: req.file ? req.file.filename : null,
     });
 
