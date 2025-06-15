@@ -2,6 +2,9 @@ const Servicio = require("../models/Servicio");
 
 const crearServicio = async (req, res) => {
   try {
+    console.log("👉 Body recibido:", req.body);
+    console.log("👉 Archivo recibido:", req.file);
+
     const nuevaImagen = req.file ? req.file.filename : null;
 
     const nuevoServicio = new Servicio({
@@ -10,6 +13,8 @@ const crearServicio = async (req, res) => {
     });
 
     const servicioGuardado = await nuevoServicio.save();
+    console.log("✅ Servicio guardado:", servicioGuardado);
+
     res.status(201).json(servicioGuardado);
   } catch (error) {
     console.error("❌ Error al crear servicio:", error);
