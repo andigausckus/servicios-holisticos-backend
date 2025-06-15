@@ -1,25 +1,28 @@
 const Servicio = require("../models/Servicio");
 
-const crearServicio = async (req, res) => {
+exports.crearServicio = async (req, res) => {
   try {
-    console.log("👉 Body recibido:", req.body);
-    console.log("👉 Archivo recibido:", req.file);
-
-    const nuevaImagen = req.file ? req.file.filename : null;
+    console.log("✅ Entrando al controlador crearServicio");
+    console.log("Body recibido:", req.body);
+    console.log("Archivo recibido:", req.file);
 
     const nuevoServicio = new Servicio({
-      ...req.body,
-      imagen: nuevaImagen
+      titulo: req.body.titulo,
+      descripcion: req.body.descripcion,
+      modalidad: Array.isArray(req.body.modalidad) ? req.body.modalidad : [req.body.modalidad],
+      ubicacion: req.body.ubicacion || "",
+      duracion: req.body.duracion,
+      precio: req.body.precio,
+      categoria: req.body.categoria,
+      terapeuta: req.usuarioId, // viene del auth middleware
+      imagen: req.file ? req.file.filename : null,
     });
 
-    const servicioGuardado = await nuevoServicio.save();
-    console.log("✅ Servicio guardado:", servicioGuardado);
+    await nuevoServicio.save();
 
-    res.status(201).json(servicioGuardado);
+    res.status(201).json(nuevoServicio);
   } catch (error) {
-    console.error("❌ Error al crear servicio:", error);
-    res.status(500).json({ message: "Error al crear el servicio" });
+    console.error("❌ Error al crear el servicio:", error);
+    res.status(500).json({ mensaje: "Error al crear el servicio" });
   }
 };
-
-module.exports = { crearServicio };
