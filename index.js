@@ -4,7 +4,7 @@ const cors = require("cors");
 
 const resenasRoutes = require('./routes/resenas');
 const terapeutasRoutes = require("./routes/terapeutas");
-// const serviciosRoutes = require("./routes/servicios"); // Lo comento para evitar conflicto
+const serviciosRoutes = require("./routes/servicios");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,10 +21,9 @@ mongoose.connect("tu_cadena_de_conexión")
 // Rutas
 app.use("/api/terapeutas", terapeutasRoutes);
 app.use("/api/resenas", resenasRoutes);
-// app.use("/api/servicios", serviciosRoutes); // Comentado para usar ruta abajo
+app.use("/api/servicios", serviciosRoutes);
 
 // Ruta POST para crear un servicio (simple, sin base de datos, para test)
-app.post("/api/servicios", (req, res) => {
   const { titulo } = req.body;
 
   if (!titulo) {
