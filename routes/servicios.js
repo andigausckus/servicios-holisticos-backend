@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../auth");
-const { crearServicio } = require("../controladores/servicios");
 
-router.post("/", auth, (req, res, next) => {
-  console.log("👉 Llegó un POST a /api/servicios sin imagen");
-  next();
-}, crearServicio);
+// Ejemplo simple de ruta POST para crear servicio (sin controlador externo)
+router.post("/", (req, res) => {
+  // Aquí podés poner la lógica básica o solo un mensaje por ahora
+  res.json({ message: "Ruta POST /api/servicios activa (sin lógica aún)" });
+});
 
 router.get("/", (req, res) => {
   res.send("✅ Ruta de servicios activa");
