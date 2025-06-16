@@ -65,4 +65,15 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Obtener todos los terapeutas (para el mapa, por ejemplo)
+router.get("/", async (req, res) => {
+  try {
+    const terapeutas = await Terapeuta.find().select("-password"); // Excluye el campo de contraseña
+    res.json(terapeutas);
+  } catch (error) {
+    console.error("Error al obtener terapeutas:", error);
+    res.status(500).json({ message: "Error al obtener terapeutas" });
+  }
+});
+
 module.exports = router;
