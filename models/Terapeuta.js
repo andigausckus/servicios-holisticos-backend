@@ -55,11 +55,11 @@ const TerapeutaSchema = new mongoose.Schema({
     match: [/^\d{10}$/, "El número debe tener 10 dígitos"]
   },
   ubicacion: {
-  type: {
-    lat: { type: Number },
-    lng: { type: Number }
-  },
-  required: false,
+  type: new mongoose.Schema({
+    lat: { type: Number, required: true },
+    lng: { type: Number, required: true }
+  }, { _id: false }),
+  required: false
 },
   disponibilidad: {
     type: [disponibilidadSchema],
