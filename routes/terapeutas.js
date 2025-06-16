@@ -21,13 +21,25 @@ router.post("/", async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
+    // Si "ubicacion" es string, convertir a coordenadas ficticias
+    let ubicacionFinal = ubicacion;
+    if (typeof ubicacion === "string") {
+      if (ubicacion.toLowerCase().includes("rosario")) {
+        ubicacionFinal = { lat: -32.9442, lng: -60.6505 };
+      } else if (ubicacion.toLowerCase().includes("cordoba")) {
+        ubicacionFinal = { lat: -31.4201, lng: -64.1888 };
+      } else {
+        ubicacionFinal = { lat: -34.6037, lng: -58.3816 }; // Buenos Aires default
+      }
+    }
+
     const nuevoTerapeuta = new Terapeuta({
       nombreCompleto,
       email,
       password: hashedPassword,
       fechaNacimiento,
       telefono,
-      ubicacion
+      ubicacion: ubicacionFinal,
     });
 
     const terapeutaGuardado = await nuevoTerapeuta.save();
