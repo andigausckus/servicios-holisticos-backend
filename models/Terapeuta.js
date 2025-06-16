@@ -55,10 +55,12 @@ const TerapeutaSchema = new mongoose.Schema({
     match: [/^\d{10}$/, "El número debe tener 10 dígitos"]
   },
   ubicacion: {
-    type: String,
-    required: [true, "La ubicación es obligatoria"],
-    trim: true
+  type: {
+    lat: { type: Number },
+    lng: { type: Number }
   },
+  required: false,
+},
   disponibilidad: {
     type: [disponibilidadSchema],
     default: []
