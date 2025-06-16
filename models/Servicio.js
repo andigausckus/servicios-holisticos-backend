@@ -3,29 +3,29 @@ const mongoose = require("mongoose");
 const servicioSchema = new mongoose.Schema({
   titulo: { type: String, required: true },
   descripcion: { type: String, required: true },
-  modalidad: { 
-    type: String, 
-    required: true,
-    enum: ["Presencial", "Online"] // para evitar valores inválidos
+  modalidad: {
+    type: [String], // Array como ["Online", "Presencial"]
+    enum: ["Presencial", "Online"],
+    required: true
   },
   ubicacion: {
     type: String,
     validate: {
       validator: function (valor) {
-        // Solo es obligatorio si la modalidad es presencial
-        return this.modalidad === "Presencial" ? !!valor : true;
+        // Solo es obligatorio si incluye "Presencial"
+        return this.modalidad.includes("Presencial") ? !!valor : true;
       },
       message: "La ubicación es obligatoria para servicios presenciales."
     }
   },
-  duracion: { type: String, required: true },
+  duracion: { type: Number, required: true }, // minutos totales
   precio: { type: Number, required: true },
   categoria: { type: String, required: true },
   imagen: { type: String },
-  terapeuta: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: "Terapeuta", 
-    required: true 
+  terapeuta: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Terapeuta",
+    required: true
   }
 }, { timestamps: true });
 
