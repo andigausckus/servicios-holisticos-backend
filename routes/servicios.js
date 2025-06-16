@@ -1,14 +1,46 @@
 const express = require("express");
 const router = express.Router();
+const Servicio = require("../models/Servicio");
+const jwt = require("jsonwebtoken");
 
-// Ejemplo simple de ruta POST para crear servicio (sin controlador externo)
-router.post("/", (req, res) => {
-  // Aquí podés poner la lógica básica o solo un mensaje por ahora
-  res.json({ message: "Ruta POST /api/servicios activa (sin lógica aún)" });
+// Middleware para verificar el token JWT
+function verificarToken(req, res, next) {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ error: "Token requerido" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.terapeutaId = decoded.id;
+    next();
+  } catch (err) {
+    return res.status(403).json({ error: "Token inválido" });
+  }
+}
+
+// Crear un nuevo servicio
+router.post("/", verificarToken, async (req, res) => {
+  try {
+    const nuevoServicio = new Servicio({
+      ...req.body,
+      terapeuta: req.terapeutaId,
+    });
+
+    await nuevoServicio.save();
+    res.status(201).json({ message: "Servicio creado", servicio: nuevoServicio });
+  } catch (err) {
+    console.error("Error al crear servicio:", err);
+    res.status(500).json({ error: "Error al crear el servicio" });
+  }
 });
 
-router.get("/", (req, res) => {
-  res.send("✅ Ruta de servicios activa");
+// Obtener todos los servicios
+router.get("/", async (req, res) => {
+  try {
+    const servicios = await Servicio.find().populate("terapeuta", "nombreCompleto ubicacion");
+    res.json(servicios);
+  } catch (err) {
+    res.status(500).json({ error: "Error al obtener los servicios" });
+  }
 });
 
 module.exports = router;
