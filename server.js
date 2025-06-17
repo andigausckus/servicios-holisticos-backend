@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Configurar Mercado Pago con tu access token desde variables de entorno
-mercadopago.configurations.setAccessToken(process.env.TEST-520968366620813-031514-3c112a2502f3d1ef22c3ad0d467ef18c-1630607182);
+// Configurar Mercado Pago con token de entorno
+mercadopago.configurations.setAccessToken(process.env.MP_ACCESS_TOKEN);
 
 // Conexión a MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
@@ -27,43 +27,14 @@ const terapeutasRoutes = require("./routes/terapeutas");
 const serviciosRoutes = require("./routes/servicios");
 const resenasRoutes = require("./routes/resenas");
 const reservasRoutes = require("./routes/reservas.routes");
+const pagosRoutes = require("./routes/pagos");  // NUEVO
 
 // Montar rutas
 app.use("/api/terapeutas", terapeutasRoutes);
 app.use("/api/servicios", serviciosRoutes);
 app.use("/api/resenas", resenasRoutes);
 app.use("/api/reservas", reservasRoutes);
-
-// Ruta para crear preferencia de pago Mercado Pago con split
-app.post("/api/crear-preferencia", async (req, res) => {
-  try {
-    const { items, payer, marketplace_fee, shipments } = req.body;
-
-    // Configurá la preferencia con split de mercado pago
-    const preference = {
-      items,
-      payer,
-      payment_methods: {
-        excluded_payment_types: [{ id: "ticket" }, { id: "atm" }],
-      },
-      marketplace_fee: marketplace_fee || 0, // comisión para el marketplace
-      shipments,
-      back_urls: {
-        success: "https://tu-frontend.com/pago-exitoso",
-        failure: "https://tu-frontend.com/pago-fallido",
-        pending: "https://tu-frontend.com/pago-pendiente",
-      },
-      auto_return: "approved",
-    };
-
-    const response = await mercadopago.preferences.create(preference);
-
-    res.json({ init_point: response.body.init_point });
-  } catch (error) {
-    console.error("Error creando preferencia:", error);
-    res.status(500).json({ error: "Error creando preferencia de pago" });
-  }
-});
+app.use("/api", pagosRoutes);  // NUEVO
 
 // Rutas básicas de prueba
 app.get("/api/test", (req, res) => {
