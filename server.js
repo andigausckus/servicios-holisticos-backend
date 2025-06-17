@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // Configurar Mercado Pago con tu access token desde variables de entorno
-mercadopago.configurations.setAccessToken(process.env.MP_ACCESS_TOKEN);
+mercadopago.configurations.setAccessToken(process.env.TEST-520968366620813-031514-3c112a2502f3d1ef22c3ad0d467ef18c-1630607182);
 
 // Conexión a MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
