@@ -16,9 +16,9 @@ router.post("/crear-preferencia", async (req, res) => {
       marketplace_fee: marketplace_fee || 0, // comisión para el marketplace (opcional)
       shipments,
       back_urls: {
-  success: "https://www.serviciosholisticos.com.ar/gracias",
-  failure: "https://www.serviciosholisticos.com.ar/error",
-  pending: "https://www.serviciosholisticos.com.ar/pendiente",
+  success: "https://tuservicio.com/gracias",
+  failure: "https://tuservicio.com/pago-fallido",
+  pending: "https://tuservicio.com/pago-pendiente",
 },
       auto_return: "approved",
     };
