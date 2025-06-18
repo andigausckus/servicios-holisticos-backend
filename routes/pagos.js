@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 // Importamos la instancia de MercadoPago desde index.js
-const { mercadopago } = require("../index");
+const { mercadopago } = require("../server");
 
 // ✅ Ruta de prueba para confirmar que el endpoint está funcionando
 router.get("/pagos", (req, res) => {
