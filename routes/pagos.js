@@ -1,6 +1,8 @@
 const express = require("express");
-const mercadopago = require("mercadopago");
 const router = express.Router();
+
+// Importamos la instancia de MercadoPago desde index.js
+const { mercadopago } = require("../index");
 
 // ✅ Ruta de prueba para confirmar que el endpoint está funcionando
 router.get("/pagos", (req, res) => {
@@ -28,10 +30,10 @@ router.post("/crear-preferencia", async (req, res) => {
       auto_return: "approved",
     };
 
-    const response = await mercadopago.preferences.create(preference);
-    res.json({ init_point: response.body.init_point });
+    const response = await mercadopago.preferences.create({ body: preference });
+    res.json({ init_point: response.init_point });
   } catch (error) {
-    console.error("Error creando preferencia:", error);
+    console.error("❌ Error creando preferencia:", error);
     res.status(500).json({ error: "Error creando preferencia de pago" });
   }
 });
