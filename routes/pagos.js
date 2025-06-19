@@ -29,7 +29,7 @@ router.post("/crear-preferencia", async (req, res) => {
       auto_return: "approved",
     };
 
-    const result = await mercadopago.preference.create({ body: preference });
+    const result = await mercadopago.preferences.create({ body: preference });
 
     res.json({ init_point: result.body.init_point });
   } catch (error) {
