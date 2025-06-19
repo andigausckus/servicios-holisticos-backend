@@ -1,11 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const mercadopago = require("mercadopago");
-
-// Creamos la instancia correctamente para la v2.x
-const mp = new mercadopago.MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN,
-});
+const { mercadopago } = require("../server"); // 👈 usamos la instancia exportada desde server.js
 
 // Ruta de prueba
 router.get("/pagos", (req, res) => {
@@ -34,7 +29,7 @@ router.post("/crear-preferencia", async (req, res) => {
       auto_return: "approved",
     };
 
-    const result = await mp.preference.create({ body: preference });
+    const result = await mercadopago.preferences.create({ body: preference });
 
     res.json({ init_point: result.body.init_point });
   } catch (error) {
