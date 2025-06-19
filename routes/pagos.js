@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const MercadoPago = require("mercadopago").default;
+const { MercadoPagoConfig, Preference } = require("mercadopago");
 
-// ✅ Inicialización directa de Mercado Pago
-const mercadopago = new MercadoPago({
-  access_token: process.env.MP_ACCESS_TOKEN,
-  locale: "es_AR",
+// ✅ Configuración segura y funcional
+const mercadopago = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN,
+  locale: "es-AR",
 });
 
 // Ruta de prueba
@@ -35,9 +35,10 @@ router.post("/crear-preferencia", async (req, res) => {
       auto_return: "approved",
     };
 
-    const result = await mercadopago.preference.create({ body: preference });
+    const pref = new Preference(mercadopago);
+    const result = await pref.create({ body: preference });
 
-    res.json({ init_point: result.body.init_point });
+    res.json({ init_point: result.init_point });
   } catch (error) {
     console.error("❌ Error creando preferencia:", error);
     res.status(500).json({
