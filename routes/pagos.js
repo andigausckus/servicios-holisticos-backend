@@ -1,13 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const { mercadopago } = require("../server"); // usamos la instancia exportada desde server.js
+const { mercadopago } = require("../server"); // usamos la instancia exportada
 
-// Ruta de prueba
 router.get("/pagos", (req, res) => {
   res.send("✅ Ruta de pagos funcionando");
 });
 
-// Crear preferencia de pago
 router.post("/crear-preferencia", async (req, res) => {
   try {
     const { items, payer, marketplace_fee, shipments, additional_info } = req.body;
@@ -30,11 +28,10 @@ router.post("/crear-preferencia", async (req, res) => {
     };
 
     const result = await mercadopago.preferences.create({ body: preference });
-
     res.json({ init_point: result.body.init_point });
   } catch (error) {
     console.error("❌ Error creando preferencia:", error);
-    res.status(500).json({ error: "Error creando preferencia de pago" });
+    res.status(500).json({ error: "Error creando preferencia de pago", detalle: error.message });
   }
 });
 
