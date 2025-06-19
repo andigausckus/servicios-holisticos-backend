@@ -1,18 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const mercadopago = require("mercadopago");
+const { mercadopago } = require("../server"); // usamos la instancia exportada desde server.js
 
-// ✅ Creamos la instancia con el accessToken de tu cuenta
-const mp = new mercadopago.MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN,
-});
-
-// ✅ Ruta de prueba
+// Ruta de prueba
 router.get("/pagos", (req, res) => {
   res.send("✅ Ruta de pagos funcionando");
 });
 
-// ✅ Ruta para crear una preferencia de pago
+// Crear preferencia de pago
 router.post("/crear-preferencia", async (req, res) => {
   try {
     const { items, payer, marketplace_fee, shipments, additional_info } = req.body;
@@ -34,7 +29,7 @@ router.post("/crear-preferencia", async (req, res) => {
       auto_return: "approved",
     };
 
-    const result = await mp.preference.create({ body: preference });
+    const result = await mercadopago.preference.create({ body: preference });
 
     res.json({ init_point: result.body.init_point });
   } catch (error) {
