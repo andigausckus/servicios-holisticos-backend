@@ -1,6 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { mercadopago } = require("../server"); // ✅ importar correctamente
+const MercadoPago = require("mercadopago").default;
+
+// ✅ Inicialización directa de Mercado Pago
+const mercadopago = new MercadoPago({
+  access_token: process.env.MP_ACCESS_TOKEN,
+  locale: "es_AR",
+});
 
 // Ruta de prueba
 router.get("/pagos", (req, res) => {
