@@ -3,7 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
-// ✅ Nueva forma con mercadopago v2.8.0
+// ✅ Configuración de MercadoPago (SDK versión 2.8.0)
 const MercadoPago = require("mercadopago").default;
 
 const mercadopago = new MercadoPago({
@@ -11,14 +11,14 @@ const mercadopago = new MercadoPago({
   locale: "es_AR",
 });
 
+// Exportamos la instancia correctamente
+module.exports = { mercadopago };
+
 const app = express();
 const PORT = process.env.PORT || 3003;
 
 app.use(cors());
 app.use(express.json());
-
-// Exportamos la instancia para usarla en pagos.js
-module.exports.mercadopago = mercadopago;
 
 // ✅ Conexión a MongoDB
 mongoose
@@ -40,9 +40,8 @@ app.use("/api/terapeutas", terapeutasRoutes);
 app.use("/api/servicios", serviciosRoutes);
 app.use("/api/resenas", resenasRoutes);
 app.use("/api/reservas", reservasRoutes);
-app.use("/api", pagosRoutes); // incluye /api/pagos y /api/crear-preferencia
+app.use("/api", pagosRoutes);
 
-// ✅ Rutas básicas
 app.get("/api/test", (req, res) => {
   res.json({ mensaje: "✅ API funcionando correctamente" });
 });
@@ -51,7 +50,6 @@ app.get("/", (req, res) => {
   res.send("🚀 Bienvenido a la API de Servicios Holísticos");
 });
 
-// ✅ Iniciar servidor
 app.listen(PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
