@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const mercadopago = require("mercadopago");
 
-// Configurar Mercado Pago con el token de entorno
-mercadopago.configure({
-  access_token: process.env.MP_ACCESS_TOKEN,
+// 🔁 Creamos una instancia con el access_token
+const mp = new mercadopago.MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN,
 });
 
 // ✅ Ruta de prueba
