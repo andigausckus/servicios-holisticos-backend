@@ -12,7 +12,7 @@ router.post("/", async (req, res) => {
     nombreCompleto,
     email,
     password,
-    Especialidades,
+    especialidades,
     ubicacion,
   } = req.body;
 
@@ -20,7 +20,6 @@ router.post("/", async (req, res) => {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Si "ubicacion" es string, convertir a coordenadas ficticias
     let ubicacionFinal = ubicacion;
     if (typeof ubicacion === "string") {
       if (ubicacion.toLowerCase().includes("rosario")) {
@@ -28,7 +27,7 @@ router.post("/", async (req, res) => {
       } else if (ubicacion.toLowerCase().includes("cordoba")) {
         ubicacionFinal = { lat: -31.4201, lng: -64.1888 };
       } else {
-        ubicacionFinal = { lat: -34.6037, lng: -58.3816 }; // Buenos Aires default
+        ubicacionFinal = { lat: -34.6037, lng: -58.3816 }; // Buenos Aires por defecto
       }
     }
 
@@ -36,7 +35,7 @@ router.post("/", async (req, res) => {
       nombreCompleto,
       email,
       password: hashedPassword,
-      Especialidades 
+      especialidades,
       ubicacion: ubicacionFinal,
     });
 
