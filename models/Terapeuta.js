@@ -44,18 +44,17 @@ const TerapeutaSchema = new mongoose.Schema({
     required: [true, "La contraseña es obligatoria"],
     minlength: [6, "La contraseña debe tener al menos 6 caracteres"]
   },
-  Especialidades: {
+  especialidades: {
     type: String,
     required: [true, "Al menos una especialidad es obligatoria"]
-    // Puedes usar Date si más adelante querés operaciones con fechas
   },
   ubicacion: {
-  type: new mongoose.Schema({
-    lat: { type: Number, required: true },
-    lng: { type: Number, required: true }
-  }, { _id: false }),
-  required: false
-},
+    type: new mongoose.Schema({
+      lat: { type: Number, required: true },
+      lng: { type: Number, required: true }
+    }, { _id: false }),
+    required: false
+  },
   disponibilidad: {
     type: [disponibilidadSchema],
     default: []
