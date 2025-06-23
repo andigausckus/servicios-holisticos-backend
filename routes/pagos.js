@@ -27,12 +27,11 @@ router.post("/crear-preferencia", async (req, res) => {
       marketplace_fee: marketplace_fee || 0,
       shipments,
       additional_info,
-      
       back_urls: {
-  success: "https://serviciosholisticos.com.ar/gracias",
-  failure: "https://serviciosholisticos.com.ar/pago-fallido",
-  pending: "https://serviciosholisticos.com.ar/pago-pendiente",
-}
+        success: "https://serviciosholisticos.com.ar/gracias",
+        failure: "https://serviciosholisticos.com.ar/pago-fallido",
+        pending: "https://serviciosholisticos.com.ar/pago-pendiente",
+      },
       auto_return: "approved",
     };
 
