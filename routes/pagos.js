@@ -9,6 +9,7 @@ const mercadopago = new MercadoPagoConfig({
 
 router.post("/crear-preferencia", async (req, res) => {
   try {
+    console.log("📥 Body recibido en /crear-preferencia:", req.body);
     const { items, payer, marketplace_fee, shipments, additional_info } = req.body;
 
     const preference = {
