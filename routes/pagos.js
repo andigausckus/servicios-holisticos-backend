@@ -2,18 +2,11 @@ const express = require("express");
 const router = express.Router();
 const { MercadoPagoConfig, Preference } = require("mercadopago");
 
-// ✅ Configuración segura y funcional
 const mercadopago = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
   locale: "es-AR",
 });
 
-// Ruta de prueba
-router.get("/pagos", (req, res) => {
-  res.send("✅ Ruta de pagos funcionando");
-});
-
-// Crear preferencia de pago
 router.post("/crear-preferencia", async (req, res) => {
   try {
     const { items, payer, marketplace_fee, shipments, additional_info } = req.body;
@@ -41,10 +34,7 @@ router.post("/crear-preferencia", async (req, res) => {
     res.json({ init_point: result.init_point });
   } catch (error) {
     console.error("❌ Error creando preferencia:", error);
-    res.status(500).json({
-      error: "Error creando preferencia de pago",
-      detalle: error.message,
-    });
+    res.status(500).json({ error: "Error creando preferencia", detalle: error.message });
   }
 });
 
