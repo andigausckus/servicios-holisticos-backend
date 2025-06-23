@@ -40,7 +40,7 @@ app.use("/api/terapeutas", terapeutasRoutes);
 app.use("/api/servicios", serviciosRoutes);
 app.use("/api/resenas", resenasRoutes);
 app.use("/api/reservas", reservasRoutes);
-app.use("/api", pagosRoutes);
+app.use("/api/pagos", pagosRoutes);
 
 app.get("/api/test", (req, res) => {
   res.json({ mensaje: "✅ API funcionando correctamente" });
