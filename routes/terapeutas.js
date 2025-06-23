@@ -12,9 +12,8 @@ router.post("/", async (req, res) => {
     nombreCompleto,
     email,
     password,
-    fechaNacimiento,
-    telefono,
-    ubicacion
+    Especialidades,
+    ubicacion,
   } = req.body;
 
   try {
@@ -37,8 +36,7 @@ router.post("/", async (req, res) => {
       nombreCompleto,
       email,
       password: hashedPassword,
-      fechaNacimiento,
-      telefono,
+      Especialidades 
       ubicacion: ubicacionFinal,
     });
 
