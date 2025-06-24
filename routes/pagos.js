@@ -22,9 +22,9 @@ router.post("/crear-preferencia", async (req, res) => {
       shipments,
       additional_info,
       back_urls: {
-        success: "https://serviciosholisticos.com.ar/gracias",
-        failure: "https://serviciosholisticos.com.ar/pago-fallido",
-        pending: "https://serviciosholisticos.com.ar/pago-pendiente",
+        success: "https://1f721fac-38a2-4d72-830f-70b269359703-00-2quue1dbfg8v2.riker.replit.dev/gracias",
+        failure: "https://1f721fac-38a2-4d72-830f-70b269359703-00-2quue1dbfg8v2.riker.replit.dev/pago-fallido",
+        pending: "https://1f721fac-38a2-4d72-830f-70b269359703-00-2quue1dbfg8v2.riker.replit.dev/pago-pendiente",
       },
       auto_return: "approved",
     };
