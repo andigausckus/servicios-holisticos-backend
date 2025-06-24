@@ -3,10 +3,11 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Terapeuta = require("../models/Terapeuta");
+const verificarToken = require("../middlewares/authMiddleware");
 
 const secret = process.env.JWT_SECRET;
 
-// Registrar nuevo terapeuta
+// ✅ Registrar nuevo terapeuta
 router.post("/", async (req, res) => {
   const {
     nombreCompleto,
@@ -47,7 +48,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Login de terapeuta
+// ✅ Login de terapeuta
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -68,13 +69,29 @@ router.post("/login", async (req, res) => {
       { expiresIn: "2h" }
     );
 
-    res.json({ token, terapeuta: { id: terapeuta._id, nombre: terapeuta.nombreCompleto } });
+    res.json({
+      token,
+      terapeuta: { id: terapeuta._id, nombre: terapeuta.nombreCompleto },
+    });
   } catch (err) {
     res.status(500).json({ message: "Error en el servidor" });
   }
 });
 
-// Obtener todos los terapeutas (para el mapa, por ejemplo)
+// ✅ Ruta protegida para obtener el perfil privado
+router.get("/perfil", verificarToken, async (req, res) => {
+  try {
+    const terapeuta = await Terapeuta.findById(req.user.id).select("-password");
+    if (!terapeuta) return res.status(404).json({ message: "Terapeuta no encontrado" });
+
+    res.json(terapeuta);
+  } catch (err) {
+    console.error("Error al obtener perfil:", err);
+    res.status(500).json({ message: "Error en el servidor" });
+  }
+});
+
+// ✅ Obtener todos los terapeutas (público)
 router.get("/", async (req, res) => {
   try {
     const terapeutas = await Terapeuta.find().select("-password");
