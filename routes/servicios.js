@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Servicio = require("../models/Servicio");
+const Terapeuta = require("../models/Terapeuta"); // ✅ IMPORTANTE
 const jwt = require("jsonwebtoken");
 
 // Middleware para verificar el token JWT
@@ -26,6 +27,12 @@ router.post("/", verificarToken, async (req, res) => {
     });
 
     await nuevoServicio.save();
+
+    // ✅ Asociar el servicio al terapeuta
+    await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
+      $push: { servicios: nuevoServicio._id }
+    });
+
     res.status(201).json({ id: nuevoServicio._id });
   } catch (err) {
     console.error("Error al crear servicio:", err);
