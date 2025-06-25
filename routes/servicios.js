@@ -1,68 +1,70 @@
 const express = require("express");
 const router = express.Router();
 const Servicio = require("../models/Servicio");
-const Terapeuta = require("../models/Terapeuta");
-const jwt = require("jsonwebtoken");
+const { verificarToken } = require("../middlewares/verificarToken");
+
 const multer = require("multer");
 const path = require("path");
 
-// Middleware para verificar el token JWT
-function verificarToken(req, res, next) {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Token requerido" });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.terapeutaId = decoded.id;
-    next();
-  } catch (err) {
-    return res.status(403).json({ error: "Token inválido" });
-  }
-}
-
-// Configurar almacenamiento de imágenes con multer
+// Configuración de multer
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/"); // Carpeta donde se guardan las imágenes
+  destination: function (req, file, cb) {
+    cb(null, "uploads/");
   },
-  filename: (req, file, cb) => {
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname);
-    const nombreUnico = Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
-    cb(null, nombreUnico);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
   },
 });
 
-const upload = multer({ storage });
+// Filtro para asegurarse de que el archivo sea una imagen
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Solo se permiten imágenes."));
+  }
+};
 
-// Crear un nuevo servicio
+// Límite de tamaño: 5MB
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+});
+
+// Ruta: Crear nuevo servicio
 router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
   try {
+    const {
+      titulo,
+      descripcion,
+      modalidad,
+      duracion,
+      precio,
+      categoria,
+    } = req.body;
+
+    const nuevaImagen = req.file ? req.file.filename : null;
+
     const nuevoServicio = new Servicio({
-      ...req.body,
-      terapeuta: req.terapeutaId,
-      imagen: req.file ? `/uploads/${req.file.filename}` : "", // Guardar ruta de la imagen
+      titulo,
+      descripcion,
+      modalidad,
+      duracion,
+      precio,
+      categoria,
+      imagen: nuevaImagen,
+      terapeuta: req.usuario.id, // desde el token
     });
 
-    await nuevoServicio.save();
+    const servicioGuardado = await nuevoServicio.save();
 
-    await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
-      $push: { servicios: nuevoServicio._id }
-    });
-
-    res.status(201).json({ id: nuevoServicio._id });
-  } catch (err) {
-    console.error("Error al crear servicio:", err);
-    res.status(500).json({ error: "Error al crear el servicio" });
-  }
-});
-
-// Obtener todos los servicios
-router.get("/", async (req, res) => {
-  try {
-    const servicios = await Servicio.find().populate("terapeuta", "nombreCompleto ubicacion");
-    res.json(servicios);
-  } catch (err) {
-    res.status(500).json({ error: "Error al obtener los servicios" });
+    res.status(201).json(servicioGuardado);
+  } catch (error) {
+    console.error("Error al crear servicio:", error);
+    res.status(500).json({ message: "Error al crear el servicio." });
   }
 });
 
