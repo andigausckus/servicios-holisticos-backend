@@ -58,7 +58,11 @@ const TerapeutaSchema = new mongoose.Schema({
   disponibilidad: {
     type: [disponibilidadSchema],
     default: []
-  }
+  },
+  servicios: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Servicio"
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model("Terapeuta", TerapeutaSchema);
