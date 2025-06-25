@@ -78,10 +78,13 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ✅ Ruta protegida para obtener el perfil privado
+// ✅ Ruta protegida para obtener el perfil privado + servicios
 router.get("/perfil", verificarToken, async (req, res) => {
   try {
-    const terapeuta = await Terapeuta.findById(req.user.id).select("-password");
+    const terapeuta = await Terapeuta.findById(req.user.id)
+      .select("-password")
+      .populate("servicios");
+
     if (!terapeuta) return res.status(404).json({ message: "Terapeuta no encontrado" });
 
     res.json(terapeuta);
