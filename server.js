@@ -28,6 +28,7 @@ app.use("/api/servicios", serviciosRoutes);
 app.use("/api/resenas", resenasRoutes);
 app.use("/api/reservas", reservasRoutes);
 app.use("/api/pagos", pagosRoutes); // clave para que MercadoPago funcione
+app.use("/uploads", express.static("uploads"));
 
 // ✅ Ruta de prueba
 app.get("/", (req, res) => {
