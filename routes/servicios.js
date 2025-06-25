@@ -92,4 +92,15 @@ router.get("/", async (req, res) => {
   }
 });
 
+    // Obtener servicios del terapeuta autenticado
+router.get("/mis-servicios", verificarToken, async (req, res) => {
+  try {
+    const servicios = await Servicio.find({ terapeuta: req.terapeutaId });
+    res.json(servicios);
+  } catch (err) {
+    console.error("Error al obtener tus servicios:", err);
+    res.status(500).json({ error: "Error al obtener tus servicios" });
+  }
+});
+
 module.exports = router;
