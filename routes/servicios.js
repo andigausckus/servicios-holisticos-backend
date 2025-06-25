@@ -103,4 +103,23 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
   }
 });
 
+// Obtener un servicio por ID
+router.get("/:id", verificarToken, async (req, res) => {
+  try {
+    const servicio = await Servicio.findOne({
+      _id: req.params.id,
+      terapeuta: req.terapeutaId,
+    });
+
+    if (!servicio) {
+      return res.status(404).json({ error: "Servicio no encontrado" });
+    }
+
+    res.json(servicio);
+  } catch (err) {
+    console.error("Error al obtener servicio:", err);
+    res.status(500).json({ error: "Error al obtener el servicio" });
+  }
+});
+
 module.exports = router;
