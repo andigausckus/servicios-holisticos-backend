@@ -102,4 +102,28 @@ router.get("/", async (req, res) => {
   }
 });
 
+    // ✅ Guardar disponibilidad horaria del terapeuta
+router.post("/disponibilidad", verificarToken, async (req, res) => {
+  try {
+    const { disponibilidad } = req.body;
+
+    if (!Array.isArray(disponibilidad)) {
+      return res.status(400).json({ message: "Formato de disponibilidad inválido" });
+    }
+
+    const terapeuta = await Terapeuta.findById(req.user.id);
+    if (!terapeuta) {
+      return res.status(404).json({ message: "Terapeuta no encontrado" });
+    }
+
+    terapeuta.disponibilidad = disponibilidad;
+    await terapeuta.save();
+
+    res.json({ message: "Disponibilidad guardada correctamente" });
+  } catch (err) {
+    console.error("Error al guardar disponibilidad:", err);
+    res.status(500).json({ message: "Error al guardar disponibilidad" });
+  }
+});
+
 module.exports = router;
