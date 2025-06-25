@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Servicio = require("../models/Servicio");
-const Terapeuta = require("../models/Terapeuta"); // ✅ IMPORTANTE
+const Terapeuta = require("../models/Terapeuta");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+const path = require("path");
 
 // Middleware para verificar el token JWT
 function verificarToken(req, res, next) {
@@ -18,17 +20,31 @@ function verificarToken(req, res, next) {
   }
 }
 
+// Configurar almacenamiento de imágenes con multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // Carpeta donde se guardan las imágenes
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const nombreUnico = Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
+    cb(null, nombreUnico);
+  },
+});
+
+const upload = multer({ storage });
+
 // Crear un nuevo servicio
-router.post("/", verificarToken, async (req, res) => {
+router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
   try {
     const nuevoServicio = new Servicio({
       ...req.body,
       terapeuta: req.terapeutaId,
+      imagen: req.file ? `/uploads/${req.file.filename}` : "", // Guardar ruta de la imagen
     });
 
     await nuevoServicio.save();
 
-    // ✅ Asociar el servicio al terapeuta
     await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
       $push: { servicios: nuevoServicio._id }
     });
