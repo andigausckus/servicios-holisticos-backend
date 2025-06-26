@@ -109,6 +109,7 @@ router.get("/:id", async (req, res) => {
 // ✅ Obtener servicios del terapeuta autenticado
 router.get("/mis-servicios", verificarToken, async (req, res) => {
   try {
+    console.log("🧪 ID del terapeuta autenticado:", req.terapeutaId);
     const servicios = await Servicio.find({ terapeuta: req.terapeutaId });
     res.json(servicios);
   } catch (err) {
