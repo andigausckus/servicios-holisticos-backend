@@ -40,7 +40,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // máximo 5 MB
 });
 
-// Crear servicio
+// ✅ Crear servicio
 router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
   try {
     const {
@@ -82,7 +82,7 @@ router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
   }
 });
 
-// Obtener todos los servicios
+// ✅ Obtener todos los servicios (público)
 router.get("/", async (req, res) => {
   try {
     const servicios = await Servicio.find().populate("terapeuta", "nombreCompleto ubicacion");
@@ -92,7 +92,21 @@ router.get("/", async (req, res) => {
   }
 });
 
-    // Obtener servicios del terapeuta autenticado
+// ✅ Obtener un servicio por ID (público, sin token)
+router.get("/:id", async (req, res) => {
+  try {
+    const servicio = await Servicio.findById(req.params.id).populate("terapeuta", "nombreCompleto");
+    if (!servicio) {
+      return res.status(404).json({ error: "Servicio no encontrado" });
+    }
+    res.json(servicio);
+  } catch (err) {
+    console.error("Error al obtener servicio público:", err);
+    res.status(500).json({ error: "Error al obtener el servicio público" });
+  }
+});
+
+// ✅ Obtener servicios del terapeuta autenticado
 router.get("/mis-servicios", verificarToken, async (req, res) => {
   try {
     const servicios = await Servicio.find({ terapeuta: req.terapeutaId });
@@ -103,8 +117,8 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
   }
 });
 
-// Obtener un servicio por ID
-router.get("/:id", verificarToken, async (req, res) => {
+// ✅ Obtener un servicio del terapeuta autenticado (privado)
+router.get("/privado/:id", verificarToken, async (req, res) => {
   try {
     const servicio = await Servicio.findOne({
       _id: req.params.id,
@@ -117,12 +131,12 @@ router.get("/:id", verificarToken, async (req, res) => {
 
     res.json(servicio);
   } catch (err) {
-    console.error("Error al obtener servicio:", err);
-    res.status(500).json({ error: "Error al obtener el servicio" });
+    console.error("Error al obtener servicio privado:", err);
+    res.status(500).json({ error: "Error al obtener el servicio privado" });
   }
 });
 
-// Actualizar un servicio existente
+// ✅ Actualizar un servicio existente
 router.put("/:id", verificarToken, upload.single("imagen"), async (req, res) => {
   try {
     const servicioExistente = await Servicio.findOne({
