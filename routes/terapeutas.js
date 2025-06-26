@@ -129,4 +129,23 @@ router.post("/disponibilidad", verificarToken, async (req, res) => {
   }
 });
 
+// ✅ Obtener disponibilidad pública por ID de servicio
+router.get("/disponibilidad/:servicioId", async (req, res) => {
+  try {
+    const { servicioId } = req.params;
+
+    // Buscamos el terapeuta que tiene este servicio
+    const terapeuta = await Terapeuta.findOne({ "servicios": servicioId });
+
+    if (!terapeuta || !terapeuta.disponibilidad) {
+      return res.status(404).json({ message: "Disponibilidad no encontrada" });
+    }
+
+    res.json(terapeuta.disponibilidad);
+  } catch (err) {
+    console.error("Error al obtener disponibilidad:", err);
+    res.status(500).json({ message: "Error al obtener disponibilidad" });
+  }
+});
+
 module.exports = router;
