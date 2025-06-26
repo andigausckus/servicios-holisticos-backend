@@ -122,4 +122,50 @@ router.get("/:id", verificarToken, async (req, res) => {
   }
 });
 
+// Actualizar un servicio existente
+router.put("/:id", verificarToken, upload.single("imagen"), async (req, res) => {
+  try {
+    const servicioExistente = await Servicio.findOne({
+      _id: req.params.id,
+      terapeuta: req.terapeutaId,
+    });
+
+    if (!servicioExistente) {
+      return res.status(404).json({ error: "Servicio no encontrado" });
+    }
+
+    const {
+      titulo,
+      descripcion,
+      modalidad,
+      duracion,
+      precio,
+      categoria,
+      plataformas,
+    } = req.body;
+
+    if (!titulo || !descripcion || !modalidad || !duracion || !precio || !categoria) {
+      return res.status(400).json({ error: "Faltan campos obligatorios." });
+    }
+
+    servicioExistente.titulo = titulo;
+    servicioExistente.descripcion = descripcion;
+    servicioExistente.modalidad = modalidad;
+    servicioExistente.duracion = duracion;
+    servicioExistente.precio = precio;
+    servicioExistente.categoria = categoria;
+    servicioExistente.plataformas = JSON.parse(plataformas || "[]");
+
+    if (req.file) {
+      servicioExistente.imagen = req.file.filename;
+    }
+
+    await servicioExistente.save();
+    res.json({ mensaje: "Servicio actualizado correctamente." });
+  } catch (err) {
+    console.error("Error al actualizar servicio:", err);
+    res.status(500).json({ error: "Error al actualizar el servicio." });
+  }
+});
+
 module.exports = router;
