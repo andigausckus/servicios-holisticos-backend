@@ -103,7 +103,7 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Obtener un servicio público por ID
+// ✅ Obtener un servicio público por ID (sin token)
 router.get("/publico/:id", async (req, res) => {
   try {
     const servicio = await Servicio.findById(req.params.id).populate("terapeuta", "nombreCompleto");
@@ -117,7 +117,7 @@ router.get("/publico/:id", async (req, res) => {
   }
 });
 
-// ✅ Obtener un servicio por ID (¡esta va después!)
+// ✅ Obtener un servicio del terapeuta autenticado (privado)
 router.get("/:id", verificarToken, async (req, res) => {
   try {
     const servicio = await Servicio.findOne({
@@ -133,25 +133,6 @@ router.get("/:id", verificarToken, async (req, res) => {
   } catch (err) {
     console.error("Error al obtener servicio:", err);
     res.status(500).json({ error: "Error al obtener el servicio" });
-  }
-});
-
-// ✅ Obtener un servicio del terapeuta autenticado (privado)
-router.get("/privado/:id", verificarToken, async (req, res) => {
-  try {
-    const servicio = await Servicio.findOne({
-      _id: req.params.id,
-      terapeuta: req.terapeutaId,
-    });
-
-    if (!servicio) {
-      return res.status(404).json({ error: "Servicio no encontrado" });
-    }
-
-    res.json(servicio);
-  } catch (err) {
-    console.error("Error al obtener servicio privado:", err);
-    res.status(500).json({ error: "Error al obtener el servicio privado" });
   }
 });
 
@@ -198,6 +179,29 @@ router.put("/:id", verificarToken, upload.single("imagen"), async (req, res) => 
   } catch (err) {
     console.error("Error al actualizar servicio:", err);
     res.status(500).json({ error: "Error al actualizar el servicio." });
+  }
+});
+
+// ✅ Eliminar un servicio
+router.delete("/:id", verificarToken, async (req, res) => {
+  try {
+    const servicio = await Servicio.findOneAndDelete({
+      _id: req.params.id,
+      terapeuta: req.terapeutaId,
+    });
+
+    if (!servicio) {
+      return res.status(404).json({ error: "Servicio no encontrado o no autorizado" });
+    }
+
+    await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
+      $pull: { servicios: servicio._id },
+    });
+
+    res.json({ mensaje: "Servicio eliminado correctamente." });
+  } catch (err) {
+    console.error("Error al eliminar servicio:", err);
+    res.status(500).json({ error: "Error al eliminar el servicio." });
   }
 });
 
