@@ -103,6 +103,20 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
   }
 });
 
+// ✅ Obtener un servicio público por ID
+router.get("/publico/:id", async (req, res) => {
+  try {
+    const servicio = await Servicio.findById(req.params.id).populate("terapeuta", "nombreCompleto");
+    if (!servicio) {
+      return res.status(404).json({ error: "Servicio no encontrado" });
+    }
+    res.json(servicio);
+  } catch (err) {
+    console.error("Error al obtener servicio público:", err);
+    res.status(500).json({ error: "Error al obtener el servicio público" });
+  }
+});
+
 // ✅ Obtener un servicio por ID (¡esta va después!)
 router.get("/:id", verificarToken, async (req, res) => {
   try {
