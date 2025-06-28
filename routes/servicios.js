@@ -65,7 +65,7 @@ router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
       precio,
       categoria,
       plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,
-      terapeuta: req.user.id,
+      terapeuta: req.terapeutaId,
       imagen: req.file ? req.file.filename : null,
     });
 
