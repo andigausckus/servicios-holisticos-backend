@@ -129,50 +129,7 @@ router.post("/disponibilidad", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Guardar disponibilidad por fechas específicas (con rangos)
-router.post("/disponibilidad-fechas", verificarToken, async (req, res) => {
-  try {
-    const { fechas } = req.body;
-
-    if (!Array.isArray(fechas)) {
-      return res.status(400).json({ message: "Formato inválido: se esperaba un array de fechas" });
-    }
-
-    const terapeuta = await Terapeuta.findById(req.user.id);
-    if (!terapeuta) {
-      return res.status(404).json({ message: "Terapeuta no encontrado" });
-    }
-
-    // Guardamos en un nuevo campo "disponibilidadPorFechas"
-    terapeuta.disponibilidadPorFechas = fechas;
-    await terapeuta.save();
-
-    res.json({ message: "Disponibilidad por fechas guardada correctamente" });
-  } catch (err) {
-    console.error("Error al guardar disponibilidad por fechas:", err);
-    res.status(500).json({ message: "Error en el servidor" });
-  }
-});
-
-// ✅ Obtener disponibilidad semanal por servicio
-router.get("/disponibilidad/:servicioId", async (req, res) => {
-  try {
-    const { servicioId } = req.params;
-
-    const terapeuta = await Terapeuta.findOne({ "servicios": servicioId });
-
-    if (!terapeuta || !terapeuta.disponibilidad) {
-      return res.status(404).json({ message: "Disponibilidad no encontrada" });
-    }
-
-    res.json(terapeuta.disponibilidad);
-  } catch (err) {
-    console.error("Error al obtener disponibilidad:", err);
-    res.status(500).json({ message: "Error al obtener disponibilidad" });
-  }
-});
-
-// 🆕 ✅ Guardar disponibilidad por fecha específica con rangos
+// ✅ Guardar disponibilidad por fecha específica con rangos
 router.post("/disponibilidad-fechas", verificarToken, async (req, res) => {
   try {
     const { fechas } = req.body;
@@ -196,4 +153,22 @@ router.post("/disponibilidad-fechas", verificarToken, async (req, res) => {
   }
 });
 
+// ✅ Obtener disponibilidad semanal por servicio
+router.get("/disponibilidad/:servicioId", async (req, res) => {
+  try {
+    const { servicioId } = req.params;
+
+    const terapeuta = await Terapeuta.findOne({ servicios: servicioId });
+
+    if (!terapeuta || !terapeuta.disponibilidad) {
+      return res.status(404).json({ message: "Disponibilidad no encontrada" });
+    }
+
+    res.json(terapeuta.disponibilidad);
+  } catch (err) {
+    console.error("Error al obtener disponibilidad:", err);
+    res.status(500).json({ message: "Error al obtener disponibilidad" });
+  }
+});
+  
 module.exports = router;
