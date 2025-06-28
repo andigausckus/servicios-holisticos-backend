@@ -3,7 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Terapeuta = require("../models/Terapeuta");
-const Servicio = require("../models/Servicio"); // Asegurate de importar esto
+const Servicio = require("../models/Servicio");
 const verificarToken = require("../middlewares/authMiddleware");
 
 const secret = process.env.JWT_SECRET;
@@ -106,7 +106,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// ✅ Guardar disponibilidad semanal
+// ✅ Guardar disponibilidad horaria semanal
 router.post("/disponibilidad", verificarToken, async (req, res) => {
   try {
     const { disponibilidad } = req.body;
@@ -130,7 +130,7 @@ router.post("/disponibilidad", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Guardar disponibilidad por fecha específica
+// ✅ Guardar disponibilidad por fecha específica con rangos
 router.post("/disponibilidad-fechas", verificarToken, async (req, res) => {
   try {
     const { fechas } = req.body;
@@ -143,8 +143,7 @@ router.post("/disponibilidad-fechas", verificarToken, async (req, res) => {
     if (!terapeuta) {
       return res.status(404).json({ message: "Terapeuta no encontrado" });
     }
-    
-console.log("🎯 Fechas recibidas:", fechas);
+
     terapeuta.disponibilidadPorFechas = fechas;
     await terapeuta.save();
 
@@ -156,9 +155,10 @@ console.log("🎯 Fechas recibidas:", fechas);
 });
 
 // ✅ Obtener disponibilidad semanal por servicio
-router.get("/disponibilidad-semanal/:servicioId", async (req, res) => {
+router.get("/disponibilidad/:servicioId", async (req, res) => {
   try {
     const { servicioId } = req.params;
+
     const terapeuta = await Terapeuta.findOne({ servicios: servicioId });
 
     if (!terapeuta || !terapeuta.disponibilidad) {
@@ -167,12 +167,12 @@ router.get("/disponibilidad-semanal/:servicioId", async (req, res) => {
 
     res.json(terapeuta.disponibilidad);
   } catch (err) {
-    console.error("Error al obtener disponibilidad semanal:", err);
+    console.error("Error al obtener disponibilidad:", err);
     res.status(500).json({ message: "Error al obtener disponibilidad" });
   }
 });
 
-// ✅ Obtener disponibilidad por fechas del terapeuta según su servicio
+// ✅ Obtener disponibilidad por fechas del terapeuta según su servicio (ruta corregida)
 router.get("/disponibilidad-fechas/:servicioId", async (req, res) => {
   try {
     const servicio = await Servicio.findById(req.params.servicioId).populate("terapeuta");
@@ -184,7 +184,7 @@ router.get("/disponibilidad-fechas/:servicioId", async (req, res) => {
     const disponibilidad = servicio.terapeuta.disponibilidadPorFechas || [];
     res.json(disponibilidad);
   } catch (err) {
-    console.error("Error al obtener disponibilidad por fechas:", err);
+    console.error("Error al obtener disponibilidad:", err);
     res.status(500).json({ error: "Error al obtener disponibilidad del terapeuta" });
   }
 });
