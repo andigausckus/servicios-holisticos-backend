@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Rango horario genérico (para días de la semana o fechas específicas)
 const rangoSchema = new mongoose.Schema({
   desde: {
     type: String,
@@ -13,11 +14,25 @@ const rangoSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-const disponibilidadSchema = new mongoose.Schema({
+// Disponibilidad por día de la semana (modelo actual)
+const disponibilidadSemanaSchema = new mongoose.Schema({
   dia: {
     type: String,
     required: true,
     enum: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+  },
+  rangos: {
+    type: [rangoSchema],
+    default: []
+  }
+}, { _id: false });
+
+// 🆕 Disponibilidad por fecha específica (YYYY-MM-DD)
+const disponibilidadFechaSchema = new mongoose.Schema({
+  fecha: {
+    type: String,
+    required: true,
+    match: [/^\d{4}-\d{2}-\d{2}$/, "Formato de fecha inválido (YYYY-MM-DD)"]
   },
   rangos: {
     type: [rangoSchema],
@@ -56,7 +71,11 @@ const TerapeutaSchema = new mongoose.Schema({
     required: false
   },
   disponibilidad: {
-    type: [disponibilidadSchema],
+    type: [disponibilidadSemanaSchema],
+    default: []
+  },
+  disponibilidadFechas: {
+    type: [disponibilidadFechaSchema],
     default: []
   },
   servicios: [{
