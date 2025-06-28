@@ -170,5 +170,22 @@ router.get("/disponibilidad/:servicioId", async (req, res) => {
     res.status(500).json({ message: "Error al obtener disponibilidad" });
   }
 });
+
+// ✅ Ruta pública: Obtener disponibilidad por fechas del terapeuta según su servicio
+router.get("/disponibilidad/:servicioId", async (req, res) => {
+  try {
+    const servicio = await Servicio.findById(req.params.servicioId).populate("terapeuta");
+
+    if (!servicio) {
+      return res.status(404).json({ error: "Servicio no encontrado" });
+    }
+
+    const disponibilidad = servicio.terapeuta.disponibilidadPorFechas || [];
+    res.json(disponibilidad);
+  } catch (err) {
+    console.error("Error al obtener disponibilidad:", err);
+    res.status(500).json({ error: "Error al obtener disponibilidad del terapeuta" });
+  }
+});
   
 module.exports = router;
