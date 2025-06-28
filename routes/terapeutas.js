@@ -143,7 +143,8 @@ router.post("/disponibilidad-fechas", verificarToken, async (req, res) => {
     if (!terapeuta) {
       return res.status(404).json({ message: "Terapeuta no encontrado" });
     }
-
+    
+console.log("🎯 Fechas recibidas:", fechas);
     terapeuta.disponibilidadPorFechas = fechas;
     await terapeuta.save();
 
