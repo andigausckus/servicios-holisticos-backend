@@ -27,7 +27,7 @@ const disponibilidadSemanaSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-// 🆕 Disponibilidad por fecha específica (YYYY-MM-DD)
+// Disponibilidad por fecha específica (YYYY-MM-DD)
 const disponibilidadFechaSchema = new mongoose.Schema({
   fecha: {
     type: String,
@@ -74,7 +74,7 @@ const TerapeutaSchema = new mongoose.Schema({
     type: [disponibilidadSemanaSchema],
     default: []
   },
-  disponibilidadFechas: {
+  disponibilidadPorFechas: {
     type: [disponibilidadFechaSchema],
     default: []
   },
