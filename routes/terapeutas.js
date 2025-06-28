@@ -105,7 +105,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-    // ✅ Guardar disponibilidad horaria del terapeuta
+// ✅ Guardar disponibilidad horaria semanal
 router.post("/disponibilidad", verificarToken, async (req, res) => {
   try {
     const { disponibilidad } = req.body;
@@ -129,12 +129,11 @@ router.post("/disponibilidad", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Obtener disponibilidad pública por ID de servicio
+// ✅ Obtener disponibilidad semanal por servicio
 router.get("/disponibilidad/:servicioId", async (req, res) => {
   try {
     const { servicioId } = req.params;
 
-    // Buscamos el terapeuta que tiene este servicio
     const terapeuta = await Terapeuta.findOne({ "servicios": servicioId });
 
     if (!terapeuta || !terapeuta.disponibilidad) {
@@ -145,6 +144,30 @@ router.get("/disponibilidad/:servicioId", async (req, res) => {
   } catch (err) {
     console.error("Error al obtener disponibilidad:", err);
     res.status(500).json({ message: "Error al obtener disponibilidad" });
+  }
+});
+
+// 🆕 ✅ Guardar disponibilidad por fecha específica con rangos
+router.post("/disponibilidad-fechas", verificarToken, async (req, res) => {
+  try {
+    const { fechas } = req.body;
+
+    if (!Array.isArray(fechas)) {
+      return res.status(400).json({ message: "Formato de fechas inválido" });
+    }
+
+    const terapeuta = await Terapeuta.findById(req.user.id);
+    if (!terapeuta) {
+      return res.status(404).json({ message: "Terapeuta no encontrado" });
+    }
+
+    terapeuta.disponibilidadFechas = fechas;
+    await terapeuta.save();
+
+    res.json({ message: "Disponibilidad por fecha guardada correctamente" });
+  } catch (err) {
+    console.error("Error al guardar disponibilidad por fecha:", err);
+    res.status(500).json({ message: "Error al guardar disponibilidad por fecha" });
   }
 });
 
