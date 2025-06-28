@@ -157,18 +157,22 @@ router.post("/disponibilidad-fechas", verificarToken, async (req, res) => {
 // ✅ Obtener disponibilidad por fechas (correcta)
 router.get("/disponibilidad-fechas/:servicioId", async (req, res) => {
   try {
-    const servicio = await Servicio.findById(req.params.servicioId).populate("terapeuta");
+    const servicio = await Servicio.findById(req.params.servicioId).populate({
+      path: "terapeuta",
+      select: "disponibilidadPorFechas"
+    });
 
-    if (!servicio || !servicio.terapeuta) {
+    if (!servicio) {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
     const disponibilidad = servicio.terapeuta.disponibilidadPorFechas || [];
     res.json(disponibilidad);
   } catch (err) {
-    console.error("Error al obtener disponibilidad por fechas:", err);
+    console.error("Error al obtener disponibilidad:", err);
     res.status(500).json({ error: "Error al obtener disponibilidad del terapeuta" });
   }
 });
+
 
 module.exports = router;
