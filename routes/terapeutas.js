@@ -144,12 +144,17 @@ router.post("/disponibilidad-fechas", verificarToken, async (req, res) => {
       return res.status(404).json({ message: "Terapeuta no encontrado" });
     }
 
+    console.log("🔍 Disponibilidad enviada:", fechas);
+    console.log("🧠 Antes de guardar:", terapeuta.disponibilidadPorFechas);
+
     terapeuta.disponibilidadPorFechas = fechas;
     await terapeuta.save();
 
+    console.log("✅ Después de guardar:", terapeuta.disponibilidadPorFechas);
+
     res.json({ message: "Disponibilidad por fechas guardada correctamente" });
   } catch (err) {
-    console.error("Error al guardar disponibilidad por fechas:", err);
+    console.error("❌ Error al guardar disponibilidad por fechas:", err);
     res.status(500).json({ message: "Error al guardar disponibilidad por fechas" });
   }
 });
