@@ -21,6 +21,7 @@ const serviciosRoutes = require("./routes/servicios");
 const resenasRoutes = require("./routes/resenas");
 const reservasRoutes = require("./routes/reservas.routes");
 const pagosRoutes = require("./routes/pagos");
+const rutaDisponibilidad = require("./routes/disponibilidad");
 
 // ✅ Uso de rutas
 app.use("/api/terapeutas", terapeutasRoutes);
@@ -29,6 +30,7 @@ app.use("/api/resenas", resenasRoutes);
 app.use("/api/reservas", reservasRoutes);
 app.use("/api/pagos", pagosRoutes); // clave para que MercadoPago funcione
 app.use("/uploads", express.static("uploads"));
+app.use("/api/disponibilidad", rutaDisponibilidad);
 
 // ✅ Ruta de prueba
 app.get("/", (req, res) => {
