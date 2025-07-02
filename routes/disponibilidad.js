@@ -38,4 +38,30 @@ router.get("/mis-horarios", verificarToken, async (req, res) => {
   }
 });
 
+// ✅ Guardar disponibilidad semanal
+router.post("/", verificarToken, async (req, res) => {
+  try {
+    const { fechas } = req.body;
+
+    if (!Array.isArray(fechas) || fechas.length === 0) {
+      return res.status(400).json({ error: "Datos de disponibilidad inválidos" });
+    }
+
+    for (const dia of fechas) {
+      if (!dia.fecha || !Array.isArray(dia.rangos)) continue;
+
+      await Disponibilidad.findOneAndUpdate(
+        { terapeuta: req.terapeutaId, fecha: new Date(dia.fecha) },
+        { terapeuta: req.terapeutaId, fecha: new Date(dia.fecha), rangos: dia.rangos },
+        { upsert: true, new: true }
+      );
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error al guardar disponibilidad:", error);
+    res.status(500).json({ error: "Error al guardar disponibilidad" });
+  }
+});
+
 module.exports = router;
