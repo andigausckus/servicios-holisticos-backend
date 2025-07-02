@@ -53,7 +53,7 @@ router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
       plataformas,
     } = req.body;
 
-    if (!titulo || !descripcion || !modalidad || !duracion || !precio || !categoria) {
+    if (!titulo || !descripcion || !modalidad || !duracionMinutos || !precio || !categoria) {
       return res.status(400).json({ error: "Faltan campos obligatorios." });
     }
 
@@ -158,7 +158,7 @@ router.put("/:id", verificarToken, upload.single("imagen"), async (req, res) => 
       plataformas,
     } = req.body;
 
-    if (!titulo || !descripcion || !modalidad || !duracion || !precio || !categoria) {
+    if (!titulo || !descripcion || !modalidad || !duracionMinutos || !precio || !categoria) {
       return res.status(400).json({ error: "Faltan campos obligatorios." });
     }
 
