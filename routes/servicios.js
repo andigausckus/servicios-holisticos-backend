@@ -47,7 +47,7 @@ router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
       titulo,
       descripcion,
       modalidad,
-      duracion,
+      duracionMinutos,
       precio,
       categoria,
       plataformas,
@@ -61,7 +61,7 @@ router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
       titulo,
       descripcion,
       modalidad,
-      duracion,
+      duracionMinutos,
       precio,
       categoria,
       plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,
@@ -152,7 +152,7 @@ router.put("/:id", verificarToken, upload.single("imagen"), async (req, res) => 
       titulo,
       descripcion,
       modalidad,
-      duracion,
+      duracionMinutos,
       precio,
       categoria,
       plataformas,
@@ -165,7 +165,7 @@ router.put("/:id", verificarToken, upload.single("imagen"), async (req, res) => 
     servicioExistente.titulo = titulo;
     servicioExistente.descripcion = descripcion;
     servicioExistente.modalidad = modalidad;
-    servicioExistente.duracion = duracion;
+    servicioExistente.duracionMinutos = duracionMinutos;
     servicioExistente.precio = precio;
     servicioExistente.categoria = categoria;
     servicioExistente.plataformas = JSON.parse(plataformas || "[]");
