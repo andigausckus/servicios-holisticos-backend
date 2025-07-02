@@ -1,37 +1,32 @@
 const mongoose = require("mongoose");
 
-const servicioSchema = new mongoose.Schema({
-  titulo: { type: String, required: true },
-  descripcion: { type: String, required: true },
-  modalidad: {
-    type: [String], // Array como ["Online", "Presencial"]
-    enum: ["Presencial", "Online"],
-    required: true,
-  },
-  ubicacion: {
+const horarioSchema = new mongoose.Schema({
+  dia: {
     type: String,
-    validate: {
-      validator: function (valor) {
-        // Solo es obligatorio si incluye "Presencial"
-        return this.modalidad.includes("Presencial") ? !!valor : true;
-      },
-      message: "La ubicación es obligatoria para servicios presenciales.",
-    },
-  },
-  duracion: { type: Number, required: true }, // minutos totales
-  precio: { type: Number, required: true },
-  categoria: { type: String, required: true },
-  plataformas: {
-    type: [String],
-    enum: ["WhatsApp", "Zoom", "Skype", "Google Meet"],
     required: true,
+    enum: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
   },
-  imagen: { type: String },
+  hora: {
+    type: String,
+    required: true,
+    match: [/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (debe ser HH:mm)"]
+  }
+}, { _id: false });
+
+const servicioSchema = new mongoose.Schema({
+  nombre: { type: String, required: true },
+  descripcion: String,
+  precio: { type: Number, required: true },
+  duracionMinutos: { type: Number, required: true },
   terapeuta: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Terapeuta",
     required: true,
   },
+  horariosDisponibles: {
+    type: [horarioSchema],
+    default: [],
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Servicio", servicioSchema);
