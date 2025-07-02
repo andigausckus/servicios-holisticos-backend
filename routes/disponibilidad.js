@@ -17,6 +17,39 @@ function verificarToken(req, res, next) {
   }
 }
 
+// ✅ Guardar disponibilidad semanal
+router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
+  try {
+    const { disponibilidad } = req.body;
+
+    if (!Array.isArray(disponibilidad) || disponibilidad.length === 0) {
+      return res.status(400).json({ error: "Datos inválidos" });
+    }
+
+    // Eliminar horarios anteriores del terapeuta para esa semana
+    const fechas = disponibilidad.map((d) => new Date(d.fecha));
+    const desde = new Date(Math.min(...fechas));
+    const hasta = new Date(Math.max(...fechas));
+    await Disponibilidad.deleteMany({
+      terapeuta: req.terapeutaId,
+      fecha: { $gte: desde, $lte: hasta },
+    });
+
+    // Guardar nueva disponibilidad
+    const docs = disponibilidad.map((d) => ({
+      terapeuta: req.terapeutaId,
+      fecha: new Date(d.fecha),
+      rangos: d.rangos,
+    }));
+
+    await Disponibilidad.insertMany(docs);
+    res.json({ mensaje: "Disponibilidad guardada correctamente" });
+  } catch (error) {
+    console.error("❌ Error al guardar disponibilidad:", error);
+    res.status(500).json({ error: "Error al guardar disponibilidad" });
+  }
+});
+
 // ✅ Obtener horarios cargados por el terapeuta entre dos fechas
 router.get("/mis-horarios", verificarToken, async (req, res) => {
   try {
@@ -38,29 +71,30 @@ router.get("/mis-horarios", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Guardar disponibilidad semanal
-router.post("/", verificarToken, async (req, res) => {
+// ✅ Obtener disponibilidad pública por terapeuta
+router.get("/disponibilidad-fechas/:terapeutaId", async (req, res) => {
   try {
-    const { fechas } = req.body;
+    const { terapeutaId } = req.params;
 
-    if (!Array.isArray(fechas) || fechas.length === 0) {
-      return res.status(400).json({ error: "Datos de disponibilidad inválidos" });
-    }
+    const hoy = new Date();
+    const lunes = new Date(hoy);
+    const diaSemana = hoy.getDay();
+    lunes.setDate(hoy.getDate() - ((diaSemana + 6) % 7)); // lunes
+    lunes.setHours(0, 0, 0, 0);
 
-    for (const dia of fechas) {
-      if (!dia.fecha || !Array.isArray(dia.rangos)) continue;
+    const domingo = new Date(lunes);
+    domingo.setDate(lunes.getDate() + 6);
+    domingo.setHours(23, 59, 59, 999);
 
-      await Disponibilidad.findOneAndUpdate(
-        { terapeuta: req.terapeutaId, fecha: new Date(dia.fecha) },
-        { terapeuta: req.terapeutaId, fecha: new Date(dia.fecha), rangos: dia.rangos },
-        { upsert: true, new: true }
-      );
-    }
+    const horarios = await Disponibilidad.find({
+      terapeuta: terapeutaId,
+      fecha: { $gte: lunes, $lte: domingo },
+    });
 
-    res.json({ success: true });
+    res.json(horarios);
   } catch (error) {
-    console.error("Error al guardar disponibilidad:", error);
-    res.status(500).json({ error: "Error al guardar disponibilidad" });
+    console.error("Error al obtener disponibilidad pública:", error);
+    res.status(500).json({ error: "Error al obtener disponibilidad" });
   }
 });
 
