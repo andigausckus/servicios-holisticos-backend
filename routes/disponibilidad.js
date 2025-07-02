@@ -17,6 +17,25 @@ function verificarToken(req, res, next) {
   }
 }
 
+// Función para dividir un rango en bloques
+function dividirEnHorarios(desde, hasta, duracionMinutos = 30) {
+  const [hDesde, mDesde] = desde.split(":").map(Number);
+  const [hHasta, mHasta] = hasta.split(":").map(Number);
+
+  const fechaDesde = new Date(0, 0, 0, hDesde, mDesde);
+  const fechaHasta = new Date(0, 0, 0, hHasta, mHasta);
+
+  const horarios = [];
+
+  while (fechaDesde < fechaHasta) {
+    const hora = fechaDesde.toTimeString().slice(0, 5); // "HH:mm"
+    horarios.push({ hora, disponible: true });
+    fechaDesde.setMinutes(fechaDesde.getMinutes() + duracionMinutos);
+  }
+
+  return horarios;
+}
+
 // ✅ Guardar disponibilidad semanal
 router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
   try {
@@ -26,7 +45,7 @@ router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
       return res.status(400).json({ error: "Datos inválidos" });
     }
 
-    // Eliminar horarios anteriores del terapeuta para esa semana
+    // Borrar disponibilidad previa en ese rango de fechas
     const fechas = disponibilidad.map((d) => new Date(d.fecha));
     const desde = new Date(Math.min(...fechas));
     const hasta = new Date(Math.max(...fechas));
@@ -35,14 +54,24 @@ router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
       fecha: { $gte: desde, $lte: hasta },
     });
 
-    // Guardar nueva disponibilidad
-    const docs = disponibilidad.map((d) => ({
-      terapeuta: req.terapeutaId,
-      fecha: new Date(d.fecha),
-      rangos: d.rangos,
-    }));
+    // Crear nuevos bloques de horarios
+    const bloques = [];
 
-    await Disponibilidad.insertMany(docs);
+    disponibilidad.forEach((dia) => {
+      let horarios = [];
+      dia.rangos.forEach((rango) => {
+        const generados = dividirEnHorarios(rango.desde, rango.hasta, 30); // Podés cambiar a 60 si tus sesiones son de 1h fijas
+        horarios.push(...generados);
+      });
+
+      bloques.push({
+        terapeuta: req.terapeutaId,
+        fecha: new Date(dia.fecha),
+        horarios,
+      });
+    });
+
+    await Disponibilidad.insertMany(bloques);
     res.json({ mensaje: "Disponibilidad guardada correctamente" });
   } catch (error) {
     console.error("❌ Error al guardar disponibilidad:", error);
