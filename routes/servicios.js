@@ -194,6 +194,27 @@ router.delete("/:id", verificarToken, async (req, res) => {
       return res.status(404).json({ error: "Servicio no encontrado o no autorizado" });
     }
 
+    // Guardar o actualizar horarios de un servicio
+router.put("/:id/horarios", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { horarios } = req.body;
+
+    if (!Array.isArray(horarios)) {
+      return res.status(400).json({ error: "Horarios inválidos" });
+    }
+
+    await Servicio.findByIdAndUpdate(id, {
+      horariosDisponibles: horarios,
+    });
+
+    res.json({ mensaje: "Horarios guardados correctamente" });
+  } catch (error) {
+    console.error("Error al guardar horarios:", error);
+    res.status(500).json({ error: "Error al guardar horarios" });
+  }
+});
+
     await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
       $pull: { servicios: servicio._id },
     });
