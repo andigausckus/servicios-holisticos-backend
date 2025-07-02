@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Subdocumento para horarios disponibles
 const horarioSchema = new mongoose.Schema({
   dia: {
     type: String,
@@ -13,19 +14,28 @@ const horarioSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
+// Modelo principal de Servicio
 const servicioSchema = new mongoose.Schema({
-  nombre: { type: String, required: true },
-  descripcion: String,
-  precio: { type: Number, required: true },
+  titulo: { type: String, required: true }, // En frontend: "Título"
+  descripcion: { type: String, required: true },
+  modalidad: {
+    type: String,
+    enum: ["Online", "Presencial", "Ambas"],
+    required: true
+  },
   duracionMinutos: { type: Number, required: true },
+  precio: { type: Number, required: true },
+  categoria: { type: String, required: true },
+  plataformas: { type: [String], default: [] },
+  imagen: { type: String }, // nombre del archivo de imagen
   terapeuta: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Terapeuta",
-    required: true,
+    required: true
   },
   horariosDisponibles: {
     type: [horarioSchema],
-    default: [],
+    default: []
   }
 }, { timestamps: true });
 
