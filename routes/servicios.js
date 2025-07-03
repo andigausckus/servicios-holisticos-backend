@@ -29,6 +29,7 @@ router.post("/", verificarToken, async (req, res) => {
       precio,
       categoria,
       plataformas,
+      imagen, // viene desde Cloudinary
     } = req.body;
 
     if (!titulo || !descripcion || !modalidad || !duracionMinutos || !precio || !categoria) {
@@ -44,7 +45,7 @@ router.post("/", verificarToken, async (req, res) => {
       categoria,
       plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,
       terapeuta: req.terapeutaId,
-      imagen: req.body.imagen || null,
+      imagen: imagen || null, // guardamos la URL de Cloudinary
     });
 
     await nuevoServicio.save();
