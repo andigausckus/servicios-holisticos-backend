@@ -3,9 +3,6 @@ const router = express.Router();
 const Servicio = require("../models/Servicio");
 const Terapeuta = require("../models/Terapeuta");
 const jwt = require("jsonwebtoken");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
 
 // Middleware JWT
 function verificarToken(req, res, next) {
@@ -20,25 +17,6 @@ function verificarToken(req, res, next) {
     return res.status(403).json({ error: "Token inválido" });
   }
 }
-
-// Configuración multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = "uploads/";
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir);
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const nombreUnico = Date.now() + "-" + Math.round(Math.random() * 1e9) + ext;
-    cb(null, nombreUnico);
-  },
-});
-
-const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // máximo 5 MB
-});
 
 // ✅ Crear servicio
 router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
