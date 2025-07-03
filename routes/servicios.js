@@ -116,7 +116,7 @@ router.get("/:id", verificarToken, async (req, res) => {
 });
 
 // ✅ Actualizar un servicio existente
-router.put("/:id", verificarToken, upload.single("imagen"), async (req, res) => {
+router.put("/:id", verificarToken, async (req, res) => {
   try {
     const servicioExistente = await Servicio.findOne({
       _id: req.params.id,
@@ -135,6 +135,7 @@ router.put("/:id", verificarToken, upload.single("imagen"), async (req, res) => 
       precio,
       categoria,
       plataformas,
+      imagen, // nueva imagen desde Cloudinary (opcional)
     } = req.body;
 
     if (!titulo || !descripcion || !modalidad || !duracionMinutos || !precio || !categoria) {
@@ -149,8 +150,8 @@ router.put("/:id", verificarToken, upload.single("imagen"), async (req, res) => 
     servicioExistente.categoria = categoria;
     servicioExistente.plataformas = JSON.parse(plataformas || "[]");
 
-    if (req.file) {
-      servicioExistente.imagen = req.file.filename;
+    if (imagen) {
+      servicioExistente.imagen = imagen; // solo si se mandó nueva imagen
     }
 
     await servicioExistente.save();
