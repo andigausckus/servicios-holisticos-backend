@@ -19,7 +19,7 @@ function verificarToken(req, res, next) {
 }
 
 // ✅ Crear servicio
-router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
+router.post("/", verificarToken, async (req, res) => {
   try {
     const {
       titulo,
@@ -44,7 +44,7 @@ router.post("/", verificarToken, upload.single("imagen"), async (req, res) => {
       categoria,
       plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,
       terapeuta: req.terapeutaId,
-      imagen: req.file ? req.file.filename : null,
+      imagen: req.body.imagen || null,
     });
 
     await nuevoServicio.save();
