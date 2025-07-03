@@ -39,6 +39,7 @@ router.post("/", async (req, res) => {
       email,
       password: hashedPassword,
       especialidades,
+      whatsapp,
       ubicacion: ubicacionFinal,
     });
 
