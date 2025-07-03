@@ -27,6 +27,7 @@ router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
     }
 
     // Actualizar la disponibilidadPorFechas del terapeuta
+    console.log("🧠 Disponibilidad recibida:", disponibilidad);
     await Terapeuta.findByIdAndUpdate(
       req.terapeutaId,
       { disponibilidadPorFechas: disponibilidad },
