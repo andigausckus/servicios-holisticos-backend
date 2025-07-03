@@ -17,15 +17,10 @@ function verificarToken(req, res, next) {
   }
 }
 
-// Guardar disponibilidad semanal (en el campo disponibilidadPorFechas del terapeuta)
+// Guardar disponibilidad por fechas (formato tradicional de fechas + rangos)
 router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
   try {
     const { disponibilidad } = req.body;
-
-    if (!disponibilidad.every(d => d.fecha && Array.isArray(d.rangos) && d.rangos.length > 0)) {
-  console.log("🚫 Formato incorrecto en disponibilidad:", disponibilidad);
-  return res.status(400).json({ error: "Cada día debe tener al menos un rango válido" });
-    }
 
     console.log("🧠 Disponibilidad recibida:", disponibilidad);
 
@@ -33,7 +28,7 @@ router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
       return res.status(400).json({ error: "Datos inválidos: no hay días con disponibilidad" });
     }
 
-    // Validar que cada día tenga al menos un rango válido
+    // Validación: cada día debe tener una fecha válida y al menos un rango correcto
     for (const dia of disponibilidad) {
       if (
         !dia.fecha ||
@@ -41,13 +36,20 @@ router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
         !Array.isArray(dia.rangos) ||
         dia.rangos.length === 0
       ) {
+        console.log("🚫 Día inválido:", dia);
         return res.status(400).json({
           error: `Día inválido o sin rangos: ${JSON.stringify(dia)}`
         });
       }
 
       for (const r of dia.rangos) {
-        if (!r.desde || !r.hasta || r.desde.length !== 5 || r.hasta.length !== 5) {
+        if (
+          !r.desde ||
+          !r.hasta ||
+          !/^([01]\d|2[0-3]):([0-5]\d)$/.test(r.desde) ||
+          !/^([01]\d|2[0-3]):([0-5]\d)$/.test(r.hasta)
+        ) {
+          console.log("🚫 Rango inválido:", r);
           return res.status(400).json({
             error: `Rango horario inválido: ${JSON.stringify(r)}`
           });
@@ -55,6 +57,7 @@ router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
       }
     }
 
+    // Actualizar en la base de datos
     await Terapeuta.findByIdAndUpdate(
       req.terapeutaId,
       { disponibilidadPorFechas: disponibilidad },
