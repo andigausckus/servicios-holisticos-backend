@@ -22,12 +22,34 @@ router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
   try {
     const { disponibilidad } = req.body;
 
+    console.log("🧠 Disponibilidad recibida:", disponibilidad);
+
     if (!Array.isArray(disponibilidad) || disponibilidad.length === 0) {
-      return res.status(400).json({ error: "Datos inválidos" });
+      return res.status(400).json({ error: "Datos inválidos: no hay días con disponibilidad" });
     }
 
-    // Actualizar la disponibilidadPorFechas del terapeuta
-    console.log("🧠 Disponibilidad recibida:", disponibilidad);
+    // Validar que cada día tenga al menos un rango válido
+    for (const dia of disponibilidad) {
+      if (
+        !dia.fecha ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(dia.fecha) ||
+        !Array.isArray(dia.rangos) ||
+        dia.rangos.length === 0
+      ) {
+        return res.status(400).json({
+          error: `Día inválido o sin rangos: ${JSON.stringify(dia)}`
+        });
+      }
+
+      for (const r of dia.rangos) {
+        if (!r.desde || !r.hasta || r.desde.length !== 5 || r.hasta.length !== 5) {
+          return res.status(400).json({
+            error: `Rango horario inválido: ${JSON.stringify(r)}`
+          });
+        }
+      }
+    }
+
     await Terapeuta.findByIdAndUpdate(
       req.terapeutaId,
       { disponibilidadPorFechas: disponibilidad },
