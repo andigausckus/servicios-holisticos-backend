@@ -22,6 +22,11 @@ router.post("/terapeutas/disponibilidad", verificarToken, async (req, res) => {
   try {
     const { disponibilidad } = req.body;
 
+    if (!disponibilidad.every(d => d.fecha && Array.isArray(d.rangos) && d.rangos.length > 0)) {
+  console.log("🚫 Formato incorrecto en disponibilidad:", disponibilidad);
+  return res.status(400).json({ error: "Cada día debe tener al menos un rango válido" });
+    }
+
     console.log("🧠 Disponibilidad recibida:", disponibilidad);
 
     if (!Array.isArray(disponibilidad) || disponibilidad.length === 0) {
