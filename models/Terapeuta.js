@@ -63,6 +63,10 @@ const TerapeutaSchema = new mongoose.Schema({
     type: String,
     required: [true, "Al menos una especialidad es obligatoria"]
   },
+  whatsapp: {
+  type: String,
+  trim: true,
+},
   ubicacion: {
     type: new mongoose.Schema({
       lat: { type: Number, required: true },
