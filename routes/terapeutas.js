@@ -108,6 +108,7 @@ router.get("/", async (req, res) => {
 
 // ✅ Guardar disponibilidad semanal
 router.post("/disponibilidad", verificarToken, async (req, res) => {
+  console.log("✅ Body recibido en backend:", req.body);
   try {
     const { disponibilidad } = req.body;
 
