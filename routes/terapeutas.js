@@ -15,6 +15,7 @@ router.post("/", async (req, res) => {
     email,
     password,
     especialidades,
+    whatsapp,
     ubicacion,
   } = req.body;
 
