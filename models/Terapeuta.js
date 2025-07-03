@@ -66,6 +66,12 @@ const TerapeutaSchema = new mongoose.Schema({
   whatsapp: {
   type: String,
   trim: true,
+  validate: {
+    validator: function (v) {
+      return /^\d{10}$/.test(v);
+    },
+    message: "El número de WhatsApp debe tener exactamente 10 dígitos (sin 0 ni 15).",
+  },
 },
   ubicacion: {
     type: new mongoose.Schema({
