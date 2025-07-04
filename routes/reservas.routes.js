@@ -23,4 +23,13 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/", async (req, res) => {
+  try {
+    const reservas = await Reserva.find().sort({ fecha: -1 });
+    res.json(reservas);
+  } catch (error) {
+    res.status(500).json({ mensaje: "❌ Error al obtener reservas", error });
+  }
+});
+
 module.exports = router;
