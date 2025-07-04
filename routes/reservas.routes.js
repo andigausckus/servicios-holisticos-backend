@@ -36,4 +36,19 @@ router.get("/mis-reservas", authMiddleware, async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const { estado } = req.body;
+    const reservaActualizada = await Reserva.findByIdAndUpdate(
+      req.params.id,
+      { estado },
+      { new: true }
+    );
+    res.json({ mensaje: "✅ Estado actualizado", reserva: reservaActualizada });
+  } catch (error) {
+    console.error("❌ Error al actualizar reserva:", error);
+    res.status(500).json({ mensaje: "❌ No se pudo actualizar la reserva", error });
+  }
+});
+
 module.exports = router;
