@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { MercadoPagoConfig, Preference } = require("mercadopago");
+const UsuarioReserva = require("../models/UsuarioReserva");
 
 const mercadopago = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
@@ -12,6 +13,22 @@ router.post("/crear-preferencia", async (req, res) => {
     console.log("📥 Body recibido en /crear-preferencia:", req.body);
     const { items, payer, marketplace_fee, shipments, additional_info } = req.body;
 
+    // ✅ Guardar datos del usuario en MongoDB
+    const nuevaReserva = new UsuarioReserva({
+      nombre: payer?.name || "Sin nombre",
+      email: payer?.email || "Sin email",
+      telefono: payer?.phone?.number || "Sin teléfono",
+      mensaje: additional_info || "",
+      servicioId: items?.[0]?.servicioId || null, // Esto solo si lo mandás
+      terapeutaId: items?.[0]?.terapeutaId || null, // Esto también opcional
+      fechaReserva: items?.[0]?.fechaReserva || "", // También podrías enviar estos datos
+      horaReserva: items?.[0]?.horaReserva || "",
+    });
+
+    await nuevaReserva.save();
+    console.log("✅ UsuarioReserva guardado:", nuevaReserva._id);
+
+    // ✅ Crear preferencia de MercadoPago
     const preference = {
       items,
       payer,
