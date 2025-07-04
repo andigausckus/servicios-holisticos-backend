@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const Reserva = require("../models/Reserva");
-const authMiddleware = require("../middleware/auth"); // si ya tenés JWT
+const authMiddleware = require("../middleware/auth");
 
+// ✅ Crear nueva reserva
 router.post("/", async (req, res) => {
   try {
     const nueva = new Reserva(req.body);
@@ -14,9 +15,10 @@ router.post("/", async (req, res) => {
   }
 });
 
+// ✅ Obtener TODAS las reservas (uso general o para admin)
 router.get("/", async (req, res) => {
   try {
-    const reservas = await Reserva.find().sort({ creadoEn: -1 }).populate("servicioId terapeutaId");
+    const reservas = await Reserva.find().sort({ fecha: -1 }).populate("servicioId terapeutaId");
     res.json(reservas);
   } catch (error) {
     console.error("❌ Error al obtener reservas:", error);
@@ -24,15 +26,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
-  try {
-    const reservas = await Reserva.find().sort({ fecha: -1 });
-    res.json(reservas);
-  } catch (error) {
-    res.status(500).json({ mensaje: "❌ Error al obtener reservas", error });
-  }
-});
-
+// ✅ Obtener SOLO las reservas del terapeuta logueado
 router.get("/mis-reservas", authMiddleware, async (req, res) => {
   try {
     const reservas = await Reserva.find({ terapeutaId: req.user.id }).sort({ fecha: -1 });
