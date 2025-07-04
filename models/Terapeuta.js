@@ -14,7 +14,7 @@ const rangoSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-// Disponibilidad por día de la semana
+// Disponibilidad por día de la semana (modelo actual)
 const disponibilidadSemanaSchema = new mongoose.Schema({
   dia: {
     type: String,
@@ -27,7 +27,7 @@ const disponibilidadSemanaSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-// Disponibilidad por fecha específica
+// Disponibilidad por fecha específica (YYYY-MM-DD)
 const disponibilidadFechaSchema = new mongoose.Schema({
   fecha: {
     type: String,
@@ -70,21 +70,8 @@ const TerapeutaSchema = new mongoose.Schema({
       validator: function (v) {
         return /^\d{10}$/.test(v);
       },
-      message: "El número de WhatsApp debe tener exactamente 10 dígitos (sin 0 ni 15).",
-    },
-  },
-  cbuCvu: {
-    type: String,
-    trim: true,
-    minlength: 10,
-    maxlength: 30,
-    required: false
-  },
-  bancoOBilletera: {
-    type: String,
-    trim: true,
-    maxlength: 50,
-    required: false
+      message: "El número de WhatsApp debe tener exactamente 10 dígitos (sin 0 ni 15)."
+    }
   },
   ubicacion: {
     type: new mongoose.Schema({
@@ -92,6 +79,33 @@ const TerapeutaSchema = new mongoose.Schema({
       lng: { type: Number, required: true }
     }, { _id: false }),
     required: false
+  },
+  // 🔵 Nuevos campos de pago
+  cbuCvu: {
+    type: String,
+    required: [true, "El CBU/CVU es obligatorio"],
+    validate: {
+      validator: function (v) {
+        return /^\d{22}$/.test(v);
+      },
+      message: "El CBU/CVU debe tener exactamente 22 dígitos."
+    }
+  },
+  bancoOBilletera: {
+    type: String,
+    required: [true, "El banco o billetera es obligatorio"],
+    enum: [
+      "Mercado Pago",
+      "Ualá",
+      "Naranja X",
+      "Brubank",
+      "Banco Nación",
+      "Banco Provincia",
+      "Banco Galicia",
+      "Banco Santander",
+      "Banco BBVA",
+      "Banco Macro"
+    ]
   },
   disponibilidad: {
     type: [disponibilidadSemanaSchema],
@@ -104,11 +118,7 @@ const TerapeutaSchema = new mongoose.Schema({
   servicios: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Servicio"
-  }],
-  creadoEn: {
-    type: Date,
-    default: Date.now
-  }
+  }]
 }, { timestamps: true });
 
 module.exports = mongoose.model("Terapeuta", TerapeutaSchema);
