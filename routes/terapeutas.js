@@ -11,13 +11,15 @@ const secret = process.env.JWT_SECRET;
 // ✅ Registrar nuevo terapeuta
 router.post("/", async (req, res) => {
   const {
-    nombreCompleto,
-    email,
-    password,
-    especialidades,
-    whatsapp,
-    ubicacion,
-  } = req.body;
+  nombreCompleto,
+  email,
+  password,
+  especialidades,
+  whatsapp,
+  ubicacion,
+  cbuCvu,
+  bancoOBilletera,
+} = req.body;
 
   try {
     const saltRounds = 10;
@@ -41,6 +43,8 @@ router.post("/", async (req, res) => {
       especialidades,
       whatsapp,
       ubicacion: ubicacionFinal,
+      cbuCvu,
+      bancoOBilletera,
     });
 
     const terapeutaGuardado = await nuevoTerapeuta.save();
