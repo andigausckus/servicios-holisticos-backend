@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Reserva = require("../models/Reserva");
+const authMiddleware = require("../middleware/auth"); // si ya tenés JWT
 
 router.post("/", async (req, res) => {
   try {
@@ -29,6 +30,15 @@ router.get("/", async (req, res) => {
     res.json(reservas);
   } catch (error) {
     res.status(500).json({ mensaje: "❌ Error al obtener reservas", error });
+  }
+});
+
+router.get("/mis-reservas", authMiddleware, async (req, res) => {
+  try {
+    const reservas = await Reserva.find({ terapeutaId: req.user.id }).sort({ fecha: -1 });
+    res.json(reservas);
+  } catch (err) {
+    res.status(500).json({ mensaje: "❌ Error al obtener reservas", error: err });
   }
 });
 
