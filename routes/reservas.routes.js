@@ -1,24 +1,25 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const mongoose = require('mongoose');
+const Reserva = require("../models/Reserva");
 
-// Esquema temporal (si aún no tenés un modelo separado)
-const reservaSchema = new mongoose.Schema({
-  usuarioNombre: String,
-  usuarioEmail: String,
-  fecha: Date,
-  terapeutaId: String,
+router.post("/", async (req, res) => {
+  try {
+    const nueva = new Reserva(req.body);
+    await nueva.save();
+    res.status(201).json({ mensaje: "✅ Reserva registrada", reserva: nueva });
+  } catch (error) {
+    console.error("❌ Error al guardar reserva:", error);
+    res.status(500).json({ mensaje: "❌ Error al guardar reserva", error });
+  }
 });
 
-const Reserva = mongoose.model('Reserva', reservaSchema);
-
-router.post('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const nuevaReserva = new Reserva(req.body);
-    await nuevaReserva.save();
-    res.status(201).json({ mensaje: '✅ Reserva registrada', reserva: nuevaReserva });
+    const reservas = await Reserva.find().sort({ creadoEn: -1 }).populate("servicioId terapeutaId");
+    res.json(reservas);
   } catch (error) {
-    res.status(500).json({ mensaje: '❌ Error al guardar reserva', error });
+    console.error("❌ Error al obtener reservas:", error);
+    res.status(500).json({ mensaje: "❌ Error al obtener reservas", error });
   }
 });
 
