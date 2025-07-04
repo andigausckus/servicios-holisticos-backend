@@ -182,5 +182,15 @@ router.get("/disponibilidad-fechas/:servicioId", async (req, res) => {
   }
 });
 
+// Obtener todos los terapeutas (para vista admin)
+router.get("/admin/listado", async (req, res) => {
+  try {
+    const terapeutas = await Terapeuta.find().sort({ creadoEn: -1 });
+    res.json(terapeutas);
+  } catch (error) {
+    console.error("❌ Error al obtener terapeutas:", error);
+    res.status(500).json({ mensaje: "Error al obtener terapeutas" });
+  }
+});
 
 module.exports = router;
