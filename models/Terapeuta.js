@@ -14,7 +14,7 @@ const rangoSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-// Disponibilidad por día de la semana (modelo actual)
+// Disponibilidad por día de la semana
 const disponibilidadSemanaSchema = new mongoose.Schema({
   dia: {
     type: String,
@@ -27,7 +27,7 @@ const disponibilidadSemanaSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-// Disponibilidad por fecha específica (YYYY-MM-DD)
+// Disponibilidad por fecha específica
 const disponibilidadFechaSchema = new mongoose.Schema({
   fecha: {
     type: String,
@@ -64,15 +64,28 @@ const TerapeutaSchema = new mongoose.Schema({
     required: [true, "Al menos una especialidad es obligatoria"]
   },
   whatsapp: {
-  type: String,
-  trim: true,
-  validate: {
-    validator: function (v) {
-      return /^\d{10}$/.test(v);
+    type: String,
+    trim: true,
+    validate: {
+      validator: function (v) {
+        return /^\d{10}$/.test(v);
+      },
+      message: "El número de WhatsApp debe tener exactamente 10 dígitos (sin 0 ni 15).",
     },
-    message: "El número de WhatsApp debe tener exactamente 10 dígitos (sin 0 ni 15).",
   },
-},
+  cbuCvu: {
+    type: String,
+    trim: true,
+    minlength: 10,
+    maxlength: 30,
+    required: false
+  },
+  bancoOBilletera: {
+    type: String,
+    trim: true,
+    maxlength: 50,
+    required: false
+  },
   ubicacion: {
     type: new mongoose.Schema({
       lat: { type: Number, required: true },
@@ -91,7 +104,11 @@ const TerapeutaSchema = new mongoose.Schema({
   servicios: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Servicio"
-  }]
+  }],
+  creadoEn: {
+    type: Date,
+    default: Date.now
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model("Terapeuta", TerapeutaSchema);
