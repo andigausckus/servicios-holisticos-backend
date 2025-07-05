@@ -25,6 +25,7 @@ const rutaDisponibilidad = require("./routes/disponibilidad");
 const emailsRoutes = require("./routes/emails");
 const mensajeGlobalRoutes = require("./routes/mensajeGlobal.routes");
 
+
 // ✅ Uso de rutas
 app.use("/api/terapeutas", terapeutasRoutes);
 app.use("/api/servicios", serviciosRoutes);
@@ -34,6 +35,8 @@ app.use("/api/pagos", pagosRoutes); // clave para que MercadoPago funcione
 app.use("/api/disponibilidad", rutaDisponibilidad);
 app.use("/api/emails", emailsRoutes);
 app.use("/api/mensaje-global", mensajeGlobalRoutes);
+app.use("/api/admin", require("./routes/admin.routes"));
+
 
 // ✅ Ruta de prueba
 app.get("/", (req, res) => {
