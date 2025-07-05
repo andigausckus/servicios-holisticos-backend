@@ -8,6 +8,11 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
+    const nuevoTerapeuta = new Terapeuta({
+  ...req.body,
+  aprobado: false  // 🔴 <- Esto es fundamental
+});
+
     const passwordOk = await bcrypt.compare(password, terapeuta.password);
     if (!passwordOk) {
       return res.status(401).json({ message: "Credenciales inválidas" });
