@@ -10,7 +10,11 @@ const reservaSchema = new mongoose.Schema({
   horaReserva: { type: String, required: true },
   precio: { type: Number, required: true },
   plataforma: { type: String },
+
   estado: { type: String, default: "confirmada" },
+  paymentId: { type: String },        // 🆕 ID del pago en MP
+  preferenceId: { type: String },     // 🆕 ID de preferencia
+
   creadoEn: { type: Date, default: Date.now },
 });
 
