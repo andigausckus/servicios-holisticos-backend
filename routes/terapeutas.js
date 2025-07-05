@@ -1,60 +1,3 @@
-const express = require("express");
-const router = express.Router();
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const Terapeuta = require("../models/Terapeuta");
-const Servicio = require("../models/Servicio"); // Asegurate de tener este modelo
-const verificarToken = require("../middlewares/authMiddleware");
-
-const secret = process.env.JWT_SECRET;
-
-// ✅ Registrar nuevo terapeuta
-router.post("/", async (req, res) => {
-  const {
-  nombreCompleto,
-  email,
-  password,
-  especialidades,
-  whatsapp,
-  ubicacion,
-  cbuCvu,
-  bancoOBilletera,
-} = req.body;
-
-  try {
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    let ubicacionFinal = ubicacion;
-    if (typeof ubicacion === "string") {
-      if (ubicacion.toLowerCase().includes("rosario")) {
-        ubicacionFinal = { lat: -32.9442, lng: -60.6505 };
-      } else if (ubicacion.toLowerCase().includes("cordoba")) {
-        ubicacionFinal = { lat: -31.4201, lng: -64.1888 };
-      } else {
-        ubicacionFinal = { lat: -34.6037, lng: -58.3816 }; // Buenos Aires por defecto
-      }
-    }
-
-    const nuevoTerapeuta = new Terapeuta({
-      nombreCompleto,
-      email,
-      password: hashedPassword,
-      especialidades,
-      whatsapp,
-      ubicacion: ubicacionFinal,
-      cbuCvu,
-      bancoOBilletera,
-    });
-
-    const terapeutaGuardado = await nuevoTerapeuta.save();
-    res.status(201).json(terapeutaGuardado);
-  } catch (err) {
-    console.error("Error al registrar terapeuta:", err);
-    res.status(400).json({ message: err.message });
-  }
-});
-
 // ✅ Login de terapeuta
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -68,6 +11,14 @@ router.post("/login", async (req, res) => {
     const passwordOk = await bcrypt.compare(password, terapeuta.password);
     if (!passwordOk) {
       return res.status(401).json({ message: "Credenciales inválidas" });
+    }
+
+    // 🛑 Verificamos si fue aprobado por el admin
+    if (!terapeuta.aprobado) {
+      return res.status(403).json({
+        message:
+          "Tu cuenta aún no fue aprobada. Te avisaremos por email cuando esté lista.",
+      });
     }
 
     const token = jwt.sign(
@@ -84,117 +35,3 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 });
-
-// ✅ Ruta protegida para obtener el perfil privado + servicios
-router.get("/perfil", verificarToken, async (req, res) => {
-  try {
-    const terapeuta = await Terapeuta.findById(req.user.id)
-      .select("-password")
-      .populate("servicios");
-
-    if (!terapeuta) return res.status(404).json({ message: "Terapeuta no encontrado" });
-
-    res.json(terapeuta);
-  } catch (err) {
-    console.error("Error al obtener perfil:", err);
-    res.status(500).json({ message: "Error en el servidor" });
-  }
-});
-
-// ✅ Obtener todos los terapeutas (público)
-router.get("/", async (req, res) => {
-  try {
-    const terapeutas = await Terapeuta.find().select("-password");
-    res.json(terapeutas);
-  } catch (error) {
-    console.error("Error al obtener terapeutas:", error);
-    res.status(500).json({ message: "Error al obtener terapeutas" });
-  }
-});
-
-// ✅ Guardar disponibilidad semanal
-router.post("/disponibilidad", verificarToken, async (req, res) => {
-  console.log("✅ Body recibido en backend:", req.body);
-  try {
-    const { disponibilidad } = req.body;
-
-    if (!Array.isArray(disponibilidad)) {
-      return res.status(400).json({ message: "Formato de disponibilidad inválido" });
-    }
-
-    const terapeuta = await Terapeuta.findById(req.user.id);
-    if (!terapeuta) {
-      return res.status(404).json({ message: "Terapeuta no encontrado" });
-    }
-
-    terapeuta.disponibilidad = disponibilidad;
-    await terapeuta.save();
-
-    res.json({ message: "Disponibilidad guardada correctamente" });
-  } catch (err) {
-    console.error("Error al guardar disponibilidad:", err);
-    res.status(500).json({ message: "Error al guardar disponibilidad" });
-  }
-});
-
-// ✅ Guardar disponibilidad por fechas específicas
-router.post("/disponibilidad-fechas", verificarToken, async (req, res) => {
-  try {
-    const { fechas } = req.body;
-
-    if (!Array.isArray(fechas)) {
-      return res.status(400).json({ message: "Formato de fechas inválido" });
-    }
-
-    const terapeuta = await Terapeuta.findById(req.user.id);
-    if (!terapeuta) {
-      return res.status(404).json({ message: "Terapeuta no encontrado" });
-    }
-
-    console.log("🔍 Disponibilidad enviada:", fechas);
-    console.log("🧠 Antes de guardar:", terapeuta.disponibilidadPorFechas);
-
-    terapeuta.disponibilidadPorFechas = fechas;
-    await terapeuta.save();
-
-    console.log("✅ Después de guardar:", terapeuta.disponibilidadPorFechas);
-
-    res.json({ message: "Disponibilidad por fechas guardada correctamente" });
-  } catch (err) {
-    console.error("❌ Error al guardar disponibilidad por fechas:", err);
-    res.status(500).json({ message: "Error al guardar disponibilidad por fechas" });
-  }
-});
-
-// ✅ Obtener disponibilidad por fechas (correcta)
-router.get("/disponibilidad-fechas/:servicioId", async (req, res) => {
-  try {
-    const servicio = await Servicio.findById(req.params.servicioId).populate({
-      path: "terapeuta",
-      select: "disponibilidadPorFechas"
-    });
-
-    if (!servicio) {
-      return res.status(404).json({ error: "Servicio no encontrado" });
-    }
-
-    const disponibilidad = servicio.terapeuta.disponibilidadPorFechas || [];
-    res.json(disponibilidad);
-  } catch (err) {
-    console.error("Error al obtener disponibilidad:", err);
-    res.status(500).json({ error: "Error al obtener disponibilidad del terapeuta" });
-  }
-});
-
-// Obtener todos los terapeutas (para vista admin)
-router.get("/admin/listado", async (req, res) => {
-  try {
-    const terapeutas = await Terapeuta.find().sort({ creadoEn: -1 });
-    res.json(terapeutas);
-  } catch (error) {
-    console.error("❌ Error al obtener terapeutas:", error);
-    res.status(500).json({ mensaje: "Error al obtener terapeutas" });
-  }
-});
-
-module.exports = router;
