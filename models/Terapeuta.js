@@ -107,6 +107,11 @@ const TerapeutaSchema = new mongoose.Schema({
       "Banco Macro"
     ]
   },
+
+            aprobado: {
+  type: Boolean,
+  default: false
+},
   disponibilidad: {
     type: [disponibilidadSemanaSchema],
     default: []
