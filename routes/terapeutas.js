@@ -1,3 +1,10 @@
+const express = require("express");
+const router = express.Router();
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const Terapeuta = require("../models/Terapeuta");
+const secret = process.env.JWT_SECRET;
+
 // ✅ Login de terapeuta
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -7,11 +14,6 @@ router.post("/login", async (req, res) => {
     if (!terapeuta) {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
-
-    const nuevoTerapeuta = new Terapeuta({
-  ...req.body,
-  aprobado: false  // 🔴 <- Esto es fundamental
-});
 
     const passwordOk = await bcrypt.compare(password, terapeuta.password);
     if (!passwordOk) {
@@ -37,6 +39,9 @@ router.post("/login", async (req, res) => {
       terapeuta: { id: terapeuta._id, nombre: terapeuta.nombreCompleto },
     });
   } catch (err) {
+    console.error("❌ Error en /login:", err);
     res.status(500).json({ message: "Error en el servidor" });
   }
 });
+
+module.exports = router;
