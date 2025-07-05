@@ -108,7 +108,7 @@ const TerapeutaSchema = new mongoose.Schema({
     ]
   },
 
-            aprobado: {
+  aprobado: {
   type: Boolean,
   default: false
 },
