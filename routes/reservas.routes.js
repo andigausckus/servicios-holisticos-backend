@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Reserva = require("../models/Reserva");
-const authMiddleware = require("../middleware/auth");
+const authMiddleware = require("../middlewares/auth");
 
 // ✅ Crear nueva reserva
 router.post("/", async (req, res) => {
