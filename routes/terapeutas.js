@@ -87,12 +87,6 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    if (!terapeuta.aprobado) {
-      return res.status(403).json({
-        message: "Tu cuenta aún no fue aprobada. Te avisaremos por email cuando esté lista.",
-      });
-    }
-
     const token = jwt.sign(
       { id: terapeuta._id, email: terapeuta.email },
       secret,
