@@ -74,12 +74,11 @@ const TerapeutaSchema = new mongoose.Schema({
     }
   },
   ubicacion: {
-    type: new mongoose.Schema({
-      lat: { type: Number, required: true },
-      lng: { type: Number, required: true }
-    }, { _id: false }),
-    required: false
-  },
+  type: String,
+  trim: true,
+  required: false
+},
+  
   // 🔵 Nuevos campos de pago
   cbuCvu: {
     type: String,
