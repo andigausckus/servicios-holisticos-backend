@@ -8,35 +8,64 @@ const secret = process.env.JWT_SECRET;
 // ✅ Ruta para registrar nuevo terapeuta
 router.post("/", async (req, res) => {
   try {
-    const { nombreCompleto, email, password, especialidades, modalidad, ubicacion } = req.body;
+    const {
+      nombreCompleto,
+      email,
+      password,
+      especialidades,
+      whatsapp,
+      ubicacion,
+      cbuCvu,
+      bancoOBilletera,
+    } = req.body;
 
-    // Validación básica
-    if (!nombreCompleto || !email || !password || !especialidades || !modalidad || !ubicacion) {
+    // Validación mínima de campos obligatorios
+    if (
+      !nombreCompleto ||
+      !email ||
+      !password ||
+      !especialidades ||
+      !whatsapp ||
+      !ubicacion ||
+      !cbuCvu ||
+      !bancoOBilletera
+    ) {
       return res.status(400).json({ message: "Faltan campos obligatorios" });
     }
 
-    // Verificar si el terapeuta ya existe
+    // Validar longitud exacta del número de WhatsApp (10 dígitos)
+    if (!/^\d{10}$/.test(whatsapp)) {
+      return res.status(400).json({ message: "El WhatsApp debe tener 10 dígitos sin 0 ni 15" });
+    }
+
+    // Validar longitud del CBU/CVU
+    if (!/^\d{22}$/.test(cbuCvu)) {
+      return res.status(400).json({ message: "El CBU/CVU debe tener 22 dígitos" });
+    }
+
+    // Verificar si el email ya está registrado
     const existe = await Terapeuta.findOne({ email });
     if (existe) {
       return res.status(400).json({ message: "El email ya está registrado" });
     }
 
-    // Hashear la contraseña
+    // Hashear contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear y guardar terapeuta
     const nuevoTerapeuta = new Terapeuta({
       nombreCompleto,
       email,
       password: hashedPassword,
       especialidades,
-      modalidad,
+      whatsapp,
       ubicacion,
+      cbuCvu,
+      bancoOBilletera,
     });
 
-    await nuevoTerapeuta.save();
+    const guardado = await nuevoTerapeuta.save();
 
-    res.status(201).json({ message: "Terapeuta registrado con éxito", id: nuevoTerapeuta._id });
+    res.status(201).json({ message: "Terapeuta registrado con éxito", _id: guardado._id });
   } catch (error) {
     console.error("❌ Error al registrar terapeuta:", error);
     res.status(500).json({ message: "Error en el servidor", error });
@@ -58,11 +87,9 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
-    // 🛑 Verificamos si fue aprobado por el admin
     if (!terapeuta.aprobado) {
       return res.status(403).json({
-        message:
-          "Tu cuenta aún no fue aprobada. Te avisaremos por email cuando esté lista.",
+        message: "Tu cuenta aún no fue aprobada. Te avisaremos por email cuando esté lista.",
       });
     }
 
