@@ -64,14 +64,15 @@ const TerapeutaSchema = new mongoose.Schema({
     required: [true, "Al menos una especialidad es obligatoria"]
   },
   whatsapp: {
-    type: String,
-    trim: true,
-    validate: {
-      validator: function (v) {
-        return /^\d{10}$/.test(v);
-      },
-      message: "El número de WhatsApp debe tener exactamente 10 dígitos (sin 0 ni 15)."
-    }
+  type: String,
+  required: [true, "El número de WhatsApp es obligatorio"],
+  trim: true,
+  validate: {
+    validator: function (v) {
+      return /^\d{10}$/.test(v);
+    },
+    message: "El número de WhatsApp debe tener exactamente 10 dígitos (sin 0 ni 15)."
+  }
   },
   ubicacion: {
   type: String,
