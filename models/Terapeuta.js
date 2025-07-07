@@ -110,8 +110,8 @@ const TerapeutaSchema = new mongoose.Schema({
 
   aprobado: {
   type: Boolean,
-  default: false
-},
+  default: true // ✅ Ahora se aprueba automáticamente
+}
   disponibilidad: {
     type: [disponibilidadSemanaSchema],
     default: []
