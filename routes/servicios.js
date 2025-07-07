@@ -29,7 +29,7 @@ router.post("/", verificarToken, async (req, res) => {
       precio,
       categoria,
       plataformas,
-      imagen, // viene desde Cloudinary
+      imagen,
     } = req.body;
 
     if (!titulo || !descripcion || !modalidad || !duracionMinutos || !precio || !categoria) {
@@ -45,7 +45,7 @@ router.post("/", verificarToken, async (req, res) => {
       categoria,
       plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,
       terapeuta: req.terapeutaId,
-      imagen: imagen || null, // guardamos la URL de Cloudinary
+      imagen: imagen || null,
     });
 
     await nuevoServicio.save();
@@ -61,7 +61,7 @@ router.post("/", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Obtener todos los servicios (público)
+// ✅ Obtener todos los servicios
 router.get("/", async (req, res) => {
   try {
     const servicios = await Servicio.find().populate("terapeuta", "nombreCompleto ubicacion");
@@ -82,7 +82,7 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Obtener un servicio público por ID (sin token)
+// ✅ Obtener un servicio público por ID
 router.get("/publico/:id", async (req, res) => {
   try {
     const servicio = await Servicio.findById(req.params.id).populate("terapeuta", "nombreCompleto");
@@ -96,7 +96,7 @@ router.get("/publico/:id", async (req, res) => {
   }
 });
 
-// ✅ Obtener un servicio del terapeuta autenticado (privado)
+// ✅ Obtener un servicio privado por ID
 router.get("/:id", verificarToken, async (req, res) => {
   try {
     const servicio = await Servicio.findOne({
@@ -115,7 +115,7 @@ router.get("/:id", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Actualizar un servicio existente
+// ✅ Actualizar un servicio
 router.put("/:id", verificarToken, async (req, res) => {
   try {
     const servicioExistente = await Servicio.findOne({
@@ -135,7 +135,7 @@ router.put("/:id", verificarToken, async (req, res) => {
       precio,
       categoria,
       plataformas,
-      imagen, // nueva imagen desde Cloudinary (opcional)
+      imagen,
     } = req.body;
 
     if (!titulo || !descripcion || !modalidad || !duracionMinutos || !precio || !categoria) {
@@ -151,7 +151,7 @@ router.put("/:id", verificarToken, async (req, res) => {
     servicioExistente.plataformas = JSON.parse(plataformas || "[]");
 
     if (imagen) {
-      servicioExistente.imagen = imagen; // solo si se mandó nueva imagen
+      servicioExistente.imagen = imagen;
     }
 
     await servicioExistente.save();
@@ -174,8 +174,19 @@ router.delete("/:id", verificarToken, async (req, res) => {
       return res.status(404).json({ error: "Servicio no encontrado o no autorizado" });
     }
 
-    // Guardar o actualizar horarios de un servicio
-router.put("/:id/horarios", async (req, res) => {
+    await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
+      $pull: { servicios: servicio._id },
+    });
+
+    res.json({ mensaje: "Servicio eliminado correctamente." });
+  } catch (err) {
+    console.error("Error al eliminar servicio:", err);
+    res.status(500).json({ error: "Error al eliminar el servicio." });
+  }
+});
+
+// ✅ Guardar o actualizar horarios del servicio
+router.put("/:id/horarios", verificarToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { horarios } = req.body;
@@ -192,17 +203,6 @@ router.put("/:id/horarios", async (req, res) => {
   } catch (error) {
     console.error("Error al guardar horarios:", error);
     res.status(500).json({ error: "Error al guardar horarios" });
-  }
-});
-
-    await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
-      $pull: { servicios: servicio._id },
-    });
-
-    res.json({ mensaje: "Servicio eliminado correctamente." });
-  } catch (err) {
-    console.error("Error al eliminar servicio:", err);
-    res.status(500).json({ error: "Error al eliminar el servicio." });
   }
 });
 
