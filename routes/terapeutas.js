@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Terapeuta = require("../models/Terapeuta");
 const secret = process.env.JWT_SECRET;
+const verificarToken = require("../middlewares/auth");
 
 // ✅ Ruta para registrar nuevo terapeuta
 router.post("/", async (req, res) => {
