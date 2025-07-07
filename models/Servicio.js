@@ -1,22 +1,31 @@
 const mongoose = require("mongoose");
 
-// Subdocumento para horarios disponibles
+// Subdocumento para los bloques horarios por día
 const horarioSchema = new mongoose.Schema({
-  dia: {
+  fecha: {
     type: String,
     required: true,
-    enum: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+    match: [/^\d{4}-\d{2}-\d{2}$/, "Formato inválido. Debe ser YYYY-MM-DD"]
   },
-  hora: {
-    type: String,
-    required: true,
-    match: [/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (debe ser HH:mm)"]
-  }
+  horariosFijos: [
+    {
+      desde: {
+        type: String,
+        required: true,
+        match: [/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato inválido (HH:mm)"]
+      },
+      hasta: {
+        type: String,
+        required: true,
+        match: [/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato inválido (HH:mm)"]
+      }
+    }
+  ]
 }, { _id: false });
 
 // Modelo principal de Servicio
 const servicioSchema = new mongoose.Schema({
-  titulo: { type: String, required: true }, // En frontend: "Título"
+  titulo: { type: String, required: true },
   descripcion: { type: String, required: true },
   modalidad: {
     type: String,
@@ -27,7 +36,7 @@ const servicioSchema = new mongoose.Schema({
   precio: { type: Number, required: true },
   categoria: { type: String, required: true },
   plataformas: { type: [String], default: [] },
-  imagen: { type: String }, // nombre del archivo de imagen
+  imagen: { type: String },
   terapeuta: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Terapeuta",
