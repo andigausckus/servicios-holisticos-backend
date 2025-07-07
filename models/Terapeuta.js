@@ -109,9 +109,10 @@ const TerapeutaSchema = new mongoose.Schema({
   },
 
   aprobado: {
-  type: Boolean,
-  default: true // ✅ Ahora se aprueba automáticamente
-}
+    type: Boolean,
+    default: true // ✅ Ahora se aprueba automáticamente
+  }, // ✅ coma agregada
+  
   disponibilidad: {
     type: [disponibilidadSemanaSchema],
     default: []
