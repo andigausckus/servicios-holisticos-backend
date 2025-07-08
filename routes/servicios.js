@@ -138,7 +138,16 @@ router.put("/:id", verificarToken, async (req, res) => {
       imagen,
     } = req.body;
 
-    if (!titulo || !descripcion || !modalidad || !duracionMinutos || !precio || !categoria) {
+    if (
+      !titulo?.trim() ||
+      !descripcion?.trim() ||
+      !modalidad ||
+      duracionMinutos === undefined ||
+      isNaN(duracionMinutos) ||
+      !precio ||
+      !categoria?.trim() ||
+      !plataformas || plataformas.length === 0
+    ) {
       return res.status(400).json({ error: "Faltan campos obligatorios." });
     }
 
@@ -148,7 +157,7 @@ router.put("/:id", verificarToken, async (req, res) => {
     servicioExistente.duracionMinutos = duracionMinutos;
     servicioExistente.precio = precio;
     servicioExistente.categoria = categoria;
-    servicioExistente.plataformas = JSON.parse(plataformas || "[]");
+    servicioExistente.plataformas = plataformas;
 
     if (imagen) {
       servicioExistente.imagen = imagen;
