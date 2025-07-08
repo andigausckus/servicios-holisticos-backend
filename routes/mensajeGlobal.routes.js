@@ -37,4 +37,15 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Eliminar mensaje global
+router.delete("/mensaje-global", async (req, res) => {
+  try {
+    await MensajeGlobal.deleteMany({});
+    res.json({ mensaje: "Mensaje eliminado" });
+  } catch (error) {
+    console.error("❌ Error al eliminar mensaje:", error);
+    res.status(500).json({ error: "Error al eliminar el mensaje global" });
+  }
+});
+
 module.exports = router;
