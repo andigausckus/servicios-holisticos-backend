@@ -37,8 +37,8 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Eliminar mensaje global
-router.delete("/mensaje-global", async (req, res) => {
+// ✅ Eliminar mensaje global
+router.delete("/", async (req, res) => {
   try {
     await MensajeGlobal.deleteMany({});
     res.json({ mensaje: "Mensaje eliminado" });
