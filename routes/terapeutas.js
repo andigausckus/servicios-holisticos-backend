@@ -117,12 +117,13 @@ router.get("/perfil", verificarToken, async (req, res) => {
     res.status(500).json({ message: "Error en el servidor" });
   }
 
-      // en terapeutas.js
+      // Ruta para borrar todos los terapeutas (temporal)
 router.delete('/borrar-todos', async (req, res) => {
   try {
     await Terapeuta.deleteMany({});
     res.json({ mensaje: 'Todos los terapeutas fueron eliminados' });
   } catch (error) {
+    console.error('Error al borrar terapeutas:', error);
     res.status(500).json({ error: 'Error al borrar terapeutas' });
   }
 });
