@@ -71,6 +71,17 @@ router.get("/", async (req, res) => {
   }
 });
 
+// 🔥 Ruta temporal para borrar todos los servicios
+router.delete("/borrar-todos", async (req, res) => {
+  try {
+    await Servicio.deleteMany({});
+    res.json({ mensaje: "Todos los servicios fueron eliminados" });
+  } catch (error) {
+    console.error("Error al borrar servicios:", error);
+    res.status(500).json({ error: "Error al borrar servicios" });
+  }
+});
+
 // ✅ Obtener servicios del terapeuta autenticado
 router.get("/mis-servicios", verificarToken, async (req, res) => {
   try {
@@ -212,17 +223,6 @@ router.put("/:id/horarios", verificarToken, async (req, res) => {
   } catch (error) {
     console.error("Error al guardar horarios:", error);
     res.status(500).json({ error: "Error al guardar horarios" });
-  }
-});
-
-// 🔥 Ruta temporal para borrar todos los servicios
-router.delete("/borrar-todos", async (req, res) => {
-  try {
-    await Servicio.deleteMany({});
-    res.json({ mensaje: "Todos los servicios fueron eliminados" });
-  } catch (error) {
-    console.error("Error al borrar servicios:", error);
-    res.status(500).json({ error: "Error al borrar servicios" });
   }
 });
 
