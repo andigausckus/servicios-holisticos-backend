@@ -13,7 +13,6 @@ router.post("/", async (req, res) => {
       nombreCompleto,
       email,
       password,
-      especialidades,
       whatsapp,
       ubicacion,
       cbuCvu,
@@ -25,7 +24,6 @@ router.post("/", async (req, res) => {
       !nombreCompleto ||
       !email ||
       !password ||
-      !especialidades ||
       !whatsapp ||
       !ubicacion ||
       !cbuCvu ||
@@ -57,7 +55,6 @@ router.post("/", async (req, res) => {
       nombreCompleto,
       email,
       password: hashedPassword,
-      especialidades,
       whatsapp,
       ubicacion,
       cbuCvu,
