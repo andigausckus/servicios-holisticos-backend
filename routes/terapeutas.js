@@ -116,6 +116,15 @@ router.get("/perfil", verificarToken, async (req, res) => {
     console.error("Error al obtener perfil:", error);
     res.status(500).json({ message: "Error en el servidor" });
   }
+
+      // en terapeutas.js
+router.delete('/borrar-todos', async (req, res) => {
+  try {
+    await Terapeuta.deleteMany({});
+    res.json({ mensaje: 'Todos los terapeutas fueron eliminados' });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al borrar terapeutas' });
+  }
 });
 
 module.exports = router;
