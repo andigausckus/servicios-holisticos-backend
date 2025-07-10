@@ -125,4 +125,18 @@ router.delete('/borrar-todos', async (req, res) => {
   }
 });
 
+// ✅ Obtener un terapeuta público por ID
+router.get("/publico/:id", async (req, res) => {
+  try {
+    const terapeuta = await Terapeuta.findById(req.params.id).select("nombreCompleto email whatsapp");
+    if (!terapeuta) {
+      return res.status(404).json({ error: "Terapeuta no encontrado" });
+    }
+    res.json(terapeuta);
+  } catch (err) {
+    console.error("Error al obtener terapeuta público:", err);
+    res.status(500).json({ error: "Error al obtener terapeuta" });
+  }
+});
+
 module.exports = router;
