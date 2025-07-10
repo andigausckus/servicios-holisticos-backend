@@ -215,13 +215,14 @@ router.put("/:id/horarios", verificarToken, async (req, res) => {
   }
 });
 
-// en servicios.js (o donde tengas tus rutas de servicios)
-router.delete('/borrar-todos', async (req, res) => {
+// 🔥 Ruta temporal para borrar todos los servicios
+router.delete("/borrar-todos", async (req, res) => {
   try {
     await Servicio.deleteMany({});
-    res.json({ mensaje: 'Todos los servicios fueron eliminados' });
+    res.json({ mensaje: "Todos los servicios fueron eliminados" });
   } catch (error) {
-    res.status(500).json({ error: 'Error al borrar servicios' });
+    console.error("Error al borrar servicios:", error);
+    res.status(500).json({ error: "Error al borrar servicios" });
   }
 });
 
