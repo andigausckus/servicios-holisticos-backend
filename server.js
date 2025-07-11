@@ -25,6 +25,7 @@ const rutaDisponibilidad = require("./routes/disponibilidad");
 const emailsRoutes = require("./routes/emails");
 const mensajeGlobalRoutes = require("./routes/mensajeGlobal.routes");
 const adminRoutes = require("./routes/admin.routes");
+const bloqueosRouter = require("./routes/bloqueos");
 
 
 // ✅ Uso de rutas
@@ -37,6 +38,7 @@ app.use("/api/disponibilidad", rutaDisponibilidad);
 app.use("/api/emails", emailsRoutes);
 app.use("/api/mensaje-global", mensajeGlobalRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/bloqueos", bloqueosRouter);
 
 
 // ✅ Ruta de prueba
