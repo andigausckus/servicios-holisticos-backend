@@ -51,4 +51,28 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+// ✅ Liberar un horario bloqueado (cuando expira el temporizador)
+const Bloqueo = require("../models/Bloqueo");
+
+router.post("/liberar", async (req, res) => {
+  const { servicioId, fecha, hora } = req.body;
+
+  if (!servicioId || !fecha || !hora) {
+    return res.status(400).json({ error: "Faltan datos obligatorios" });
+  }
+
+  try {
+    const result = await Bloqueo.deleteOne({ servicioId, fecha, hora });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ mensaje: "No se encontró bloqueo para liberar" });
+    }
+
+    res.json({ mensaje: "⛔ Reserva liberada correctamente" });
+  } catch (error) {
+    console.error("❌ Error al liberar reserva:", error);
+    res.status(500).json({ error: "Error al liberar reserva" });
+  }
+});
+
 module.exports = router;
