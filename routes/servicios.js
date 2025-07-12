@@ -106,8 +106,9 @@ router.get("/publico/:id", async (req, res) => {
     const bloqueos = await Bloqueo.find({ servicioId: servicio._id });
     const reservas = await Reserva.find({ servicioId: servicio._id });
 
-    const horariosConEstado = (servicio.horariosDisponibles || []).map((dia) => {
-  const horariosFijosConEstado = (dia.horariosFijos || []).map((horario) => {
+    const horariosFijosConEstado = (dia.horariosFijos || [])
+  .filter(h => h.desde && h.hasta) // ✅ asegurarse que tengan ambos valores
+  .map((horario) => {
     const estaReservado = reservas.some(
       (r) => r.fecha === dia.fecha && r.hora === horario.desde
     );
@@ -117,7 +118,8 @@ router.get("/publico/:id", async (req, res) => {
 
     let estado = "disponible";
     if (estaReservado) estado = "reservado";
-else if (estaBloqueado) estado = "no_disponible"; // 🧠 esto es lo que entiende el frontend
+    else if (estaBloqueado) estado = "no_disponible";
+
     return {
       ...horario,
       estado,
