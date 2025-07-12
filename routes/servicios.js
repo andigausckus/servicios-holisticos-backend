@@ -103,12 +103,11 @@ router.get("/publico/:id", async (req, res) => {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
-    // ✅ Traer bloqueos activos y reservas pagadas para este servicio
     const bloqueos = await Bloqueo.find({ servicioId: servicio._id });
     const reservas = await Reserva.find({ servicioId: servicio._id });
 
     const horariosConEstado = (servicio.horariosDisponibles || []).map((dia) => {
-      const rangos = (dia.horariosFijos || []).map((rango) => {
+      const rangos = (dia.rangos || []).map((rango) => {
         const estaReservado = reservas.some(
           (r) => r.fecha === dia.fecha && r.hora === rango.desde
         );
@@ -122,7 +121,7 @@ router.get("/publico/:id", async (req, res) => {
 
         return {
           ...rango,
-          estado,
+          estado, // ⬅️ este campo lo necesita el frontend
         };
       });
 
@@ -132,7 +131,6 @@ router.get("/publico/:id", async (req, res) => {
       };
     });
 
-    // ✅ Respondemos el servicio incluyendo los estados de cada horario
     res.json({
       ...servicio.toObject(),
       horariosDisponibles: horariosConEstado,
