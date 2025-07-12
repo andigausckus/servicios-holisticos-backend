@@ -3,8 +3,8 @@ const router = express.Router();
 const Servicio = require("../models/Servicio");
 const Terapeuta = require("../models/Terapeuta");
 const jwt = require("jsonwebtoken");
-const Reserva = require("../models/Reserva");
 const Bloqueo = require("../models/Bloqueo");
+const Reserva = require("../models/Reserva");
 
 // Middleware JWT
 function verificarToken(req, res, next) {
@@ -103,34 +103,44 @@ router.get("/publico/:id", async (req, res) => {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
-    // ✅ Reservas confirmadas
-    const reservas = await Reserva.find({
-      servicioId: servicio._id,
-      estado: "reservado",
-    });
+    // ✅ Traer bloqueos activos y reservas pagadas para este servicio
+    const bloqueos = await Bloqueo.find({ servicioId: servicio._id });
+    const reservas = await Reserva.find({ servicioId: servicio._id });
 
-    // ✅ Bloqueos activos (aún no expirados)
-    const bloqueos = await Bloqueo.find({
-      servicioId: servicio._id,
-      bloqueadoHasta: { $gt: new Date() }, // aún válidos
-    });
+    const horariosConEstado = servicio.horariosDisponibles.map((dia) => {
+      const rangos = dia.horariosFijos.map((rango) => {
+        const estaReservado = reservas.some(
+          (r) => r.fecha === dia.fecha && r.hora === rango.desde
+        );
+        const estaBloqueado = bloqueos.some(
+          (b) => b.fecha === dia.fecha && b.hora === rango.desde
+        );
 
-    const horariosReservados = new Set(reservas.map(r => `${r.fecha}-${r.hora}`));
-    const horariosBloqueados = new Set(bloqueos.map(b => `${b.fecha}-${b.hora}`));
+        let estado = "disponible";
+        if (estaReservado) estado = "reservado";
+        else if (estaBloqueado) estado = "bloqueado";
 
-    // 🔁 Marcar rangos en el array de horarios
-    servicio.horariosDisponibles.forEach(dia => {
-      dia.horariosFijos = dia.horariosFijos.map(rango => {
-        const clave = `${dia.fecha}-${rango.desde}`;
-        if (horariosReservados.has(clave)) {
-          return { ...rango, estado: "reservado" };
-        }
-        if (horariosBloqueados.has(clave)) {
-          return { ...rango, estado: "bloqueado" };
-        }
-        return rango;
+        return {
+          ...rango,
+          estado,
+        };
       });
+
+      return {
+        fecha: dia.fecha,
+        rangos,
+      };
     });
+
+    res.json({
+      ...servicio.toObject(),
+      horariosDisponibles: horariosConEstado,
+    });
+  } catch (err) {
+    console.error("❌ Error al obtener servicio público:", err);
+    res.status(500).json({ error: "Error al obtener el servicio público" });
+  }
+});
 
     res.json(servicio);
   } catch (err) {
