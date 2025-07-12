@@ -3,6 +3,7 @@ const router = express.Router();
 const Servicio = require("../models/Servicio");
 const Terapeuta = require("../models/Terapeuta");
 const jwt = require("jsonwebtoken");
+const Reserva = require("../models/Reserva"); // asegurate de tener este importado arriba
 
 // Middleware JWT
 function verificarToken(req, res, next) {
@@ -93,13 +94,37 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Obtener un servicio público por ID
+// ✅ Obtener un servicio público por ID y marcar horarios reservados
 router.get("/publico/:id", async (req, res) => {
   try {
     const servicio = await Servicio.findById(req.params.id).populate("terapeuta", "nombreCompleto");
     if (!servicio) {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
+
+    // 🧠 Obtener reservas confirmadas para este servicio
+    const reservas = await Reserva.find({
+      servicioId: servicio._id,
+      estado: "reservado",
+    });
+
+    const reservasMap = new Map();
+    reservas.forEach((r) => {
+      const key = `${r.fecha}-${r.hora}`;
+      reservasMap.set(key, true);
+    });
+
+    // 🛠️ Recorrer horarios y marcar como reservados si corresponde
+    servicio.horariosDisponibles.forEach((dia) => {
+      dia.horariosFijos = dia.horariosFijos.map((rango) => {
+        const clave = `${dia.fecha}-${rango.desde}`;
+        if (reservasMap.has(clave)) {
+          return { ...rango, estado: "reservado" };
+        }
+        return rango;
+      });
+    });
+
     res.json(servicio);
   } catch (err) {
     console.error("Error al obtener servicio público:", err);
