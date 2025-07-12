@@ -3,7 +3,8 @@ const router = express.Router();
 const Servicio = require("../models/Servicio");
 const Terapeuta = require("../models/Terapeuta");
 const jwt = require("jsonwebtoken");
-const Reserva = require("../models/Reserva"); // asegurate de tener este importado arriba
+const Reserva = require("../models/Reserva");
+const Bloqueo = require("../models/Bloqueo");
 
 // Middleware JWT
 function verificarToken(req, res, next) {
@@ -102,24 +103,30 @@ router.get("/publico/:id", async (req, res) => {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
-    // 🧠 Obtener reservas confirmadas para este servicio
+    // ✅ Reservas confirmadas
     const reservas = await Reserva.find({
       servicioId: servicio._id,
       estado: "reservado",
     });
 
-    const reservasMap = new Map();
-    reservas.forEach((r) => {
-      const key = `${r.fecha}-${r.hora}`;
-      reservasMap.set(key, true);
+    // ✅ Bloqueos activos (aún no expirados)
+    const bloqueos = await Bloqueo.find({
+      servicioId: servicio._id,
+      bloqueadoHasta: { $gt: new Date() }, // aún válidos
     });
 
-    // 🛠️ Recorrer horarios y marcar como reservados si corresponde
-    servicio.horariosDisponibles.forEach((dia) => {
-      dia.horariosFijos = dia.horariosFijos.map((rango) => {
+    const horariosReservados = new Set(reservas.map(r => `${r.fecha}-${r.hora}`));
+    const horariosBloqueados = new Set(bloqueos.map(b => `${b.fecha}-${b.hora}`));
+
+    // 🔁 Marcar rangos en el array de horarios
+    servicio.horariosDisponibles.forEach(dia => {
+      dia.horariosFijos = dia.horariosFijos.map(rango => {
         const clave = `${dia.fecha}-${rango.desde}`;
-        if (reservasMap.has(clave)) {
+        if (horariosReservados.has(clave)) {
           return { ...rango, estado: "reservado" };
+        }
+        if (horariosBloqueados.has(clave)) {
+          return { ...rango, estado: "bloqueado" };
         }
         return rango;
       });
@@ -127,7 +134,7 @@ router.get("/publico/:id", async (req, res) => {
 
     res.json(servicio);
   } catch (err) {
-    console.error("Error al obtener servicio público:", err);
+    console.error("❌ Error al obtener servicio público:", err);
     res.status(500).json({ error: "Error al obtener el servicio público" });
   }
 });
