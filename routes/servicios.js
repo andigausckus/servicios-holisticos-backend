@@ -95,7 +95,7 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Obtener un servicio público por ID y marcar horarios reservados
+// ✅ Obtener un servicio público por ID
 router.get("/publico/:id", async (req, res) => {
   try {
     const servicio = await Servicio.findById(req.params.id).populate("terapeuta", "nombreCompleto");
@@ -107,8 +107,8 @@ router.get("/publico/:id", async (req, res) => {
     const bloqueos = await Bloqueo.find({ servicioId: servicio._id });
     const reservas = await Reserva.find({ servicioId: servicio._id });
 
-    const horariosConEstado = servicio.horariosDisponibles.map((dia) => {
-      const rangos = dia.horariosFijos.map((rango) => {
+    const horariosConEstado = (servicio.horariosDisponibles || []).map((dia) => {
+      const rangos = (dia.horariosFijos || []).map((rango) => {
         const estaReservado = reservas.some(
           (r) => r.fecha === dia.fecha && r.hora === rango.desde
         );
@@ -132,17 +132,11 @@ router.get("/publico/:id", async (req, res) => {
       };
     });
 
+    // ✅ Respondemos el servicio incluyendo los estados de cada horario
     res.json({
       ...servicio.toObject(),
       horariosDisponibles: horariosConEstado,
     });
-  } catch (err) {
-    console.error("❌ Error al obtener servicio público:", err);
-    res.status(500).json({ error: "Error al obtener el servicio público" });
-  }
-});
-
-    res.json(servicio);
   } catch (err) {
     console.error("❌ Error al obtener servicio público:", err);
     res.status(500).json({ error: "Error al obtener el servicio público" });
