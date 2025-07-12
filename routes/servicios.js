@@ -106,36 +106,38 @@ router.get("/publico/:id", async (req, res) => {
     const bloqueos = await Bloqueo.find({ servicioId: servicio._id });
     const reservas = await Reserva.find({ servicioId: servicio._id });
 
-    const horariosFijosConEstado = (dia.horariosFijos || [])
-  .filter(h => h.desde && h.hasta) // ✅ asegurarse que tengan ambos valores
-  .map((horario) => {
-    const estaReservado = reservas.some(
-      (r) => r.fecha === dia.fecha && r.hora === horario.desde
-    );
-    const estaBloqueado = bloqueos.some(
-      (b) => b.fecha === dia.fecha && b.hora === horario.desde
-    );
+    const horariosConEstado = (servicio.horariosDisponibles || []).map((dia) => {
+      const horariosFijosConEstado = (dia.horariosFijos || [])
+        .filter(h => h.desde && h.hasta) // ✅ filtro agregado
+        .map((horario) => {
+          const estaReservado = reservas.some(
+            (r) => r.fecha === dia.fecha && r.hora === horario.desde
+          );
+          const estaBloqueado = bloqueos.some(
+            (b) => b.fecha === dia.fecha && b.hora === horario.desde
+          );
 
-    let estado = "disponible";
-    if (estaReservado) estado = "reservado";
-    else if (estaBloqueado) estado = "no_disponible";
+          let estado = "disponible";
+          if (estaReservado) estado = "reservado";
+          else if (estaBloqueado) estado = "no_disponible";
 
-    return {
-      ...horario,
-      estado,
-    };
-  });
+          return {
+            ...horario,
+            estado,
+          };
+        });
 
-  return {
-    fecha: dia.fecha,
-    horariosFijos: horariosFijosConEstado, // ✅ así lo querés vos
-  };
-});
+      return {
+        fecha: dia.fecha,
+        horariosFijos: horariosFijosConEstado,
+      };
+    });
 
     res.json({
-  ...servicio.toObject(),
-  horariosDisponibles: horariosConEstado,
-});
+      ...servicio.toObject(),
+      horariosDisponibles: horariosConEstado,
+    });
+
   } catch (err) {
     console.error("❌ Error al obtener servicio público:", err);
     res.status(500).json({ error: "Error al obtener el servicio público" });
