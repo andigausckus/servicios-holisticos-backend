@@ -117,8 +117,7 @@ router.get("/publico/:id", async (req, res) => {
 
     let estado = "disponible";
     if (estaReservado) estado = "reservado";
-    else if (estaBloqueado) estado = "bloqueado";
-
+else if (estaBloqueado) estado = "no_disponible"; // 🧠 esto es lo que entiende el frontend
     return {
       ...horario,
       estado,
