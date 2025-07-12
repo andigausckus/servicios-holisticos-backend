@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Bloqueo = require("../models/Bloqueo");
+const Reserva = require("../models/Reserva");
 
 // Crear bloqueo
 router.post("/", async (req, res) => {
@@ -42,6 +43,37 @@ router.get("/verificar", async (req, res) => {
     }
   } catch (err) {
     res.status(500).json({ error: "Error al verificar bloqueo" });
+  }
+});
+
+router.get("/todos", async (req, res) => {
+  try {
+    const { servicioId, desde, hasta } = req.query;
+
+    if (!servicioId || !desde || !hasta) {
+      return res.status(400).json({ mensaje: "Faltan parámetros: servicioId, desde, hasta" });
+    }
+
+    // Horarios bloqueados temporalmente
+    const bloqueos = await Bloqueo.find({
+      servicioId,
+      fecha: { $gte: desde, $lte: hasta },
+    }).select("fecha hora");
+
+    // Reservas confirmadas
+    const reservasConfirmadas = await Reserva.find({
+      servicioId,
+      fecha: { $gte: desde, $lte: hasta },
+      estado: "confirmada",
+    }).select("fecha hora");
+
+    res.json({
+      bloqueos: bloqueos.map(b => ({ fecha: b.fecha, hora: b.hora })),
+      reservas: reservasConfirmadas.map(r => ({ fecha: r.fecha, hora: r.hora })),
+    });
+  } catch (error) {
+    console.error("❌ Error al obtener bloqueos y reservas:", error);
+    res.status(500).json({ mensaje: "❌ Error interno del servidor" });
   }
 });
 
