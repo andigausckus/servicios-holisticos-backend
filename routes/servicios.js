@@ -107,34 +107,34 @@ router.get("/publico/:id", async (req, res) => {
     const reservas = await Reserva.find({ servicioId: servicio._id });
 
     const horariosConEstado = (servicio.horariosDisponibles || []).map((dia) => {
-      const rangos = (dia.rangos || []).map((rango) => {
-        const estaReservado = reservas.some(
-          (r) => r.fecha === dia.fecha && r.hora === rango.desde
-        );
-        const estaBloqueado = bloqueos.some(
-          (b) => b.fecha === dia.fecha && b.hora === rango.desde
-        );
+  const horariosFijosConEstado = (dia.horariosFijos || []).map((horario) => {
+    const estaReservado = reservas.some(
+      (r) => r.fecha === dia.fecha && r.hora === horario.desde
+    );
+    const estaBloqueado = bloqueos.some(
+      (b) => b.fecha === dia.fecha && b.hora === horario.desde
+    );
 
-        let estado = "disponible";
-        if (estaReservado) estado = "reservado";
-        else if (estaBloqueado) estado = "bloqueado";
+    let estado = "disponible";
+    if (estaReservado) estado = "reservado";
+    else if (estaBloqueado) estado = "bloqueado";
 
-        return {
-          ...rango,
-          estado, // ⬅️ este campo lo necesita el frontend
-        };
-      });
+    return {
+      ...horario,
+      estado,
+    };
+  });
 
-      return {
-        fecha: dia.fecha,
-        rangos,
-      };
-    });
+  return {
+    fecha: dia.fecha,
+    horariosFijos: horariosFijosConEstado, // ✅ así lo querés vos
+  };
+});
 
     res.json({
-      ...servicio.toObject(),
-      horariosDisponibles: horariosConEstado,
-    });
+  ...servicio.toObject(),
+  horariosDisponibles: horariosConEstado,
+});
   } catch (err) {
     console.error("❌ Error al obtener servicio público:", err);
     res.status(500).json({ error: "Error al obtener el servicio público" });
