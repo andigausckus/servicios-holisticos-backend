@@ -5,6 +5,7 @@ const Terapeuta = require("../models/Terapeuta");
 const jwt = require("jsonwebtoken");
 const Bloqueo = require("../models/Bloqueo");
 const Reserva = require("../models/Reserva");
+const mongoose = require("mongoose"); // asegurate de tener esta línea al comienzo del archivo
 
 // Middleware JWT
 function verificarToken(req, res, next) {
