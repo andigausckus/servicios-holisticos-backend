@@ -98,8 +98,15 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
 
 // ✅ Obtener un servicio público por ID
 router.get("/publico/:id", async (req, res) => {
+  const { id } = req.params;
+
+  // ✅ Validación para evitar error si el ID no es un ObjectId válido
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: "ID de servicio inválido" });
+  }
+
   try {
-    const servicio = await Servicio.findById(req.params.id).populate("terapeuta", "nombreCompleto");
+    const servicio = await Servicio.findById(id).populate("terapeuta", "nombreCompleto");
     if (!servicio) {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
