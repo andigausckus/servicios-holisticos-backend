@@ -152,6 +152,32 @@ router.get("/publico/:id", async (req, res) => {
   }
 });
 
+// 🧹 Limpiar horarios inválidos (temporal)
+router.post("/admin/limpiar-horarios-invalidos", async (req, res) => {
+  const servicios = await Servicio.find();
+  let totalLimpiados = 0;
+
+  for (const servicio of servicios) {
+    let cambiado = false;
+
+    const nuevosHorarios = (servicio.horariosDisponibles || []).map(dia => {
+      const horariosFijos = (dia.horariosFijos || []).filter(h => h.desde && h.hasta);
+      if (horariosFijos.length !== dia.horariosFijos.length) {
+        cambiado = true;
+      }
+      return { ...dia, horariosFijos };
+    });
+
+    if (cambiado) {
+      servicio.horariosDisponibles = nuevosHorarios;
+      await servicio.save();
+      totalLimpiados++;
+    }
+  }
+
+  res.json({ mensaje: "Horarios inválidos eliminados", serviciosActualizados: totalLimpiados });
+});
+
 // ✅ Obtener un servicio privado por ID
 router.get("/:id", verificarToken, async (req, res) => {
   try {
