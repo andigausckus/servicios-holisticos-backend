@@ -100,7 +100,6 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
 router.get("/publico/:id", async (req, res) => {
   const { id } = req.params;
 
-  // ✅ Validación para evitar error si el ID no es un ObjectId válido
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return res.status(400).json({ error: "ID de servicio inválido" });
   }
@@ -116,7 +115,7 @@ router.get("/publico/:id", async (req, res) => {
 
     const horariosConEstado = (servicio.horariosDisponibles || []).map((dia) => {
       const horariosFijosConEstado = (dia.horariosFijos || [])
-        .filter(h => h.desde && h.hasta) // ✅ filtro agregado
+        .filter(h => h.desde && h.hasta)
         .map((horario) => {
           const estaReservado = reservas.some(
             (r) => r.fecha === dia.fecha && r.hora === horario.desde
@@ -130,7 +129,8 @@ router.get("/publico/:id", async (req, res) => {
           else if (estaBloqueado) estado = "no_disponible";
 
           return {
-            ...horario,
+            desde: horario.desde,
+            hasta: horario.hasta,
             estado,
           };
         });
