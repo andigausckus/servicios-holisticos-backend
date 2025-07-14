@@ -83,6 +83,7 @@ const payer = payment.payer; // ✅ este sí tiene el email real
 
         const prefData = await prefResponse.json();
         const item = prefData.items?.[0];
+        console.log("📦 Preferencia (prefData):", prefData);
 
         if (!item || !payer || !payer.email) {
   console.warn("❗ Preferencia incompleta o sin email del usuario:", payer);
