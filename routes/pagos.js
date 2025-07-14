@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const { MercadoPagoConfig, Preference } = require("mercadopago");
 const { enviarComprobante } = require("../utils/email"); // ✅ importar función
+const { Payment } = require("mercadopago");
+const Reserva = require("../models/Reserva");
+const Bloqueo = require("../models/Bloqueo");
 
 const mercadopago = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
@@ -54,6 +57,72 @@ router.post("/crear-preferencia", async (req, res) => {
   } catch (error) {
     console.error("❌ Error creando preferencia:", error);
     res.status(500).json({ error: "Error creando preferencia", detalle: error.message });
+  }
+});
+
+router.post("/webhook", async (req, res) => {
+  try {
+    const { type, data } = req.body;
+
+    if (type === "payment") {
+      const payment = await new Payment(mercadopago).get({ id: data.id });
+
+      if (payment.status === "approved") {
+        const preference_id = payment.preference_id;
+        const payer = payment.payer;
+
+        // Obtenemos la preferencia para saber qué servicio, fecha y hora
+        const prefResponse = await fetch(`https://api.mercadopago.com/checkout/preferences/${preference_id}`, {
+          headers: {
+            Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
+          },
+        });
+
+        const prefData = await prefResponse.json();
+        const item = prefData.items?.[0];
+
+        if (!item || !payer?.email) {
+          console.warn("❗ Preferencia incompleta o sin email del usuario.");
+          return res.sendStatus(200); // Responder 200 aunque falte algo
+        }
+
+        // ✅ Evitar duplicados
+        const yaExiste = await Reserva.findOne({ paymentId: payment.id });
+        if (yaExiste) return res.sendStatus(200);
+
+        // 💾 Crear reserva
+        const nuevaReserva = new Reserva({
+          servicioId: item.servicioId,
+          terapeutaId: item.terapeutaId,
+          usuarioNombre: payer.name || "Sin nombre",
+          usuarioEmail: payer.email,
+          usuarioTelefono: payer.phone?.number || "",
+          fechaReserva: item.fechaReserva,
+          horaReserva: item.horaReserva,
+          precio: item.unit_price,
+          plataforma: item.plataforma || "",
+          estado: "confirmada",
+          paymentId: payment.id,
+          preferenceId: preference_id,
+        });
+
+        await nuevaReserva.save();
+
+        // 🧼 Eliminar bloqueo temporal (si existe)
+        await Bloqueo.findOneAndDelete({
+          servicioId: item.servicioId,
+          fecha: item.fechaReserva,
+          hora: item.horaReserva,
+        });
+
+        console.log("✅ Reserva confirmada por webhook:", nuevaReserva._id);
+      }
+    }
+
+    res.sendStatus(200);
+  } catch (error) {
+    console.error("❌ Error en webhook de pago:", error);
+    res.sendStatus(500);
   }
 });
 
