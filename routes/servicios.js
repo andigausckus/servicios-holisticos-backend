@@ -125,8 +125,8 @@ router.get("/publico/:id", async (req, res) => {
           );
 
           let estado = "disponible";
-          if (estaReservado) estado = "reservado";
-          else if (estaBloqueado) estado = "no_disponible";
+if (estaReservado) estado = "reservado";
+else if (estaBloqueado) estado = "en_proceso";
 
           return {
             desde: horario.desde,
