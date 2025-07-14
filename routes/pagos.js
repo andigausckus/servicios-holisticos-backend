@@ -15,15 +15,26 @@ const mercadopago = new MercadoPagoConfig({
 router.post("/crear-preferencia", async (req, res) => {
   try {
     console.log("📥 Body recibido en /crear-preferencia:", req.body);
-    const { items, payer, additional_info } = req.body;
+    const { items, payer, shipments, additional_info } = req.body;
+
+    const itemsConMetadata = items.map((item) => ({
+      ...item,
+      metadata: {
+        servicioId: item.servicioId,
+        terapeutaId: item.terapeutaId,
+        fechaReserva: item.fechaReserva,
+        horaReserva: item.horaReserva,
+        plataforma: item.plataforma || ""
+      }
+    }));
 
     const preference = {
-      items,
+      items: itemsConMetadata,
       payer,
       payment_methods: {
         excluded_payment_types: [{ id: "ticket" }, { id: "atm" }],
       },
-      shipments: {},
+      shipments,
       additional_info,
       back_urls: {
         success: "https://www.serviciosholisticos.com.ar/gracias",
@@ -50,16 +61,13 @@ router.post("/webhook", async (req, res) => {
     const { type, data } = req.body;
 
     if (type === "payment") {
-      const paymentClient = new Payment(mercadopago);
-const { body: payment } = await paymentClient.get({ id: data.id });
-      if (!payment) return res.sendStatus(200);
+      const payment = await new Payment(mercadopago).get({ id: data.id });
 
-      if (payment.status === "approved") {
+      if (payment && payment.status === "approved") {
         const preference_id = payment.preference_id;
         const payer = payment.payer;
         console.log("👤 Payer recibido del payment:", payer);
 
-        // Obtener preferencia
         const prefResponse = await fetch(`https://api.mercadopago.com/checkout/preferences/${preference_id}`, {
           headers: {
             Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
@@ -67,10 +75,12 @@ const { body: payment } = await paymentClient.get({ id: data.id });
         });
 
         const prefData = await prefResponse.json();
-        console.log("📦 Preferencia (prefData):", prefData);
         const item = prefData.items?.[0];
+        const metadata = item?.metadata || {};
 
-        if (!item || !payer || !payer.email) {
+        console.log("📦 Preferencia (prefData):", prefData);
+
+        if (!metadata.servicioId || !metadata.fechaReserva || !payer?.email) {
           console.warn("❗ Preferencia incompleta o sin email del usuario:", payer);
           return res.sendStatus(200);
         }
@@ -78,17 +88,16 @@ const { body: payment } = await paymentClient.get({ id: data.id });
         const yaExiste = await Reserva.findOne({ paymentId: payment.id });
         if (yaExiste) return res.sendStatus(200);
 
-        // Crear reserva
         const nuevaReserva = new Reserva({
-          servicioId: item.servicioId,
-          terapeutaId: item.terapeutaId,
+          servicioId: metadata.servicioId,
+          terapeutaId: metadata.terapeutaId,
           usuarioNombre: payer.name || "Sin nombre",
           usuarioEmail: payer.email,
           usuarioTelefono: payer.phone?.number || "",
-          fechaReserva: item.fechaReserva,
-          horaReserva: item.horaReserva,
+          fechaReserva: metadata.fechaReserva,
+          horaReserva: metadata.horaReserva,
           precio: item.unit_price,
-          plataforma: item.plataforma || "",
+          plataforma: metadata.plataforma || "",
           estado: "confirmada",
           paymentId: payment.id,
           preferenceId: preference_id,
@@ -96,60 +105,13 @@ const { body: payment } = await paymentClient.get({ id: data.id });
 
         await nuevaReserva.save();
 
-        // Eliminar bloqueo
         await Bloqueo.findOneAndDelete({
-          servicioId: item.servicioId,
-          fecha: item.fechaReserva,
-          hora: item.horaReserva,
+          servicioId: metadata.servicioId,
+          fecha: metadata.fechaReserva,
+          hora: metadata.horaReserva,
         });
 
-        // Obtener terapeuta
-        const terapeuta = await Terapeuta.findById(item.terapeutaId);
-        if (!terapeuta) {
-          console.warn("⚠️ Terapeuta no encontrado:", item.terapeutaId);
-          return res.sendStatus(200);
-        }
-
-        // 📧 Enviar email al usuario
-        await enviarComprobante({
-          destinatario: payer.email,
-          asunto: "🌟 Confirmación de tu sesión en Servicios Holísticos",
-          html: `
-            <h2>🌿 ¡Gracias por tu reserva!</h2>
-            <p>Hola ${payer.name || "usuario/a"},</p>
-            <p>Tu sesión con <strong>${terapeuta.nombreCompleto}</strong> está confirmada.</p>
-            <p>📅 Fecha: ${item.fechaReserva}</p>
-            <p>⏰ Hora: ${item.horaReserva}</p>
-            <br />
-            <h3>📞 Datos de contacto del terapeuta</h3>
-            <p>✉️ <strong>Email:</strong> ${terapeuta.email}</p>
-            <p>📱 <strong>WhatsApp:</strong> ${terapeuta.whatsapp}</p>
-            <br />
-            <p>Podés escribirle directamente si tenés alguna duda o el día de la sesión para coordinar.</p>
-            <p>Gracias por elegir Servicios Holísticos 🙌</p>
-          `
-        });
-
-        // 📧 Enviar email al terapeuta
-        await enviarComprobante({
-          destinatario: terapeuta.email,
-          asunto: "📬 ¡Nueva reserva confirmada!",
-          html: `
-            <h2>🧘‍♀️ ¡Tenés una nueva reserva!</h2>
-            <p>Hola ${terapeuta.nombreCompleto},</p>
-            <p>Un usuario ha reservado tu servicio <strong>${item.title}</strong>.</p>
-            <p>📅 Fecha: ${item.fechaReserva}</p>
-            <p>⏰ Hora: ${item.horaReserva}</p>
-            <p>💻 Plataforma: ${item.plataforma || "a coordinar"}</p>
-            <br />
-            <p>El usuario se llama <strong>${payer.name || "sin nombre"}</strong> y puede contactarte si tiene dudas.</p>
-            <p>También podés escribirle vos si lo necesitás para coordinar.</p>
-            <br />
-            <p>¡Gracias por formar parte de Servicios Holísticos! 💜</p>
-          `
-        });
-
-        console.log("✅ Reserva confirmada y correos enviados:", nuevaReserva._id);
+        console.log("✅ Reserva confirmada por webhook:", nuevaReserva._id);
       }
     }
 
