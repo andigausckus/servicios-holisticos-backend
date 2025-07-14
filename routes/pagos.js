@@ -62,6 +62,7 @@ router.post("/crear-preferencia", async (req, res) => {
 
 router.post("/webhook", async (req, res) => {
   try {
+    console.log("🟡 Webhook recibido de Mercado Pago:", req.body);
     const { type, data } = req.body;
 
     if (type === "payment") {
