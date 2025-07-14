@@ -50,7 +50,7 @@ router.post("/webhook", async (req, res) => {
     const { type, data } = req.body;
 
     if (type === "payment") {
-      const { response: payment } = await mercadopago.payment.get(data.id);
+      const payment = await mercadopago.payment.findById(data.id);
       if (!payment) return res.sendStatus(200);
 
       if (payment.status === "approved") {
