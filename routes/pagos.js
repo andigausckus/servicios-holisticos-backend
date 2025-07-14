@@ -1,20 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const { MercadoPagoConfig, Preference } = require("mercadopago");
-const { enviarComprobante } = require("../utils/email"); // ✅ importar función
-const { Payment } = require("mercadopago");
+const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 const Reserva = require("../models/Reserva");
 const Bloqueo = require("../models/Bloqueo");
+const Terapeuta = require("../models/Terapeuta");
+const { enviarComprobante } = require("../utils/email");
 
 const mercadopago = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
   locale: "es-AR",
 });
 
+// ✅ Crear preferencia
 router.post("/crear-preferencia", async (req, res) => {
   try {
     console.log("📥 Body recibido en /crear-preferencia:", req.body);
-    const { items, payer, marketplace_fee, shipments, additional_info } = req.body;
+    const { items, payer, additional_info } = req.body;
 
     const preference = {
       items,
@@ -22,7 +23,7 @@ router.post("/crear-preferencia", async (req, res) => {
       payment_methods: {
         excluded_payment_types: [{ id: "ticket" }, { id: "atm" }],
       },
-      shipments,
+      shipments: {},
       additional_info,
       back_urls: {
         success: "https://www.serviciosholisticos.com.ar/gracias",
@@ -35,23 +36,6 @@ router.post("/crear-preferencia", async (req, res) => {
     const pref = new Preference(mercadopago);
     const result = await pref.create({ body: preference });
 
-    // 🔐 Email opcional, lo activamos después del primer pago real:
-    /*
-    await enviarComprobante({
-      destinatario: payer.email,
-      asunto: "Confirmación de tu reserva en Servicios Holísticos",
-      html: `
-        <h2>🌟 Gracias por tu reserva</h2>
-        <p>Hola ${payer.name},</p>
-        <p>Confirmamos tu sesión con el terapeuta ${items[0].description}.</p>
-        <p>Nos comunicaremos en caso de novedades.</p>
-        <p>📅 Fecha: ${items[0].fechaReserva}</p>
-        <p>⏰ Hora: ${items[0].horaReserva}</p>
-        <p>💸 Precio: $${items[0].unit_price}</p>
-      `
-    });
-    */
-
     res.json({ init_point: result.init_point });
   } catch (error) {
     console.error("❌ Error creando preferencia:", error);
@@ -59,27 +43,22 @@ router.post("/crear-preferencia", async (req, res) => {
   }
 });
 
+// ✅ Webhook de Mercado Pago
 router.post("/webhook", async (req, res) => {
   try {
     console.log("🟡 Webhook recibido de Mercado Pago:", req.body);
     const { type, data } = req.body;
 
     if (type === "payment") {
-      const paymentResult = await new Payment(mercadopago).get({ id: data.id });
+      const payment = await new Payment(mercadopago).get({ id: data.id });
+      if (!payment) return res.sendStatus(200);
 
-if (!paymentResult || !paymentResult.response) {
-  console.warn("❌ No se pudo obtener el payment.response:", paymentResult);
-  return res.sendStatus(200);
-}
-
-const payment = paymentResult.response;
-
-if (payment.status === "approved") {
+      if (payment.status === "approved") {
         const preference_id = payment.preference_id;
         const payer = payment.payer;
         console.log("👤 Payer recibido del payment:", payer);
 
-        // Obtenemos la preferencia para saber qué servicio, fecha y hora
+        // Obtener preferencia
         const prefResponse = await fetch(`https://api.mercadopago.com/checkout/preferences/${preference_id}`, {
           headers: {
             Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
@@ -87,19 +66,18 @@ if (payment.status === "approved") {
         });
 
         const prefData = await prefResponse.json();
-        const item = prefData.items?.[0];
         console.log("📦 Preferencia (prefData):", prefData);
+        const item = prefData.items?.[0];
 
         if (!item || !payer || !payer.email) {
           console.warn("❗ Preferencia incompleta o sin email del usuario:", payer);
           return res.sendStatus(200);
         }
 
-        // ✅ Evitar duplicados
         const yaExiste = await Reserva.findOne({ paymentId: payment.id });
         if (yaExiste) return res.sendStatus(200);
 
-        // 💾 Crear reserva
+        // Crear reserva
         const nuevaReserva = new Reserva({
           servicioId: item.servicioId,
           terapeutaId: item.terapeutaId,
@@ -117,14 +95,60 @@ if (payment.status === "approved") {
 
         await nuevaReserva.save();
 
-        // 🧼 Eliminar bloqueo temporal (si existe)
+        // Eliminar bloqueo
         await Bloqueo.findOneAndDelete({
           servicioId: item.servicioId,
           fecha: item.fechaReserva,
           hora: item.horaReserva,
         });
 
-        console.log("✅ Reserva confirmada por webhook:", nuevaReserva._id);
+        // Obtener terapeuta
+        const terapeuta = await Terapeuta.findById(item.terapeutaId);
+        if (!terapeuta) {
+          console.warn("⚠️ Terapeuta no encontrado:", item.terapeutaId);
+          return res.sendStatus(200);
+        }
+
+        // 📧 Enviar email al usuario
+        await enviarComprobante({
+          destinatario: payer.email,
+          asunto: "🌟 Confirmación de tu sesión en Servicios Holísticos",
+          html: `
+            <h2>🌿 ¡Gracias por tu reserva!</h2>
+            <p>Hola ${payer.name || "usuario/a"},</p>
+            <p>Tu sesión con <strong>${terapeuta.nombreCompleto}</strong> está confirmada.</p>
+            <p>📅 Fecha: ${item.fechaReserva}</p>
+            <p>⏰ Hora: ${item.horaReserva}</p>
+            <br />
+            <h3>📞 Datos de contacto del terapeuta</h3>
+            <p>✉️ <strong>Email:</strong> ${terapeuta.email}</p>
+            <p>📱 <strong>WhatsApp:</strong> ${terapeuta.whatsapp}</p>
+            <br />
+            <p>Podés escribirle directamente si tenés alguna duda o el día de la sesión para coordinar.</p>
+            <p>Gracias por elegir Servicios Holísticos 🙌</p>
+          `
+        });
+
+        // 📧 Enviar email al terapeuta
+        await enviarComprobante({
+          destinatario: terapeuta.email,
+          asunto: "📬 ¡Nueva reserva confirmada!",
+          html: `
+            <h2>🧘‍♀️ ¡Tenés una nueva reserva!</h2>
+            <p>Hola ${terapeuta.nombreCompleto},</p>
+            <p>Un usuario ha reservado tu servicio <strong>${item.title}</strong>.</p>
+            <p>📅 Fecha: ${item.fechaReserva}</p>
+            <p>⏰ Hora: ${item.horaReserva}</p>
+            <p>💻 Plataforma: ${item.plataforma || "a coordinar"}</p>
+            <br />
+            <p>El usuario se llama <strong>${payer.name || "sin nombre"}</strong> y puede contactarte si tiene dudas.</p>
+            <p>También podés escribirle vos si lo necesitás para coordinar.</p>
+            <br />
+            <p>¡Gracias por formar parte de Servicios Holísticos! 💜</p>
+          `
+        });
+
+        console.log("✅ Reserva confirmada y correos enviados:", nuevaReserva._id);
       }
     }
 
