@@ -67,6 +67,7 @@ router.post("/webhook", async (req, res) => {
 
     if (type === "payment") {
       const payment = await new Payment(mercadopago).get({ id: data.id });
+      console.log("👤 Payer recibido del payment:", payer);
 
       if (payment.status === "approved") {
         const preference_id = payment.preference_id;
