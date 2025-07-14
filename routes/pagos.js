@@ -70,7 +70,7 @@ router.post("/webhook", async (req, res) => {
 
       if (payment.status === "approved") {
         const preference_id = payment.preference_id;
-        const payer = payment.payer;
+const payer = payment.payer; // ✅ este sí tiene el email real
 
         // Obtenemos la preferencia para saber qué servicio, fecha y hora
         const prefResponse = await fetch(`https://api.mercadopago.com/checkout/preferences/${preference_id}`, {
@@ -82,10 +82,10 @@ router.post("/webhook", async (req, res) => {
         const prefData = await prefResponse.json();
         const item = prefData.items?.[0];
 
-        if (!item || !payer?.email) {
-          console.warn("❗ Preferencia incompleta o sin email del usuario.");
-          return res.sendStatus(200); // Responder 200 aunque falte algo
-        }
+        if (!item || !payer || !payer.email) {
+  console.warn("❗ Preferencia incompleta o sin email del usuario:", payer);
+  return res.sendStatus(200);
+}
 
         // ✅ Evitar duplicados
         const yaExiste = await Reserva.findOne({ paymentId: payment.id });
