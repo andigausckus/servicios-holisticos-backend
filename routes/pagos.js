@@ -67,11 +67,12 @@ router.post("/webhook", async (req, res) => {
 
     if (type === "payment") {
       const payment = await new Payment(mercadopago).get({ id: data.id });
-      console.log("👤 Payer recibido del payment:", payer);
-
+      
       if (payment.status === "approved") {
         const preference_id = payment.preference_id;
 const payer = payment.payer; // ✅ este sí tiene el email real
+        console.log("👤 Payer recibido del payment:", payer);
+
 
         // Obtenemos la preferencia para saber qué servicio, fecha y hora
         const prefResponse = await fetch(`https://api.mercadopago.com/checkout/preferences/${preference_id}`, {
