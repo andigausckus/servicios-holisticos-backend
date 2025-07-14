@@ -22,7 +22,6 @@ router.post("/crear-preferencia", async (req, res) => {
       payment_methods: {
         excluded_payment_types: [{ id: "ticket" }, { id: "atm" }],
       },
-      marketplace_fee: Math.floor((items?.[0]?.unit_price || 0) * 0.1),
       shipments,
       additional_info,
       back_urls: {
