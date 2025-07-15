@@ -88,4 +88,42 @@ router.get("/disponibilidad-fechas/:terapeutaId", async (req, res) => {
   }
 });
 
+// Bloquear un horario por 2 minutos
+router.post("/bloquear-horario", async (req, res) => {
+  try {
+    const { terapeutaId, fecha, desde } = req.body;
+
+    const terapeuta = await Terapeuta.findById(terapeutaId);
+    if (!terapeuta || !terapeuta.disponibilidadPorFechas) {
+      return res.status(404).json({ error: "Terapeuta o disponibilidad no encontrados" });
+    }
+
+    const dia = terapeuta.disponibilidadPorFechas.find(d => d.fecha === fecha);
+    if (!dia) {
+      return res.status(404).json({ error: "Fecha no encontrada" });
+    }
+
+    const rango = dia.rangos.find(r => r.desde === desde);
+    if (!rango) {
+      return res.status(404).json({ error: "Horario no encontrado" });
+    }
+
+    const ahora = new Date();
+    const expiracion = new Date(ahora.getTime() + 2 * 60 * 1000); // 2 minutos
+
+    // Verificar si ya está bloqueado
+    if (rango.enProcesoHasta && new Date(rango.enProcesoHasta) > ahora) {
+      return res.status(400).json({ error: "Este horario ya está en proceso de reserva" });
+    }
+
+    rango.enProcesoHasta = expiracion;
+    await terapeuta.save();
+
+    res.json({ mensaje: "Horario bloqueado por 2 minutos", expiracion });
+  } catch (error) {
+    console.error("❌ Error al bloquear horario:", error);
+    res.status(500).json({ error: "Error al bloquear horario" });
+  }
+});
+
 module.exports = router;
