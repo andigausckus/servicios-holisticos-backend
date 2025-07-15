@@ -60,22 +60,22 @@ const TerapeutaSchema = new mongoose.Schema({
     minlength: [6, "La contraseña debe tener al menos 6 caracteres"]
   },
   whatsapp: {
-  type: String,
-  required: [true, "El número de WhatsApp es obligatorio"],
-  trim: true,
-  validate: {
-    validator: function (v) {
-      return /^\d{10}$/.test(v);
-    },
-    message: "El número de WhatsApp debe tener exactamente 10 dígitos (sin 0 ni 15)."
-  }
+    type: String,
+    required: [true, "El número de WhatsApp es obligatorio"],
+    trim: true,
+    validate: {
+      validator: function (v) {
+        return /^\d{10}$/.test(v);
+      },
+      message: "El número de WhatsApp debe tener exactamente 10 dígitos (sin 0 ni 15)."
+    }
   },
   ubicacion: {
-  type: String,
-  trim: true,
-  required: false
-},
-  
+    type: String,
+    trim: true,
+    required: false
+  },
+
   // 🔵 Nuevos campos de pago
   cbuCvu: {
     type: String,
@@ -107,16 +107,30 @@ const TerapeutaSchema = new mongoose.Schema({
   aprobado: {
     type: Boolean,
     default: true // ✅ Ahora se aprueba automáticamente
-  }, // ✅ coma agregada
-  
+  },
+
   disponibilidad: {
     type: [disponibilidadSemanaSchema],
     default: []
   },
+
   disponibilidadPorFechas: {
     type: [disponibilidadFechaSchema],
     default: []
   },
+
+  // 🟡 NUEVO: bloqueos temporales de horarios (por fecha y hora)
+  horariosBloqueados: {
+    type: [
+      {
+        fecha: { type: String, required: true },       // Ej: "2025-07-13"
+        hora: { type: String, required: true },         // Ej: "14:30"
+        expiracion: { type: Date, required: true }      // Fecha/hora en que expira el bloqueo
+      }
+    ],
+    default: []
+  },
+
   servicios: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "Servicio"
