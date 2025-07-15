@@ -48,30 +48,6 @@ router.post("/crear-preferencia", async (req, res) => {
     const result = await pref.create({ body: preference });
 
   // ✅ Crear bloqueo temporal para evitar reservas dobles
-const metadata = items[0];
-await new Bloqueo({
-  servicioId: metadata.servicioId,
-  fecha: metadata.fechaReserva,
-  hora: metadata.horaReserva,
-}).save();
-
-// 🕑 Eliminar automáticamente el bloqueo si no se concreta el pago en 2 minutos
-setTimeout(async () => {
-  const reservaExiste = await Reserva.findOne({
-    servicioId: metadata.servicioId,
-    fechaReserva: metadata.fechaReserva,
-    horaReserva: metadata.horaReserva,
-  });
-
-  if (!reservaExiste) {
-    await Bloqueo.findOneAndDelete({
-      servicioId: metadata.servicioId,
-      fecha: metadata.fechaReserva,
-      hora: metadata.horaReserva,
-    });
-    console.log("🧼 Bloqueo eliminado automáticamente por timeout");
-  }
-}, 2 * 60 * 1000);
 
     res.json({ init_point: result.init_point });
   } catch (error) {
