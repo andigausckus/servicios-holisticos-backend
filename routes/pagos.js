@@ -45,11 +45,17 @@ router.post("/crear-preferencia", async (req, res) => {
     };
 
     const pref = new Preference(mercadopago);
-    const result = await pref.create({ body: preference });
+const result = await pref.create({ body: preference });
 
-  // ✅ Crear bloqueo temporal para evitar reservas dobles
+const preferenceId = result.id;
 
-    res.json({ init_point: result.init_point });
+// 👉 Agregar el preferenceId al metadata del primer ítem
+if (itemsConMetadata[0] && itemsConMetadata[0].metadata) {
+  itemsConMetadata[0].metadata.preferenceId = preferenceId;
+}
+
+// (Opcional: devolver también el ID por si lo necesitás luego)
+res.json({ init_point: result.init_point, preferenceId });
   } catch (error) {
     console.error("❌ Error creando preferencia:", error);
     res.status(500).json({ error: "Error creando preferencia", detalle: error.message });
@@ -66,19 +72,9 @@ router.post("/webhook", async (req, res) => {
       const payment = await new Payment(mercadopago).get({ id: data.id });
 
       if (payment && payment.status === "approved") {
-        const preference_id = payment.preference_id;
         const payer = payment.payer;
-        console.log("👤 Payer recibido del payment:", payer);
-
-        const prefResponse = await fetch(`https://api.mercadopago.com/checkout/preferences/${preference_id}`, {
-          headers: {
-            Authorization: `Bearer ${process.env.MP_ACCESS_TOKEN}`,
-          },
-        });
-
-        const prefData = await prefResponse.json();
-        const item = prefData.items?.[0];
-        const metadata = item?.metadata || {};
+const metadata = payment.metadata || {};
+const preference_id = metadata.preferenceId || payment.preference_id;
 
         console.log("📦 Preferencia (prefData):", prefData);
 
