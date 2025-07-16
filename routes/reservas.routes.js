@@ -75,4 +75,27 @@ router.post("/liberar", async (req, res) => {
   }
 });
 
+// Obtener la reserva más reciente por email
+router.get("/reciente", async (req, res) => {
+  try {
+    const email = req.query.email;
+    if (!email) {
+      return res.status(400).json({ error: "Falta el email en la query" });
+    }
+
+    const reserva = await Reserva.findOne({ usuarioEmail: email })
+      .sort({ createdAt: -1 })
+      .populate("terapeutaId");
+
+    if (!reserva) {
+      return res.status(404).json({ error: "No se encontró una reserva para este email" });
+    }
+
+    res.json(reserva);
+  } catch (error) {
+    console.error("❌ Error al obtener reserva reciente:", error);
+    res.status(500).json({ error: "Error al buscar la reserva" });
+  }
+});
+
 module.exports = router;
