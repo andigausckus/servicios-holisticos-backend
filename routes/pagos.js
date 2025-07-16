@@ -17,14 +17,14 @@ router.post("/crear-preferencia", async (req, res) => {
     console.log("📥 Body recibido en /crear-preferencia:", req.body);
     const { items, payer, shipments, additional_info } = req.body;
 
-    // ✅ Metadata global (ya no por item)
-    const metadata = {
-      servicioId: items[0].servicioId,
-      terapeutaId: items[0].terapeutaId,
-      fechaReserva: items[0].fechaReserva,
-      horaReserva: items[0].horaReserva,
-      plataforma: items[0].plataforma || ""
-    };
+    // ✅ Metadata con claves compatibles con lo que recibe el webhook
+const metadata = {
+  servicio_id: items[0].servicioId,
+  terapeuta_id: items[0].terapeutaId,
+  fecha_reserva: items[0].fechaReserva,
+  hora_reserva: items[0].horaReserva,
+  plataforma: items[0].plataforma || ""
+};
 
     // ✅ Limpiar items para evitar errores
     const itemsFormateados = items.map((item) => ({
@@ -74,13 +74,38 @@ router.post("/webhook", async (req, res) => {
       if (payment && payment.status === "approved") {
         const preference_id = payment.preference_id;
         const payer = payment.payer;
-        const metadata = payment.metadata || {};
 
-        console.log("👤 Payer recibido del payment:", payer);
-        console.log("📦 Metadata recibido:", metadata);
+const metadata = payment.metadata || {};
 
-        // Validar datos clave
-        if (!metadata.servicioId || !metadata.fechaReserva || !payer?.email) {
+// ✅ Corregimos las claves para mantener compatibilidad
+const servicioId = metadata.servicio_id;
+const terapeutaId = metadata.terapeuta_id;
+const fechaReserva = metadata.fecha_reserva;
+const horaReserva = metadata.hora_reserva;
+const plataforma = metadata.plataforma || "";
+
+// Verificación
+if (!servicioId || !fechaReserva || !payer?.email) {
+  console.warn("❗ Metadata incompleto o sin email del usuario:", payer);
+  return res.sendStatus(200);
+}
+
+// Crear la reserva
+const nuevaReserva = new Reserva({
+  servicioId,
+  terapeutaId,
+  usuarioNombre: payer.name || "Sin nombre",
+  usuarioEmail: payer.email,
+  usuarioTelefono: payer.phone?.number || "",
+  fechaReserva,
+  horaReserva,
+  precio: payment.transaction_amount || 0,
+  plataforma,
+  estado: "confirmada",
+  paymentId: payment.id,
+  preferenceId: preference_id,
+});
+        
           console.warn("❗ Metadata incompleto o sin email del usuario:", payer);
           return res.sendStatus(200);
         }
