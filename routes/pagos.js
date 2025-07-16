@@ -17,33 +17,27 @@ router.post("/crear-preferencia", async (req, res) => {
     console.log("📥 Body recibido en /crear-preferencia:", req.body);
     const { items, payer, shipments, additional_info } = req.body;
 
-    // ✅ Metadata con claves compatibles con lo que recibe el webhook
-const metadata = {
-  servicio_id: items[0].servicioId,
-  terapeuta_id: items[0].terapeutaId,
-  fecha_reserva: items[0].fechaReserva,
-  hora_reserva: items[0].horaReserva,
-  plataforma: items[0].plataforma || ""
-};
+    const metadata = {
+      servicio_id: items[0].servicioId,
+      terapeuta_id: items[0].terapeutaId,
+      fecha_reserva: items[0].fechaReserva,
+      hora_reserva: items[0].horaReserva,
+      plataforma: items[0].plataforma || ""
+    };
 
-    // ✅ Limpiar items para evitar errores
-    const itemsFormateados = items.map((item) => ({
-      title: item.title,
-      description: item.description,
-      quantity: item.quantity,
-      currency_id: item.currency_id,
-      unit_price: item.unit_price,
+    const itemsConMetadata = items.map((item) => ({
+      ...item
     }));
 
     const preference = {
-      items: itemsFormateados,
+      items: itemsConMetadata,
       payer,
-      metadata, // ✅ Ahora sí llega correctamente al webhook
       payment_methods: {
         excluded_payment_types: [{ id: "ticket" }, { id: "atm" }],
       },
       shipments,
       additional_info,
+      metadata,
       back_urls: {
         success: "https://www.serviciosholisticos.com.ar/gracias",
         failure: "https://www.serviciosholisticos.com.ar/pago-fallido",
@@ -74,57 +68,36 @@ router.post("/webhook", async (req, res) => {
       if (payment && payment.status === "approved") {
         const preference_id = payment.preference_id;
         const payer = payment.payer;
+        console.log("👤 Payer recibido del payment:", payer);
 
-const metadata = payment.metadata || {};
+        const metadata = payment.metadata || {};
 
-// ✅ Corregimos las claves para mantener compatibilidad
-const servicioId = metadata.servicio_id;
-const terapeutaId = metadata.terapeuta_id;
-const fechaReserva = metadata.fecha_reserva;
-const horaReserva = metadata.hora_reserva;
-const plataforma = metadata.plataforma || "";
+        console.log("📦 Metadata recibido:", metadata);
 
-// Verificación
-if (!servicioId || !fechaReserva || !payer?.email) {
-  console.warn("❗ Metadata incompleto o sin email del usuario:", payer);
-  return res.sendStatus(200);
-}
+        const servicioId = metadata.servicio_id;
+        const terapeutaId = metadata.terapeuta_id;
+        const fechaReserva = metadata.fecha_reserva;
+        const horaReserva = metadata.hora_reserva;
+        const plataforma = metadata.plataforma || "";
 
-// Crear la reserva
-const nuevaReserva = new Reserva({
-  servicioId,
-  terapeutaId,
-  usuarioNombre: payer.name || "Sin nombre",
-  usuarioEmail: payer.email,
-  usuarioTelefono: payer.phone?.number || "",
-  fechaReserva,
-  horaReserva,
-  precio: payment.transaction_amount || 0,
-  plataforma,
-  estado: "confirmada",
-  paymentId: payment.id,
-  preferenceId: preference_id,
-});
-        
+        if (!servicioId || !fechaReserva || !payer?.email) {
           console.warn("❗ Metadata incompleto o sin email del usuario:", payer);
           return res.sendStatus(200);
         }
 
-        // Evitar duplicados
         const yaExiste = await Reserva.findOne({ paymentId: payment.id });
         if (yaExiste) return res.sendStatus(200);
 
-        // Crear reserva confirmada
         const nuevaReserva = new Reserva({
-          servicioId: metadata.servicioId,
-          terapeutaId: metadata.terapeutaId,
+          servicioId,
+          terapeutaId,
           usuarioNombre: payer.name || "Sin nombre",
           usuarioEmail: payer.email,
           usuarioTelefono: payer.phone?.number || "",
-          fechaReserva: metadata.fechaReserva,
-          horaReserva: metadata.horaReserva,
+          fechaReserva,
+          horaReserva,
           precio: payment.transaction_amount || 0,
-          plataforma: metadata.plataforma || "",
+          plataforma,
           estado: "confirmada",
           paymentId: payment.id,
           preferenceId: preference_id,
@@ -132,11 +105,10 @@ const nuevaReserva = new Reserva({
 
         await nuevaReserva.save();
 
-        // Eliminar el bloqueo temporal
         await Bloqueo.findOneAndDelete({
-          servicioId: metadata.servicioId,
-          fecha: metadata.fechaReserva,
-          hora: metadata.horaReserva,
+          servicioId,
+          fecha: fechaReserva,
+          hora: horaReserva,
         });
 
         console.log("✅ Reserva confirmada por webhook:", nuevaReserva._id);
