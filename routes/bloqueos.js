@@ -77,4 +77,63 @@ router.get("/todos", async (req, res) => {
   }
 });
 
+        // --- BLOQUEOS TEMPORALES (2 minutos) ---
+const BloqueoTemporal = require("../models/BloqueoTemporal");
+
+// Crear bloqueo temporal (visible para todos)
+router.post("/temporales", async (req, res) => {
+  const { servicioId, fecha, hora } = req.body;
+
+  if (!servicioId || !fecha || !hora) {
+    return res.status(400).json({ error: "Faltan datos" });
+  }
+
+  const ahora = new Date();
+  const expiracion = new Date(ahora.getTime() + 2 * 60000); // 2 minutos
+
+  try {
+    // Eliminar bloqueos expirados antes de crear uno nuevo
+    await BloqueoTemporal.deleteMany({ expiracion: { $lt: ahora } });
+
+    // Verificar si ya existe uno activo
+    const existente = await BloqueoTemporal.findOne({ servicioId, fecha, hora });
+    if (existente && existente.expiracion > ahora) {
+      return res.status(409).json({ error: "Ya existe un bloqueo activo para ese horario" });
+    }
+
+    await BloqueoTemporal.create({ servicioId, fecha, hora, expiracion });
+    res.status(201).json({ ok: true, expiracion });
+  } catch (err) {
+    console.error("❌ Error al crear bloqueo temporal:", err);
+    res.status(500).json({ error: "Error interno al crear el bloqueo temporal" });
+  }
+});
+
+// Obtener bloqueos temporales activos
+router.get("/temporales", async (req, res) => {
+  const { servicioId, desde, hasta } = req.query;
+
+  if (!servicioId || !desde || !hasta) {
+    return res.status(400).json({ error: "Faltan parámetros: servicioId, desde, hasta" });
+  }
+
+  try {
+    const ahora = new Date();
+
+    // Limpiar expirados
+    await BloqueoTemporal.deleteMany({ expiracion: { $lt: ahora } });
+
+    const bloqueosTemporales = await BloqueoTemporal.find({
+      servicioId,
+      fecha: { $gte: desde, $lte: hasta },
+      expiracion: { $gt: ahora }
+    }).select("fecha hora expiracion");
+
+    res.status(200).json({ bloqueos: bloqueosTemporales });
+  } catch (err) {
+    console.error("❌ Error al obtener bloqueos temporales:", err);
+    res.status(500).json({ error: "Error interno al obtener bloqueos temporales" });
+  }
+});
+
 module.exports = router;
