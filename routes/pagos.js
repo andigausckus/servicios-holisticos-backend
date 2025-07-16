@@ -17,20 +17,28 @@ router.post("/crear-preferencia", async (req, res) => {
     console.log("📥 Body recibido en /crear-preferencia:", req.body);
     const { items, payer, shipments, additional_info } = req.body;
 
-    const itemsConMetadata = items.map((item) => ({
-      ...item,
-      metadata: {
-        servicioId: item.servicioId,
-        terapeutaId: item.terapeutaId,
-        fechaReserva: item.fechaReserva,
-        horaReserva: item.horaReserva,
-        plataforma: item.plataforma || ""
-      }
+    // ✅ Metadata global (ya no por item)
+    const metadata = {
+      servicioId: items[0].servicioId,
+      terapeutaId: items[0].terapeutaId,
+      fechaReserva: items[0].fechaReserva,
+      horaReserva: items[0].horaReserva,
+      plataforma: items[0].plataforma || ""
+    };
+
+    // ✅ Limpiar items para evitar errores
+    const itemsFormateados = items.map((item) => ({
+      title: item.title,
+      description: item.description,
+      quantity: item.quantity,
+      currency_id: item.currency_id,
+      unit_price: item.unit_price,
     }));
 
     const preference = {
-      items: itemsConMetadata,
+      items: itemsFormateados,
       payer,
+      metadata, // ✅ Ahora sí llega correctamente al webhook
       payment_methods: {
         excluded_payment_types: [{ id: "ticket" }, { id: "atm" }],
       },
@@ -45,17 +53,9 @@ router.post("/crear-preferencia", async (req, res) => {
     };
 
     const pref = new Preference(mercadopago);
-const result = await pref.create({ body: preference });
+    const result = await pref.create({ body: preference });
 
-const preferenceId = result.id;
-
-// 👉 Agregar el preferenceId al metadata del primer ítem
-if (itemsConMetadata[0] && itemsConMetadata[0].metadata) {
-  itemsConMetadata[0].metadata.preferenceId = preferenceId;
-}
-
-// (Opcional: devolver también el ID por si lo necesitás luego)
-res.json({ init_point: result.init_point, preferenceId });
+    res.json({ init_point: result.init_point });
   } catch (error) {
     console.error("❌ Error creando preferencia:", error);
     res.status(500).json({ error: "Error creando preferencia", detalle: error.message });
@@ -72,21 +72,24 @@ router.post("/webhook", async (req, res) => {
       const payment = await new Payment(mercadopago).get({ id: data.id });
 
       if (payment && payment.status === "approved") {
+        const preference_id = payment.preference_id;
         const payer = payment.payer;
         const metadata = payment.metadata || {};
-        const preference_id = metadata.preferenceId || payment.preference_id;
 
         console.log("👤 Payer recibido del payment:", payer);
         console.log("📦 Metadata recibido:", metadata);
 
+        // Validar datos clave
         if (!metadata.servicioId || !metadata.fechaReserva || !payer?.email) {
           console.warn("❗ Metadata incompleto o sin email del usuario:", payer);
           return res.sendStatus(200);
         }
 
+        // Evitar duplicados
         const yaExiste = await Reserva.findOne({ paymentId: payment.id });
         if (yaExiste) return res.sendStatus(200);
 
+        // Crear reserva confirmada
         const nuevaReserva = new Reserva({
           servicioId: metadata.servicioId,
           terapeutaId: metadata.terapeutaId,
@@ -95,7 +98,7 @@ router.post("/webhook", async (req, res) => {
           usuarioTelefono: payer.phone?.number || "",
           fechaReserva: metadata.fechaReserva,
           horaReserva: metadata.horaReserva,
-          precio: payment.transaction_amount,
+          precio: payment.transaction_amount || 0,
           plataforma: metadata.plataforma || "",
           estado: "confirmada",
           paymentId: payment.id,
@@ -104,6 +107,7 @@ router.post("/webhook", async (req, res) => {
 
         await nuevaReserva.save();
 
+        // Eliminar el bloqueo temporal
         await Bloqueo.findOneAndDelete({
           servicioId: metadata.servicioId,
           fecha: metadata.fechaReserva,
