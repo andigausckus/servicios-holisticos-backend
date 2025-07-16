@@ -93,7 +93,7 @@ router.post("/webhook", async (req, res) => {
           terapeutaId,
           usuarioNombre: payer.name || "Sin nombre",
           usuarioEmail: payer.email,
-          usuarioTelefono: payer.phone?.number || "",
+          usuarioTelefono: payer.phone?.number || "No especificado",
           fechaReserva,
           horaReserva,
           precio: payment.transaction_amount || 0,
