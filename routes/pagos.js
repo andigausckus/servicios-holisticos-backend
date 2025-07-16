@@ -73,13 +73,14 @@ router.post("/webhook", async (req, res) => {
 
       if (payment && payment.status === "approved") {
         const payer = payment.payer;
-const metadata = payment.metadata || {};
-const preference_id = metadata.preferenceId || payment.preference_id;
+        const metadata = payment.metadata || {};
+        const preference_id = metadata.preferenceId || payment.preference_id;
 
-        console.log("📦 Preferencia (prefData):", prefData);
+        console.log("👤 Payer recibido del payment:", payer);
+        console.log("📦 Metadata recibido:", metadata);
 
         if (!metadata.servicioId || !metadata.fechaReserva || !payer?.email) {
-          console.warn("❗ Preferencia incompleta o sin email del usuario:", payer);
+          console.warn("❗ Metadata incompleto o sin email del usuario:", payer);
           return res.sendStatus(200);
         }
 
@@ -94,7 +95,7 @@ const preference_id = metadata.preferenceId || payment.preference_id;
           usuarioTelefono: payer.phone?.number || "",
           fechaReserva: metadata.fechaReserva,
           horaReserva: metadata.horaReserva,
-          precio: item.unit_price,
+          precio: payment.transaction_amount,
           plataforma: metadata.plataforma || "",
           estado: "confirmada",
           paymentId: payment.id,
