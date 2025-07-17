@@ -111,4 +111,22 @@ router.get("/por-servicio", async (req, res) => {
   }
 });
 
+// ✅ Obtener todas las HORAS CONFIRMADAS para un servicio en una fecha específica
+router.get("/confirmadas", async (req, res) => {
+  const { servicioId, fecha } = req.query;
+
+  if (!servicioId || !fecha) {
+    return res.status(400).json({ error: "Faltan servicioId o fecha" });
+  }
+
+  try {
+    const reservas = await Reserva.find({ servicioId, fechaReserva: fecha, estado: "confirmada" });
+    const horasConfirmadas = reservas.map(r => r.horaReserva);
+    res.json(horasConfirmadas);
+  } catch (error) {
+    console.error("❌ Error al obtener horas confirmadas:", error);
+    res.status(500).json({ error: "Error al obtener horas confirmadas" });
+  }
+});
+
 module.exports = router;
