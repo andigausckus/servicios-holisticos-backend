@@ -49,6 +49,28 @@ router.post("/crear-preferencia", async (req, res) => {
     const pref = new Preference(mercadopago);
     const result = await pref.create({ body: preference });
 
+    // 🔄 Guardar reserva temporal (estado: "en_proceso")
+    const reservaTemporal = new Reserva({
+      servicioId: metadata.servicio_id,
+      terapeutaId: metadata.terapeuta_id,
+      fechaReserva: metadata.fecha_reserva,
+      horaReserva: metadata.hora_reserva,
+      usuarioEmail: payer.email || "desconocido",
+      estado: "en_proceso",
+      creadaEn: new Date(),
+    });
+
+    await reservaTemporal.save();
+
+    // ⏱️ Eliminar si no se confirma en 2 minutos
+    setTimeout(async () => {
+      const reservaActual = await Reserva.findOne({ _id: reservaTemporal._id });
+      if (reservaActual && reservaActual.estado === "en_proceso") {
+        await Reserva.deleteOne({ _id: reservaTemporal._id });
+        console.log("⏱️ Reserva temporal eliminada por timeout");
+      }
+    }, 2 * 60 * 1000); // 2 minutos
+
     res.json({ init_point: result.init_point });
   } catch (error) {
     console.error("❌ Error creando preferencia:", error);
@@ -71,7 +93,6 @@ router.post("/webhook", async (req, res) => {
         console.log("👤 Payer recibido del payment:", payer);
 
         const metadata = payment.metadata || {};
-
         console.log("📦 Metadata recibido:", metadata);
 
         const servicioId = metadata.servicio_id;
@@ -105,14 +126,14 @@ router.post("/webhook", async (req, res) => {
 
         await nuevaReserva.save();
 
-// Eliminar bloqueo fijo (si existiera)
-await Bloqueo.findOneAndDelete({
-  servicioId,
-  fecha: fechaReserva,
-  hora: horaReserva,
-});
+        // Eliminar bloqueo fijo (si existiera)
+        await Bloqueo.findOneAndDelete({
+          servicioId,
+          fecha: fechaReserva,
+          hora: horaReserva,
+        });
 
-console.log("✅ Reserva confirmada por webhook:", nuevaReserva);
+        console.log("✅ Reserva confirmada por webhook:", nuevaReserva);
       }
     }
 
