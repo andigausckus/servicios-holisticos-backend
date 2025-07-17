@@ -96,4 +96,17 @@ router.get("/reciente", async (req, res) => {
   res.json(reserva);
 });
 
+// ✅ Obtener reservas confirmadas por servicio
+router.get("/", async (req, res) => {
+  try {
+    const { servicioId } = req.query;
+    if (!servicioId) return res.status(400).json({ error: "Falta servicioId" });
+
+    const reservas = await Reserva.find({ servicioId, estado: "confirmada" });
+    res.json(reservas);
+  } catch (error) {
+    res.status(500).json({ error: "Error al obtener reservas" });
+  }
+});
+
 module.exports = router;
