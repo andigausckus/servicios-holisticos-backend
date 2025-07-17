@@ -62,14 +62,17 @@ router.get("/todos", async (req, res) => {
 
     // Reservas confirmadas
     const reservasConfirmadas = await Reserva.find({
-      servicioId,
-      fecha: { $gte: desde, $lte: hasta },
-      estado: "confirmada",
-    }).select("fecha hora");
+  servicioId,
+  fechaReserva: { $gte: desde, $lte: hasta },
+  estado: "confirmada",
+}).select("fechaReserva horaReserva");
 
     res.json({
       bloqueos: bloqueos.map(b => ({ fecha: b.fecha, hora: b.hora })),
-      reservas: reservasConfirmadas.map(r => ({ fecha: r.fecha, hora: r.hora })),
+      reservas: reservasConfirmadas.map(r => ({
+  fecha: r.fechaReserva,
+  hora: r.horaReserva,
+}))
     });
   } catch (error) {
     console.error("❌ Error al obtener bloqueos y reservas:", error);
