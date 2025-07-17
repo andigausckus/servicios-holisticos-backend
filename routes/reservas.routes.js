@@ -9,6 +9,27 @@ router.post("/", async (req, res) => {
   try {
     const nueva = new Reserva(req.body);
     await nueva.save();
+
+    // ⏱ Liberación automática si no se confirma en 2 minutos
+    if (nueva.estado === "en_proceso") {
+      setTimeout(async () => {
+        try {
+          const actualizada = await Reserva.findById(nueva._id);
+          if (actualizada && actualizada.estado === "en_proceso") {
+            await Reserva.findByIdAndDelete(nueva._id); // Eliminás la reserva temporal
+            await Bloqueo.deleteOne({
+              servicioId: actualizada.servicioId,
+              fecha: actualizada.fechaReserva,
+              hora: actualizada.horaReserva,
+            });
+            console.log("⏱ Reserva liberada automáticamente por tiempo expirado");
+          }
+        } catch (error) {
+          console.error("❌ Error en temporizador de liberación:", error);
+        }
+      }, 2 * 60 * 1000); // 2 minutos
+    }
+
     res.status(201).json({ mensaje: "✅ Reserva registrada", reserva: nueva });
   } catch (error) {
     console.error("❌ Error al guardar reserva:", error);
