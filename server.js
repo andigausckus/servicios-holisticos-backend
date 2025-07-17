@@ -15,6 +15,13 @@ mongoose
   .then(() => console.log("🟢 Conectado a MongoDB"))
   .catch((err) => console.error("❌ Error al conectar a MongoDB:", err));
 
+const limpiarReservasEnProceso = require("./utils/limpiarReservasEnProceso");
+
+// ✅ Ejecutar limpieza automática cada 1 minuto
+setInterval(() => {
+  limpiarReservasEnProceso();
+}, 60 * 1000);
+
 // ✅ Importación de rutas
 const terapeutasRoutes = require("./routes/terapeutas");
 const serviciosRoutes = require("./routes/servicios");
