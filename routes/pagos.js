@@ -111,7 +111,7 @@ router.post("/webhook", async (req, res) => {
           hora: horaReserva,
         });
 
-        console.log("✅ Reserva confirmada por webhook:", nuevaReserva._id);
+        console.log("✅ Reserva confirmada por webhook:", nuevaReserva);
       }
     }
 
