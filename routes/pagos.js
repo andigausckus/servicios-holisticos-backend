@@ -112,13 +112,6 @@ await Bloqueo.findOneAndDelete({
   hora: horaReserva,
 });
 
-// ✅ Eliminar también bloqueo temporal (si existiera)
-await BloqueoTemporal.deleteOne({
-  servicioId,
-  fecha: fechaReserva,
-  hora: horaReserva,
-});
-
 console.log("✅ Reserva confirmada por webhook:", nuevaReserva);
       }
     }
