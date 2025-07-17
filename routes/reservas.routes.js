@@ -77,25 +77,23 @@ router.post("/liberar", async (req, res) => {
 
 // Obtener la reserva más reciente por email
 router.get("/reciente", async (req, res) => {
-  try {
-    const email = req.query.email;
-    if (!email) {
-      return res.status(400).json({ error: "Falta el email en la query" });
-    }
+  const { email } = req.query;
+  if (!email) return res.status(400).json({ error: "Falta el email" });
 
-    const reserva = await Reserva.findOne({ usuarioEmail: email })
-      .sort({ createdAt: -1 })
-      .populate("terapeutaId");
+  const reserva = await Reserva.findOne({ usuarioEmail: email })
+    .sort({ createdAt: -1 })
+    .populate({
+      path: "terapeutaId",
+      select: "nombreCompleto ubicacion whatsapp" // Sólo campos seguros
+    })
+    .populate({
+      path: "servicioId",
+      select: "titulo descripcion" // Solo lo necesario
+    });
 
-    if (!reserva) {
-      return res.status(404).json({ error: "No se encontró una reserva para este email" });
-    }
+  if (!reserva) return res.status(404).json({ error: "No se encontró la reserva" });
 
-    res.json(reserva);
-  } catch (error) {
-    console.error("❌ Error al obtener reserva reciente:", error);
-    res.status(500).json({ error: "Error al buscar la reserva" });
-  }
+  res.json(reserva);
 });
 
 module.exports = router;
