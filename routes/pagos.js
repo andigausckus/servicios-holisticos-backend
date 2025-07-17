@@ -105,13 +105,21 @@ router.post("/webhook", async (req, res) => {
 
         await nuevaReserva.save();
 
-        await Bloqueo.findOneAndDelete({
-          servicioId,
-          fecha: fechaReserva,
-          hora: horaReserva,
-        });
+// Eliminar bloqueo fijo (si existiera)
+await Bloqueo.findOneAndDelete({
+  servicioId,
+  fecha: fechaReserva,
+  hora: horaReserva,
+});
 
-        console.log("✅ Reserva confirmada por webhook:", nuevaReserva);
+// ✅ Eliminar también bloqueo temporal (si existiera)
+await BloqueoTemporal.deleteOne({
+  servicioId,
+  fecha: fechaReserva,
+  hora: horaReserva,
+});
+
+console.log("✅ Reserva confirmada por webhook:", nuevaReserva);
       }
     }
 
