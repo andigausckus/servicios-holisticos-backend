@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Reserva = require("../models/Reserva");
+const Bloqueo = require("../models/Bloqueo");
 const authMiddleware = require("../middlewares/auth");
 
 // ✅ Crear nueva reserva
@@ -18,7 +19,9 @@ router.post("/", async (req, res) => {
 // ✅ Obtener TODAS las reservas (uso general o para admin)
 router.get("/", async (req, res) => {
   try {
-    const reservas = await Reserva.find().sort({ fecha: -1 }).populate("servicioId terapeutaId");
+    const reservas = await Reserva.find()
+      .sort({ fecha: -1 })
+      .populate("servicioId terapeutaId");
     res.json(reservas);
   } catch (error) {
     console.error("❌ Error al obtener reservas:", error);
@@ -36,6 +39,7 @@ router.get("/mis-reservas", authMiddleware, async (req, res) => {
   }
 });
 
+// ✅ Actualizar estado de una reserva
 router.put("/:id", async (req, res) => {
   try {
     const { estado } = req.body;
@@ -52,8 +56,6 @@ router.put("/:id", async (req, res) => {
 });
 
 // ✅ Liberar un horario bloqueado (cuando expira el temporizador)
-const Bloqueo = require("../models/Bloqueo");
-
 router.post("/liberar", async (req, res) => {
   const { servicioId, fecha, hora } = req.body;
 
@@ -75,7 +77,7 @@ router.post("/liberar", async (req, res) => {
   }
 });
 
-// Obtener la reserva más reciente por email
+// ✅ Obtener la reserva más reciente por email
 router.get("/reciente", async (req, res) => {
   const { email } = req.query;
   if (!email) return res.status(400).json({ error: "Falta el email" });
@@ -84,11 +86,11 @@ router.get("/reciente", async (req, res) => {
     .sort({ createdAt: -1 })
     .populate({
       path: "terapeutaId",
-      select: "nombreCompleto ubicacion whatsapp" // Sólo campos seguros
+      select: "nombreCompleto ubicacion whatsapp",
     })
     .populate({
       path: "servicioId",
-      select: "titulo descripcion" // Solo lo necesario
+      select: "titulo descripcion",
     });
 
   if (!reserva) return res.status(404).json({ error: "No se encontró la reserva" });
@@ -96,8 +98,8 @@ router.get("/reciente", async (req, res) => {
   res.json(reserva);
 });
 
-// ✅ Obtener reservas confirmadas por servicio
-router.get("/", async (req, res) => {
+// ✅ Obtener reservas confirmadas por servicio (evita conflicto con /)
+router.get("/por-servicio", async (req, res) => {
   try {
     const { servicioId } = req.query;
     if (!servicioId) return res.status(400).json({ error: "Falta servicioId" });
