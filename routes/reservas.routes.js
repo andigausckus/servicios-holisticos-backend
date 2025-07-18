@@ -72,23 +72,35 @@ router.put("/:id", async (req, res) => {
     );
 
     if (estado === "confirmada") {
+  coif (estado === "confirmada") {
+  const axios = require("axios");
+
   const emailData = {
     nombreCliente: reservaAntes.nombre,
     emailCliente: reservaAntes.usuarioEmail,
-    nombreTerapeuta: reservaAntes.terapeutaId.nombreCompleto,
-    emailTerapeuta: reservaAntes.terapeutaId.email,
-    nombreServicio: reservaAntes.servicioId.titulo,
+    nombreTerapeuta: reservaAntes.terapeutaId?.nombreCompleto || "Sin nombre",
+    emailTerapeuta: reservaAntes.terapeutaId?.email || "Sin email",
+    nombreServicio: reservaAntes.servicioId?.titulo || "Sin título",
     fecha: reservaAntes.fechaReserva,
     hora: reservaAntes.horaReserva,
     duracion: reservaAntes.duracion,
     precio: reservaAntes.precio,
   };
 
-  // Usá fetch o axios para llamar a /emails/enviar-comprobante
-  const axios = require("axios");
-      console.log("📨 Enviando email de comprobante con:", emailData);
-  await axios.post("https://servicios-holisticos-backend.onrender.com/api/emails/enviar-comprobante", emailData);
-    }
+  console.log("📨 Preparando envío de emails...");
+  console.log("📧 Datos del email:", emailData);
+
+  try {
+    const response = await axios.post(
+      "https://servicios-holisticos-backend.onrender.com/api/emails/enviar-comprobante",
+      emailData
+    );
+    console.log("✅ Email enviado correctamente:", response.data);
+  } catch (err) {
+    console.error("❌ Error al enviar el email:", err?.response?.data || err.message || err);
+  }
+}
+
     
     res.json({ mensaje: "✅ Estado actualizado", reserva: reservaActualizada });
   } catch (error) {
