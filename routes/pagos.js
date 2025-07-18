@@ -13,6 +13,7 @@ const mercadopago = new MercadoPagoConfig({
 
 // ✅ Crear preferencia
 router.post("/crear-preferencia", async (req, res) => {
+  console.log("📥 Body completo:", req.body);
   try {
     console.log("📥 Body recibido en /crear-preferencia:", req.body);
     const { items, payer, shipments, additional_info } = req.body;
@@ -51,14 +52,17 @@ router.post("/crear-preferencia", async (req, res) => {
 
     // 🔄 Guardar reserva temporal (estado: "en_proceso")
     const reservaTemporal = new Reserva({
-      servicioId: metadata.servicio_id,
-      terapeutaId: metadata.terapeuta_id,
-      fechaReserva: metadata.fecha_reserva,
-      horaReserva: metadata.hora_reserva,
-      usuarioEmail: payer.email || "desconocido",
-      estado: "en_proceso",
-      creadaEn: new Date(),
-    });
+  servicioId: metadata.servicio_id,
+  terapeutaId: metadata.terapeuta_id,
+  fechaReserva: metadata.fecha_reserva,
+  horaReserva: metadata.hora_reserva,
+  usuarioEmail: payer.email || "desconocido",
+  usuarioNombre: payer.name || "desconocido",
+  usuarioTelefono: payer.phone?.number || "no especificado",
+  precio: items[0]?.unit_price || 0,
+  estado: "en_proceso",
+  creadaEn: new Date(),
+});
 
     await reservaTemporal.save();
 
