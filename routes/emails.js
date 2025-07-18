@@ -42,7 +42,7 @@ router.post("/enviar-comprobante", async (req, res) => {
         <li><strong>Monto recibido:</strong> $${precio}</li>
       </ul>
 
-      <p>En breve recibirás la transferencia correspondiente al 90% del valor.</p>
+      <p>En breve recibirás la transferencia correspondiente al 85% del valor.</p>
 
       <p>Gracias por formar parte de nuestra comunidad 🌸</p>
     `;
