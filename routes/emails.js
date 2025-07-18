@@ -36,6 +36,7 @@ const transporterComprobante = nodemailer.createTransport({
 });
 
 router.post("/enviar-comprobante", async (req, res) => {
+  console.log("📨 Se recibió solicitud para enviar email de comprobante:", req.body);
   try {
     const {
       nombreCliente,
