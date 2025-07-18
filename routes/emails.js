@@ -4,10 +4,12 @@ const nodemailer = require("nodemailer");
 
 // Reemplazá por tu email real de envío (Gmail, Zoho, etc.)
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "mail.serviciosholisticos.com.ar",
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.EMAIL_FROM,      // debe estar en tus variables de entorno
-    pass: process.env.EMAIL_PASS,      // contraseña de aplicación o clave
+    user: process.env.EMAIL_FROM, // debe ser notificaciones@serviciosholisticos.com.ar
+    pass: process.env.EMAIL_PASS, // tu contraseña real o variable en Render
   },
 });
 
