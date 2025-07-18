@@ -70,6 +70,25 @@ router.put("/:id", async (req, res) => {
       { estado },
       { new: true }
     );
+
+    if (estado === "confirmada") {
+  const emailData = {
+    nombreCliente: reservaAntes.nombre,
+    emailCliente: reservaAntes.usuarioEmail,
+    nombreTerapeuta: reservaAntes.terapeutaId.nombreCompleto,
+    emailTerapeuta: reservaAntes.terapeutaId.email,
+    nombreServicio: reservaAntes.servicioId.titulo,
+    fecha: reservaAntes.fechaReserva,
+    hora: reservaAntes.horaReserva,
+    duracion: reservaAntes.duracion,
+    precio: reservaAntes.precio,
+  };
+
+  // Usá fetch o axios para llamar a /emails/enviar-comprobante
+  const axios = require("axios");
+  await axios.post("http://localhost:3000/emails/enviar-comprobante", emailData); // Cambiá localhost por tu URL real si estás en producción
+    }
+    
     res.json({ mensaje: "✅ Estado actualizado", reserva: reservaActualizada });
   } catch (error) {
     console.error("❌ Error al actualizar reserva:", error);
