@@ -2,14 +2,14 @@ const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
 
-// Reemplazá por tu email real de envío (Gmail, Zoho, etc.)
+// Configuración del transporter para DomWeb (correo profesional)
 const transporter = nodemailer.createTransport({
   host: "mail.serviciosholisticos.com.ar",
   port: 465,
   secure: true,
   auth: {
-    user: process.env.EMAIL_FROM, // debe ser notificaciones@serviciosholisticos.com.ar
-    pass: process.env.EMAIL_PASS, // tu contraseña real o variable en Render
+    user: process.env.EMAIL_FROM, // notificaciones@serviciosholisticos.com.ar
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -28,7 +28,9 @@ router.post("/enviar-comprobante", async (req, res) => {
     } = req.body;
 
     const asunto = "💖 Nueva sesión confirmada - Servicios Holísticos";
-    const cuerpo = `
+
+    // 📨 Email al terapeuta
+    const cuerpoTerapeuta = `
       <p>Hola ${nombreTerapeuta},</p>
 
       <p>Recibiste una nueva reserva de sesión a través de <strong>Servicios Holísticos</strong> 🌿</p>
@@ -43,23 +45,54 @@ router.post("/enviar-comprobante", async (req, res) => {
       </ul>
 
       <p>En breve recibirás la transferencia correspondiente al 85% del valor.</p>
-
       <p>Gracias por formar parte de nuestra comunidad 🌸</p>
     `;
 
-    const mailOptions = {
+    // 📨 Email al cliente
+    const cuerpoCliente = `
+      <p>Hola ${nombreCliente},</p>
+
+      <p>Gracias por tu reserva en <strong>Servicios Holísticos</strong> 🌿</p>
+
+      <p>Tu sesión ha sido confirmada con el/la terapeuta <strong>${nombreTerapeuta}</strong>.</p>
+
+      <ul>
+        <li><strong>Servicio:</strong> ${nombreServicio}</li>
+        <li><strong>Fecha:</strong> ${fecha}</li>
+        <li><strong>Hora:</strong> ${hora}</li>
+        <li><strong>Duración:</strong> ${duracion}</li>
+        <li><strong>Monto abonado:</strong> $${precio}</li>
+      </ul>
+
+      <p>Podes escribirle al terapeuta si tenes preguntas, o hacerlo el día de la sesión directamente</p>
+      <p>Gracias por elegirnos 🙌</p>
+    `;
+
+    // Enviar correo al terapeuta
+    await transporter.sendMail({
       from: `"Servicios Holísticos" <${process.env.EMAIL_FROM}>`,
       to: emailTerapeuta,
       subject: asunto,
-      html: cuerpo,
-    };
+      html: cuerpoTerapeuta,
+    });
 
-    await transporter.sendMail(mailOptions);
+    // Enviar correo al cliente
+    await transporter.sendMail({
+      from: `"Servicios Holísticos" <${process.env.EMAIL_FROM}>`,
+      to: emailCliente,
+      subject: asunto,
+      html: cuerpoCliente,
+    });
 
-    res.json({ success: true, message: "📨 Email enviado al terapeuta" });
+    res.json({ success: true, message: "📨 Emails enviados a terapeuta y cliente" });
+
   } catch (error) {
-    console.error("❌ Error al enviar email:", error);
-    res.status(500).json({ success: false, error: "Error enviando email", detalle: error.message });
+    console.error("❌ Error al enviar emails:", error);
+    res.status(500).json({
+      success: false,
+      error: "Error enviando emails",
+      detalle: error.message,
+    });
   }
 });
 
