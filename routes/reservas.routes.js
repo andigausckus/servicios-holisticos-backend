@@ -72,7 +72,6 @@ router.put("/:id", async (req, res) => {
     );
 
     if (estado === "confirmada") {
-  coif (estado === "confirmada") {
   const axios = require("axios");
 
   const emailData = {
