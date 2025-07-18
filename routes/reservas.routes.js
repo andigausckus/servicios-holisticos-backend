@@ -64,6 +64,7 @@ router.get("/mis-reservas", authMiddleware, async (req, res) => {
 router.put("/:id", async (req, res) => {
   try {
     const { estado } = req.body;
+    const reservaAntes = await Reserva.findById(req.params.id).populate("terapeutaId servicioId");
     const reservaActualizada = await Reserva.findByIdAndUpdate(
       req.params.id,
       { estado },
