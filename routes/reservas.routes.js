@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
         try {
           const actualizada = await Reserva.findById(nueva._id);
           if (actualizada && actualizada.estado === "en_proceso") {
-            await Reserva.findByIdAndDelete(nueva._id); // Eliminás la reserva temporal
+            await Reserva.findByIdAndDelete(nueva._id);
             await Bloqueo.deleteOne({
               servicioId: actualizada.servicioId,
               fecha: actualizada.fechaReserva,
@@ -72,34 +72,34 @@ router.put("/:id", async (req, res) => {
     );
 
     if (estado === "confirmada") {
-  const axios = require("axios");
+      const axios = require("axios");
 
-  const emailData = {
-    nombreCliente: reservaAntes.nombre,
-    emailCliente: reservaAntes.usuarioEmail,
-    nombreTerapeuta: reservaAntes.terapeutaId?.nombreCompleto || "Sin nombre",
-    emailTerapeuta: reservaAntes.terapeutaId?.email || "Sin email",
-    nombreServicio: reservaAntes.servicioId?.titulo || "Sin título",
-    fecha: reservaAntes.fechaReserva,
-    hora: reservaAntes.horaReserva,
-    duracion: reservaAntes.duracion,
-    precio: reservaAntes.precio,
-  };
+      const emailData = {
+        nombreCliente: reservaAntes.nombre,
+        emailCliente: reservaAntes.usuarioEmail,
+        nombreTerapeuta: reservaAntes.terapeutaId?.nombreCompleto || "Sin nombre",
+        emailTerapeuta: reservaAntes.terapeutaId?.email || "Sin email",
+        nombreServicio: reservaAntes.servicioId?.titulo || "Sin título",
+        fecha: reservaAntes.fechaReserva,
+        hora: reservaAntes.horaReserva,
+        duracion: reservaAntes.duracion,
+        precio: reservaAntes.precio,
+      };
 
-  console.log("📨 Preparando envío de emails...");
-  console.log("📧 Datos del email:", emailData);
+      console.log("📨 Preparando envío de emails...");
+      console.log("📧 Datos del email:", emailData);
 
-  try {
-    const response = await axios.post(
-      "https://servicios-holisticos-backend.onrender.com/api/emails/enviar-comprobante",
-      emailData
-    );
-    console.log("✅ Email enviado correctamente:", response.data);
-  } catch (err) {
-    console.error("❌ Error al enviar el email:", err?.response?.data || err.message || err);
-  }
+      try {
+        const response = await axios.post(
+          "https://servicios-holisticos-backend.onrender.com/api/emails/enviar-comprobante",
+          emailData
+        );
+        console.log("✅ Email enviado correctamente:", response.data);
+      } catch (err) {
+        console.error("❌ Error al enviar el email:", err?.response?.data || err.message || err);
+      }
+    }
 
-    
     res.json({ mensaje: "✅ Estado actualizado", reserva: reservaActualizada });
   } catch (error) {
     console.error("❌ Error al actualizar reserva:", error);
@@ -150,7 +150,7 @@ router.get("/reciente", async (req, res) => {
   res.json(reserva);
 });
 
-// ✅ Obtener reservas confirmadas por servicio (evita conflicto con /)
+// ✅ Obtener reservas confirmadas por servicio
 router.get("/por-servicio", async (req, res) => {
   try {
     const { servicioId } = req.query;
