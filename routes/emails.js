@@ -13,6 +13,28 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Transporter para notificaciones (cliente y terapeuta)
+const transporterNotificaciones = nodemailer.createTransport({
+  host: "mail.serviciosholisticos.com.ar",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "notificaciones@serviciosholisticos.com.ar",
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+// Transporter para comprobantes (envío al terapeuta)
+const transporterComprobante = nodemailer.createTransport({
+  host: "mail.serviciosholisticos.com.ar",
+  port: 465,
+  secure: true,
+  auth: {
+    user: "comprobante@serviciosholisticos.com.ar",
+    pass: process.env.EMAIL_COMPROBANTE_PASS, // ⚠️ agregala en Render
+  },
+});
+
 router.post("/enviar-comprobante", async (req, res) => {
   try {
     const {
