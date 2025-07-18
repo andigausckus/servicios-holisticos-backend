@@ -37,6 +37,7 @@ const transporterComprobante = nodemailer.createTransport({
 
 router.post("/enviar-comprobante", async (req, res) => {
   console.log("📨 Se recibió solicitud para enviar email de comprobante:", req.body);
+
   try {
     const {
       nombreCliente,
@@ -55,9 +56,7 @@ router.post("/enviar-comprobante", async (req, res) => {
     // 📨 Email al terapeuta
     const cuerpoTerapeuta = `
       <p>Hola ${nombreTerapeuta},</p>
-
       <p>Recibiste una nueva reserva de sesión a través de <strong>Servicios Holísticos</strong> 🌿</p>
-
       <ul>
         <li><strong>Cliente:</strong> ${nombreCliente} (${emailCliente})</li>
         <li><strong>Servicio:</strong> ${nombreServicio}</li>
@@ -66,7 +65,6 @@ router.post("/enviar-comprobante", async (req, res) => {
         <li><strong>Duración:</strong> ${duracion}</li>
         <li><strong>Monto recibido:</strong> $${precio}</li>
       </ul>
-
       <p>En breve recibirás la transferencia correspondiente al 85% del valor.</p>
       <p>Gracias por formar parte de nuestra comunidad 🌸</p>
     `;
@@ -74,11 +72,8 @@ router.post("/enviar-comprobante", async (req, res) => {
     // 📨 Email al cliente
     const cuerpoCliente = `
       <p>Hola ${nombreCliente},</p>
-
       <p>Gracias por tu reserva en <strong>Servicios Holísticos</strong> 🌿</p>
-
       <p>Tu sesión ha sido confirmada con el/la terapeuta <strong>${nombreTerapeuta}</strong>.</p>
-
       <ul>
         <li><strong>Servicio:</strong> ${nombreServicio}</li>
         <li><strong>Fecha:</strong> ${fecha}</li>
@@ -86,26 +81,27 @@ router.post("/enviar-comprobante", async (req, res) => {
         <li><strong>Duración:</strong> ${duracion}</li>
         <li><strong>Monto abonado:</strong> $${precio}</li>
       </ul>
-
-      <p>Podes escribirle al terapeuta si tenes preguntas, o hacerlo el día de la sesión directamente</p>
+      <p>Puedes escribirle al terapeuta si tenés preguntas, o hacerlo el día de la sesión directamente.</p>
       <p>Gracias por elegirnos 🙌</p>
     `;
 
-    // Enviar correo al terapeuta
+    // Enviar email al terapeuta
     await transporter.sendMail({
       from: `"Servicios Holísticos" <${process.env.EMAIL_FROM}>`,
       to: emailTerapeuta,
       subject: asunto,
       html: cuerpoTerapeuta,
     });
+    console.log("✅ Email enviado al terapeuta:", emailTerapeuta);
 
-    // Enviar correo al cliente
+    // Enviar email al cliente
     await transporter.sendMail({
       from: `"Servicios Holísticos" <${process.env.EMAIL_FROM}>`,
       to: emailCliente,
       subject: asunto,
       html: cuerpoCliente,
     });
+    console.log("✅ Email enviado al cliente:", emailCliente);
 
     res.json({ success: true, message: "📨 Emails enviados a terapeuta y cliente" });
 
