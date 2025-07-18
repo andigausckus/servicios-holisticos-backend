@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const nodemailer = require("nodemailer");
 
-// Configuración del transporter para DomWeb (correo profesional)
+// Transporter general (no se usa directamente en este caso)
 const transporter = nodemailer.createTransport({
   host: "mail.serviciosholisticos.com.ar",
   port: 465,
@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Transporter para notificaciones (cliente y terapeuta)
+// Transporter para notificaciones al cliente
 const transporterNotificaciones = nodemailer.createTransport({
   host: "mail.serviciosholisticos.com.ar",
   port: 465,
@@ -24,14 +24,14 @@ const transporterNotificaciones = nodemailer.createTransport({
   },
 });
 
-// Transporter para comprobantes (envío al terapeuta)
+// Transporter para comprobantes al terapeuta
 const transporterComprobante = nodemailer.createTransport({
   host: "mail.serviciosholisticos.com.ar",
   port: 465,
   secure: true,
   auth: {
     user: "comprobante@serviciosholisticos.com.ar",
-    pass: process.env.EMAIL_COMPROBANTE_PASS, // ⚠️ agregala en Render
+    pass: process.env.EMAIL_COMPROBANTE_PASS,
   },
 });
 
@@ -84,10 +84,11 @@ router.post("/enviar-comprobante", async (req, res) => {
 
   let errores = [];
 
-  // Enviar email al terapeuta
+  // Enviar email al terapeuta desde comprobante@
   try {
-    await transporter.sendMail({
-      from: `"Servicios Holísticos" <${process.env.EMAIL_FROM}>`,
+    console.log("🟡 Enviando email al terapeuta...");
+    await transporterComprobante.sendMail({
+      from: `"Servicios Holísticos" <comprobante@serviciosholisticos.com.ar>`,
       to: emailTerapeuta,
       subject: asunto,
       html: cuerpoTerapeuta,
@@ -98,10 +99,11 @@ router.post("/enviar-comprobante", async (req, res) => {
     errores.push("terapeuta");
   }
 
-  // Enviar email al cliente
+  // Enviar email al cliente desde notificaciones@
   try {
-    await transporter.sendMail({
-      from: `"Servicios Holísticos" <${process.env.EMAIL_FROM}>`,
+    console.log("🟡 Enviando email al cliente...");
+    await transporterNotificaciones.sendMail({
+      from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
       to: emailCliente,
       subject: asunto,
       html: cuerpoCliente,
