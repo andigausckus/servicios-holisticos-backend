@@ -99,7 +99,6 @@ router.put("/:id", async (req, res) => {
   } catch (err) {
     console.error("❌ Error al enviar el email:", err?.response?.data || err.message || err);
   }
-}
 
     
     res.json({ mensaje: "✅ Estado actualizado", reserva: reservaActualizada });
