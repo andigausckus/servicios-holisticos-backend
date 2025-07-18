@@ -86,6 +86,7 @@ router.put("/:id", async (req, res) => {
 
   // Usá fetch o axios para llamar a /emails/enviar-comprobante
   const axios = require("axios");
+      console.log("📨 Enviando email de comprobante con:", emailData);
   await axios.post("https://servicios-holisticos-backend.onrender.com/api/emails/enviar-comprobante", emailData);
     }
     
