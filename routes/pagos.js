@@ -68,12 +68,20 @@ router.post("/crear-preferencia", async (req, res) => {
 
     // ⏱️ Eliminar si no se confirma en 2 minutos
     setTimeout(async () => {
-      const reservaActual = await Reserva.findOne({ _id: reservaTemporal._id });
-      if (reservaActual && reservaActual.estado === "en_proceso") {
-        await Reserva.deleteOne({ _id: reservaTemporal._id });
-        console.log("⏱️ Reserva temporal eliminada por timeout");
-      }
-    }, 2 * 60 * 1000); // 2 minutos
+  const reservaActual = await Reserva.findOne({ _id: reservaTemporal._id });
+  if (reservaActual && reservaActual.estado === "en_proceso") {
+    await Reserva.deleteOne({ _id: reservaTemporal._id });
+    console.log("⏱️ Reserva temporal eliminada por timeout");
+
+    await Bloqueo.findOneAndDelete({
+      servicioId: reservaTemporal.servicioId,
+      fecha: reservaTemporal.fechaReserva,
+      hora: reservaTemporal.horaReserva,
+    });
+
+    console.log("🔓 Bloqueo eliminado tras timeout");
+  }
+}, 2 * 60 * 1000); // 2 minutos
 
     res.json({ init_point: result.init_point });
   } catch (error) {
