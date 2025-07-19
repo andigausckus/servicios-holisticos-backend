@@ -68,22 +68,19 @@ router.post("/", verificarToken, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const servicios = await Servicio.find().populate("terapeuta", "nombreCompleto ubicacion");
+
+    // Verificación adicional: si el resultado no es un array, lanzar error
+    if (!Array.isArray(servicios)) {
+      throw new Error("La respuesta de Servicio.find() no es un array");
+    }
+
     res.json(servicios);
   } catch (err) {
+    console.error("❌ Error real al obtener los servicios:", err.message, err.stack);
     res.status(500).json({ error: "Error al obtener los servicios" });
   }
 });
 
-// 🔥 Ruta temporal para borrar todos los servicios
-router.delete("/borrar-todos", async (req, res) => {
-  try {
-    await Servicio.deleteMany({});
-    res.json({ mensaje: "Todos los servicios fueron eliminados" });
-  } catch (error) {
-    console.error("Error al borrar servicios:", error);
-    res.status(500).json({ error: "Error al borrar servicios" });
-  }
-});
 
 // ✅ Obtener servicios del terapeuta autenticado
 router.get("/mis-servicios", verificarToken, async (req, res) => {
