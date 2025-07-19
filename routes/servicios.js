@@ -67,14 +67,15 @@ router.post("/", verificarToken, async (req, res) => {
 // ✅ Obtener todos los servicios
 router.get("/", async (req, res) => {
   try {
-    const servicios = await Servicio.find().populate("terapeuta", "nombreCompleto ubicacion");
+    const servicios = await Servicio.find().populate("terapeuta");
 
-    // Verificación adicional: si el resultado no es un array, lanzar error
-    if (!Array.isArray(servicios)) {
-      throw new Error("La respuesta de Servicio.find() no es un array");
-    }
+if (!Array.isArray(servicios)) {
+  console.error("❌ No se obtuvo un array de servicios:", servicios);
+  return res.status(500).json({ error: "No se pudo obtener los servicios" });
+}
+console.log("🟡 Servicios obtenidos:", servicios);
+res.json(servicios);
 
-    res.json(servicios);
   } catch (err) {
     console.error("❌ Error real al obtener los servicios:", err.message, err.stack);
     res.status(500).json({ error: "Error al obtener los servicios" });
