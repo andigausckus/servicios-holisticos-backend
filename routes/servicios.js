@@ -123,8 +123,8 @@ router.get("/publico/:id", async (req, res) => {
           );
 
           let estado = "disponible";
-if (estaReservado) estado = "reservado";
-else if (estaBloqueado) estado = "en_proceso";
+          if (estaReservado) estado = "reservado";
+          else if (estaBloqueado) estado = "en_proceso";
 
           return {
             desde: horario.desde,
@@ -142,6 +142,7 @@ else if (estaBloqueado) estado = "en_proceso";
     res.json({
       ...servicio.toObject(),
       horariosDisponibles: horariosConEstado,
+      plataformas: servicio.plataformas || [],
     });
 
   } catch (err) {
@@ -149,6 +150,7 @@ else if (estaBloqueado) estado = "en_proceso";
     res.status(500).json({ error: "Error al obtener el servicio público" });
   }
 });
+
 
 // 🧹 Limpiar horarios inválidos (temporal)
 router.post("/admin/limpiar-horarios-invalidos", async (req, res) => {
