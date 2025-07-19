@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const adminEmail = "serviciosholisticos2025@gmail.com";
+const adminEmail = "notificaciones@serviciosholisticos.com.ar";
 
 // Crear una nueva reserva
 router.post("/", async (req, res) => {
