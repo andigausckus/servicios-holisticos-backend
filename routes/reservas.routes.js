@@ -3,14 +3,24 @@ const router = express.Router();
 const Reserva = require("../models/Reserva");
 const Bloqueo = require("../models/Bloqueo");
 const authMiddleware = require("../middlewares/auth");
+const nodemailer = require("nodemailer");
 
-// ✅ Crear nueva reserva
+const transporter = nodemailer.createTransport({
+  service: "Zoho",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
+
+const adminEmail = "serviciosholisticos2025@gmail.com";
+
+// Crear una nueva reserva
 router.post("/", async (req, res) => {
   try {
     const nueva = new Reserva(req.body);
     await nueva.save();
 
-    // ⏱ Liberación automática si no se confirma en 2 minutos
     if (nueva.estado === "en_proceso") {
       setTimeout(async () => {
         try {
@@ -27,7 +37,7 @@ router.post("/", async (req, res) => {
         } catch (error) {
           console.error("❌ Error en temporizador de liberación:", error);
         }
-      }, 2 * 60 * 1000); // 2 minutos
+      }, 2 * 60 * 1000);
     }
 
     res.status(201).json({ mensaje: "✅ Reserva registrada", reserva: nueva });
@@ -37,67 +47,76 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ Obtener TODAS las reservas (uso general o para admin)
-router.get("/", async (req, res) => {
-  try {
-    const reservas = await Reserva.find()
-      .sort({ fecha: -1 })
-      .populate("servicioId terapeutaId");
-    res.json(reservas);
-  } catch (error) {
-    console.error("❌ Error al obtener reservas:", error);
-    res.status(500).json({ mensaje: "❌ Error al obtener reservas", error });
-  }
-});
-
-// ✅ Obtener SOLO las reservas del terapeuta logueado
-router.get("/mis-reservas", authMiddleware, async (req, res) => {
-  try {
-    const reservas = await Reserva.find({ terapeutaId: req.user.id }).sort({ fecha: -1 });
-    res.json(reservas);
-  } catch (err) {
-    res.status(500).json({ mensaje: "❌ Error al obtener reservas", error: err });
-  }
-});
-
-// ✅ Actualizar estado de una reserva
+// Actualizar estado de una reserva
 router.put("/:id", async (req, res) => {
   try {
     const { estado } = req.body;
     const reservaAntes = await Reserva.findById(req.params.id).populate("terapeutaId servicioId");
-    const reservaActualizada = await Reserva.findByIdAndUpdate(
-      req.params.id,
-      { estado },
-      { new: true }
-    );
+    const reservaActualizada = await Reserva.findByIdAndUpdate(req.params.id, { estado }, { new: true });
 
     if (estado === "confirmada") {
-      const axios = require("axios");
+      const {
+        nombre,
+        usuarioEmail,
+        fechaReserva,
+        horaReserva,
+        duracion,
+        precio,
+        servicioId,
+        terapeutaId,
+      } = reservaAntes;
 
-      const emailData = {
-        nombreCliente: reservaAntes.nombre,
-        emailCliente: reservaAntes.usuarioEmail,
-        nombreTerapeuta: reservaAntes.terapeutaId?.nombreCompleto || "Sin nombre",
-        emailTerapeuta: reservaAntes.terapeutaId?.email || "Sin email",
-        nombreServicio: reservaAntes.servicioId?.titulo || "Sin título",
-        fecha: reservaAntes.fechaReserva,
-        hora: reservaAntes.horaReserva,
-        duracion: reservaAntes.duracion,
-        precio: reservaAntes.precio,
+      const whatsappEnlace = `https://wa.me/549${terapeutaId?.whatsapp?.replace(/\D/g, "")}`;
+
+      const emailInfo = {
+        asunto: `Nueva sesión confirmada: ${servicioId?.titulo || "Servicio"}`,
+        html: `
+          <p>✅ <strong>Sesi&oacute;n confirmada</strong></p>
+          <p><strong>Cliente:</strong> ${nombre} (${usuarioEmail})</p>
+          <p><strong>Terapeuta:</strong> ${terapeutaId?.nombreCompleto} (${terapeutaId?.email})</p>
+          <p><strong>WhatsApp del terapeuta:</strong> <a href="${whatsappEnlace}" target="_blank">${terapeutaId?.whatsapp}</a></p>
+          <p><strong>Servicio:</strong> ${servicioId?.titulo}</p>
+          <p><strong>Fecha:</strong> ${fechaReserva}</p>
+          <p><strong>Hora:</strong> ${horaReserva}</p>
+          <p><strong>Duraci&oacute;n:</strong> ${duracion} minutos</p>
+          <p><strong>Precio:</strong> $${precio}</p>
+          <hr/>
+          <p><strong>Datos bancarios del terapeuta:</strong></p>
+          <p><strong>Banco:</strong> ${terapeutaId?.banco || "No especificado"}</p>
+          <p><strong>CBU/CVU:</strong> ${terapeutaId?.cbu || "No especificado"}</p>
+        `,
       };
 
-      console.log("📨 Preparando envío de emails...");
-      console.log("📧 Datos del email:", emailData);
+      const destinatarios = [usuarioEmail, terapeutaId?.email, adminEmail].filter(Boolean);
 
-      try {
-        const response = await axios.post(
-          "https://servicios-holisticos-backend.onrender.com/api/emails/enviar-comprobante",
-          emailData
-        );
-        console.log("✅ Email enviado correctamente:", response.data);
-      } catch (err) {
-        console.error("❌ Error al enviar el email:", err?.response?.data || err.message || err);
+      for (const destinatario of destinatarios) {
+        await transporter.sendMail({
+          from: `"Servicios Holísticos" <${process.env.EMAIL_USER}>`,
+          to: destinatario,
+          subject: emailInfo.asunto,
+          html: emailInfo.html,
+        });
+        console.log(`📨 Email enviado a ${destinatario}`);
       }
+
+      // Email de reseña luego de finalizar la sesión
+      const finSesion = calcularFinSesion(fechaReserva, horaReserva, duracion);
+      const ahora = new Date();
+      const delayMs = Math.max(finSesion.getTime() - ahora.getTime() + 60 * 1000, 0); // 1 min después
+
+      setTimeout(() => {
+        transporter.sendMail({
+          from: `"Servicios Holísticos" <${process.env.EMAIL_USER}>`,
+          to: usuarioEmail,
+          subject: "🧘‍♀️ ¿Cómo fue tu sesión?",
+          html: `
+            <p>Esperamos que hayas disfrutado tu sesión con <strong>${terapeutaId?.nombreCompleto}</strong>.</p>
+            <p>¿Te gustaría dejar una reseña?</p>
+            <p><a href="https://serviciosholisticos.com.ar/resenas">Dejar reseña</a></p>
+          `,
+        });
+        console.log(`📩 Email de reseña enviado a ${usuarioEmail}`);
+      }, delayMs);
     }
 
     res.json({ mensaje: "✅ Estado actualizado", reserva: reservaActualizada });
@@ -107,78 +126,49 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// ✅ Liberar un horario bloqueado (cuando expira el temporizador)
-router.post("/liberar", async (req, res) => {
-  const { servicioId, fecha, hora } = req.body;
-
-  if (!servicioId || !fecha || !hora) {
-    return res.status(400).json({ error: "Faltan datos obligatorios" });
-  }
-
+// Obtener todas las reservas
+router.get("/", async (req, res) => {
   try {
-    const result = await Bloqueo.deleteOne({ servicioId, fecha, hora });
-
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ mensaje: "No se encontró bloqueo para liberar" });
-    }
-
-    res.json({ mensaje: "⛔ Reserva liberada correctamente" });
-  } catch (error) {
-    console.error("❌ Error al liberar reserva:", error);
-    res.status(500).json({ error: "Error al liberar reserva" });
-  }
-});
-
-// ✅ Obtener la reserva más reciente por email
-router.get("/reciente", async (req, res) => {
-  const { email } = req.query;
-  if (!email) return res.status(400).json({ error: "Falta el email" });
-
-  const reserva = await Reserva.findOne({ usuarioEmail: email })
-    .sort({ createdAt: -1 })
-    .populate({
-      path: "terapeutaId",
-      select: "nombreCompleto ubicacion whatsapp",
-    })
-    .populate({
-      path: "servicioId",
-      select: "titulo descripcion",
-    });
-
-  if (!reserva) return res.status(404).json({ error: "No se encontró la reserva" });
-
-  res.json(reserva);
-});
-
-// ✅ Obtener reservas confirmadas por servicio
-router.get("/por-servicio", async (req, res) => {
-  try {
-    const { servicioId } = req.query;
-    if (!servicioId) return res.status(400).json({ error: "Falta servicioId" });
-
-    const reservas = await Reserva.find({ servicioId, estado: "confirmada" });
+    const reservas = await Reserva.find().populate("servicioId terapeutaId");
     res.json(reservas);
   } catch (error) {
-    res.status(500).json({ error: "Error al obtener reservas" });
+    res.status(500).json({ mensaje: "❌ Error al obtener reservas", error });
   }
 });
 
-// ✅ Obtener todas las HORAS CONFIRMADAS para un servicio en una fecha específica
-router.get("/confirmadas", async (req, res) => {
-  const { servicioId, fecha } = req.query;
-
-  if (!servicioId || !fecha) {
-    return res.status(400).json({ error: "Faltan servicioId o fecha" });
-  }
-
+// Obtener reservas por terapeuta autenticado
+router.get("/mias", authMiddleware, async (req, res) => {
   try {
-    const reservas = await Reserva.find({ servicioId, fechaReserva: fecha, estado: "confirmada" });
-    const horasConfirmadas = reservas.map(r => r.horaReserva);
-    res.json(horasConfirmadas);
+    const reservas = await Reserva.find({ terapeutaId: req.user.id }).populate("servicioId");
+    res.json(reservas);
   } catch (error) {
-    console.error("❌ Error al obtener horas confirmadas:", error);
-    res.status(500).json({ error: "Error al obtener horas confirmadas" });
+    res.status(500).json({ mensaje: "❌ Error al obtener tus reservas", error });
   }
 });
+
+// Eliminar una reserva (por ID)
+router.delete("/:id", async (req, res) => {
+  try {
+    const reserva = await Reserva.findById(req.params.id);
+    if (!reserva) {
+      return res.status(404).json({ mensaje: "❌ Reserva no encontrada" });
+    }
+    await reserva.deleteOne();
+    await Bloqueo.deleteOne({
+      servicioId: reserva.servicioId,
+      fecha: reserva.fechaReserva,
+      hora: reserva.horaReserva,
+    });
+    res.json({ mensaje: "✅ Reserva eliminada y horario liberado" });
+  } catch (error) {
+    res.status(500).json({ mensaje: "❌ Error al eliminar reserva", error });
+  }
+});
+
+function calcularFinSesion(fecha, hora, duracionMin) {
+  const [h, m] = hora.split(":");
+  const inicio = new Date(`${fecha}T${h.padStart(2, "0")}:${m.padStart(2, "0")}:00`);
+  return new Date(inicio.getTime() + duracionMin * 60000);
+}
 
 module.exports = router;
