@@ -111,7 +111,7 @@ router.get("/publico/:id", async (req, res) => {
     const bloqueos = await Bloqueo.find({ servicioId: servicio._id });
     const reservas = await Reserva.find({ servicioId: servicio._id });
 
-    const horariosConEstado = (servicio.horariosDisponibles || []).map((dia) => {
+const horariosConEstado = (servicio.horariosDisponibles || []).map((dia) => {
   const horariosFijos = Array.isArray(dia.horariosFijos) ? dia.horariosFijos : [];
 
   const horariosFijosConEstado = horariosFijos
@@ -140,6 +140,7 @@ router.get("/publico/:id", async (req, res) => {
     horariosFijos: horariosFijosConEstado,
   };
 });
+    
     res.json({
       ...servicio.toObject(),
       horariosDisponibles: horariosConEstado,
