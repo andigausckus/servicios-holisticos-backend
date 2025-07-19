@@ -1,20 +1,19 @@
 const mongoose = require("mongoose");
 
-// Rango horario genérico (para días de la semana o fechas específicas)
+// Rango horario genérico
 const rangoSchema = new mongoose.Schema({
   desde: {
     type: String,
     required: true,
-    match: [/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (debe ser HH:mm)"]
+    match: [/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (HH:mm)"]
   },
   hasta: {
     type: String,
     required: true,
-    match: [/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (debe ser HH:mm)"]
+    match: [/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (HH:mm)"]
   }
 }, { _id: false });
 
-// Disponibilidad por día de la semana (modelo actual)
 const disponibilidadSemanaSchema = new mongoose.Schema({
   dia: {
     type: String,
@@ -27,7 +26,6 @@ const disponibilidadSemanaSchema = new mongoose.Schema({
   }
 }, { _id: false });
 
-// Disponibilidad por fecha específica (YYYY-MM-DD)
 const disponibilidadFechaSchema = new mongoose.Schema({
   fecha: {
     type: String,
@@ -38,6 +36,21 @@ const disponibilidadFechaSchema = new mongoose.Schema({
     type: [rangoSchema],
     default: []
   }
+}, { _id: false });
+
+const reseñaSchema = new mongoose.Schema({
+  usuario: String,
+  comentario: String,
+  puntuacion: { type: Number, min: 1, max: 5 }
+}, { _id: false });
+
+const servicioSchema = new mongoose.Schema({
+  titulo: String,
+  descripcion: String,
+  duracion: String,
+  modalidad: String,
+  precio: Number,
+  reseñas: [reseñaSchema]
 }, { _id: false });
 
 const TerapeutaSchema = new mongoose.Schema({
@@ -72,11 +85,20 @@ const TerapeutaSchema = new mongoose.Schema({
   },
   ubicacion: {
     type: String,
-    trim: true,
-    required: false
+    trim: true
   },
+  especialidades: {
+    type: [String],
+    default: []
+  },
+  modalidad: {
+    type: String,
+    enum: ["Online", "Presencial", "Ambas"]
+  },
+  fotoPerfil: String,
+  fotoPortada: String,
 
-  // 🔵 Nuevos campos de pago
+  // 🔵 Datos de pago
   cbuCvu: {
     type: String,
     required: [true, "El CBU/CVU es obligatorio"],
@@ -106,7 +128,7 @@ const TerapeutaSchema = new mongoose.Schema({
 
   aprobado: {
     type: Boolean,
-    default: true // ✅ Ahora se aprueba automáticamente
+    default: true
   },
 
   disponibilidad: {
@@ -119,53 +141,19 @@ const TerapeutaSchema = new mongoose.Schema({
     default: []
   },
 
-  // 🟡 NUEVO: bloqueos temporales de horarios (por fecha y hora)
   horariosBloqueados: {
     type: [
       {
-        fecha: { type: String, required: true },       // Ej: "2025-07-13"
-        hora: { type: String, required: true },         // Ej: "14:30"
-        expiracion: { type: Date, required: true }      // Fecha/hora en que expira el bloqueo
+        fecha: { type: String, required: true },
+        hora: { type: String, required: true },
+        expiracion: { type: Date, required: true }
       }
     ],
     default: []
   },
 
-  servicios: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Servicio"
-  }]
-}, { timestamps: true });
-
-
-const TerapeutaSchema = new mongoose.Schema({
-  nombre: { type: String, required: true },
-  descripcion: String,
-  especialidades: [String],
-  modalidad: String,
-  ubicacion: String,
-  servicios: [{
-    titulo: String,
-    descripcion: String,
-    duracion: String,
-    modalidad: String,
-    precio: Number,
-    reseñas: [{
-      usuario: String,
-      comentario: String,
-      puntuacion: { type: Number, min: 1, max: 5 }
-    }]
-  }],
-  disponibilidad: [{
-    dia: String,
-    rangos: [{
-      horaInicio: String,
-      horaFin: String
-    }]
-  }],
-  fotoPerfil: String,
-  fotoPortada: String
-}, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
+  servicios: [servicioSchema]
+}, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 // ⭐ Virtual para calcular promedio de reseñas
 TerapeutaSchema.virtual('puntuacionPromedio').get(function () {
@@ -180,10 +168,7 @@ TerapeutaSchema.virtual('puntuacionPromedio').get(function () {
   });
 
   if (totalReseñas === 0) return 0;
-
-  return (totalPuntuacion / totalReseñas).toFixed(1); // redondeado a un decimal
+  return (totalPuntuacion / totalReseñas).toFixed(1);
 });
-
-module.exports = mongoose.model("Terapeuta", TerapeutaSchema);
 
 module.exports = mongoose.model("Terapeuta", TerapeutaSchema);
