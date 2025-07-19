@@ -112,35 +112,35 @@ router.get("/publico/:id", async (req, res) => {
     const reservas = await Reserva.find({ servicioId: servicio._id });
 
 const horariosConEstado = Array.isArray(servicio.horariosDisponibles)
-  ? servicio.horariosDisponibles.map((dia) => {
-      const horariosFijos = Array.isArray(dia.horariosFijos) ? dia.horariosFijos : [];
+  ? servicio.horariosDisponibles
+      .filter((dia) => dia && Array.isArray(dia.horariosFijos))
+      .map((dia) => {
+        const horariosFijosConEstado = dia.horariosFijos
+          .filter((h) => h.desde && h.hasta)
+          .map((horario) => {
+            const estaReservado = reservas.some(
+              (r) => r.fecha === dia.fecha && r.hora === horario.desde
+            );
+            const estaBloqueado = bloqueos.some(
+              (b) => b.fecha === dia.fecha && b.hora === horario.desde
+            );
 
-      const horariosFijosConEstado = horariosFijos
-        .filter(h => h.desde && h.hasta)
-        .map((horario) => {
-          const estaReservado = reservas.some(
-            (r) => r.fecha === dia.fecha && r.hora === horario.desde
-          );
-          const estaBloqueado = bloqueos.some(
-            (b) => b.fecha === dia.fecha && b.hora === horario.desde
-          );
+            let estado = "disponible";
+            if (estaReservado) estado = "reservado";
+            else if (estaBloqueado) estado = "en_proceso";
 
-          let estado = "disponible";
-          if (estaReservado) estado = "reservado";
-          else if (estaBloqueado) estado = "en_proceso";
+            return {
+              desde: horario.desde,
+              hasta: horario.hasta,
+              estado,
+            };
+          });
 
-          return {
-            desde: horario.desde,
-            hasta: horario.hasta,
-            estado,
-          };
-        });
-
-      return {
-        fecha: dia.fecha,
-        horariosFijos: horariosFijosConEstado,
-      };
-    })
+        return {
+          fecha: dia.fecha,
+          horariosFijos: horariosFijosConEstado,
+        };
+      })
   : [];
     
     res.json({
