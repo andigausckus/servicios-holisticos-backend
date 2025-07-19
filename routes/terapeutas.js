@@ -139,4 +139,27 @@ router.get("/publico/:id", async (req, res) => {
   }
 });
 
+// ✅ Ruta pública para obtener reseñas aprobadas y puntaje promedio de un terapeuta
+const Resena = require("../models/Resena");
+
+router.get("/publico/:id/resenas", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const resenas = await Resena.find({ terapeuta: id, aprobada: true });
+
+    if (resenas.length === 0) {
+      return res.json({ promedio: 0, total: 0, resenas: [] });
+    }
+
+    const total = resenas.length;
+    const suma = resenas.reduce((acc, r) => acc + (r.puntaje || 0), 0);
+    const promedio = Math.round((suma / total) * 10) / 10; // redondeo a un decimal
+
+    res.json({ promedio, total, resenas });
+  } catch (error) {
+    console.error("Error al obtener reseñas del terapeuta:", error);
+    res.status(500).json({ message: "Error al obtener reseñas", error });
+  }
+});
+
 module.exports = router;
