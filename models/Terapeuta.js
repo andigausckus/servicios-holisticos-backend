@@ -160,12 +160,16 @@ TerapeutaSchema.virtual('puntuacionPromedio').get(function () {
   let totalPuntuacion = 0;
   let totalReseñas = 0;
 
-  this.servicios.forEach(servicio => {
-    servicio.reseñas.forEach(reseña => {
-      totalPuntuacion += reseña.puntuacion;
-      totalReseñas += 1;
+  if (Array.isArray(this.servicios)) {
+    this.servicios.forEach(servicio => {
+      if (Array.isArray(servicio.reseñas)) {
+        servicio.reseñas.forEach(reseña => {
+          totalPuntuacion += reseña.puntuacion;
+          totalReseñas += 1;
+        });
+      }
     });
-  });
+  }
 
   if (totalReseñas === 0) return 0;
   return (totalPuntuacion / totalReseñas).toFixed(1);
