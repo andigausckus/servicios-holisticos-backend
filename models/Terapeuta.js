@@ -137,4 +137,53 @@ const TerapeutaSchema = new mongoose.Schema({
   }]
 }, { timestamps: true });
 
+
+const TerapeutaSchema = new mongoose.Schema({
+  nombre: { type: String, required: true },
+  descripcion: String,
+  especialidades: [String],
+  modalidad: String,
+  ubicacion: String,
+  servicios: [{
+    titulo: String,
+    descripcion: String,
+    duracion: String,
+    modalidad: String,
+    precio: Number,
+    reseñas: [{
+      usuario: String,
+      comentario: String,
+      puntuacion: { type: Number, min: 1, max: 5 }
+    }]
+  }],
+  disponibilidad: [{
+    dia: String,
+    rangos: [{
+      horaInicio: String,
+      horaFin: String
+    }]
+  }],
+  fotoPerfil: String,
+  fotoPortada: String
+}, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
+
+// ⭐ Virtual para calcular promedio de reseñas
+TerapeutaSchema.virtual('puntuacionPromedio').get(function () {
+  let totalPuntuacion = 0;
+  let totalReseñas = 0;
+
+  this.servicios.forEach(servicio => {
+    servicio.reseñas.forEach(reseña => {
+      totalPuntuacion += reseña.puntuacion;
+      totalReseñas += 1;
+    });
+  });
+
+  if (totalReseñas === 0) return 0;
+
+  return (totalPuntuacion / totalReseñas).toFixed(1); // redondeado a un decimal
+});
+
+module.exports = mongoose.model("Terapeuta", TerapeutaSchema);
+
 module.exports = mongoose.model("Terapeuta", TerapeutaSchema);
