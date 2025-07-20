@@ -4,7 +4,7 @@ const { MercadoPagoConfig, Preference, Payment } = require("mercadopago");
 const Reserva = require("../models/Reserva");
 const Bloqueo = require("../models/Bloqueo");
 const Terapeuta = require("../models/Terapeuta");
-const { enviarComprobante } = require("../utils/email");
+const { enviarEmailsReserva } = require("../utils/emailSender"); // ✅ nueva línea
 
 const mercadopago = new MercadoPagoConfig({
   accessToken: process.env.MP_ACCESS_TOKEN,
@@ -52,36 +52,36 @@ router.post("/crear-preferencia", async (req, res) => {
 
     // 🔄 Guardar reserva temporal (estado: "en_proceso")
     const reservaTemporal = new Reserva({
-  servicioId: metadata.servicio_id,
-  terapeutaId: metadata.terapeuta_id,
-  fechaReserva: metadata.fecha_reserva,
-  horaReserva: metadata.hora_reserva,
-  usuarioEmail: payer.email || "desconocido",
-  usuarioNombre: payer.name || "desconocido",
-  usuarioTelefono: payer.phone?.number || "no especificado",
-  precio: items[0]?.unit_price || 0,
-  estado: "en_proceso",
-  creadaEn: new Date(),
-});
+      servicioId: metadata.servicio_id,
+      terapeutaId: metadata.terapeuta_id,
+      fechaReserva: metadata.fecha_reserva,
+      horaReserva: metadata.hora_reserva,
+      usuarioEmail: payer.email || "desconocido",
+      usuarioNombre: payer.name || "desconocido",
+      usuarioTelefono: payer.phone?.number || "no especificado",
+      precio: items[0]?.unit_price || 0,
+      estado: "en_proceso",
+      creadaEn: new Date(),
+    });
 
     await reservaTemporal.save();
 
     // ⏱️ Eliminar si no se confirma en 2 minutos
     setTimeout(async () => {
-  const reservaActual = await Reserva.findOne({ _id: reservaTemporal._id });
-  if (reservaActual && reservaActual.estado === "en_proceso") {
-    await Reserva.deleteOne({ _id: reservaTemporal._id });
-    console.log("⏱️ Reserva temporal eliminada por timeout");
+      const reservaActual = await Reserva.findOne({ _id: reservaTemporal._id });
+      if (reservaActual && reservaActual.estado === "en_proceso") {
+        await Reserva.deleteOne({ _id: reservaTemporal._id });
+        console.log("⏱️ Reserva temporal eliminada por timeout");
 
-    await Bloqueo.findOneAndDelete({
-      servicioId: reservaTemporal.servicioId,
-      fecha: reservaTemporal.fechaReserva,
-      hora: reservaTemporal.horaReserva,
-    });
+        await Bloqueo.findOneAndDelete({
+          servicioId: reservaTemporal.servicioId,
+          fecha: reservaTemporal.fechaReserva,
+          hora: reservaTemporal.horaReserva,
+        });
 
-    console.log("🔓 Bloqueo eliminado tras timeout");
-  }
-}, 2 * 60 * 1000); // 2 minutos
+        console.log("🔓 Bloqueo eliminado tras timeout");
+      }
+    }, 2 * 60 * 1000); // 2 minutos
 
     res.json({ init_point: result.init_point });
   } catch (error) {
@@ -137,6 +137,9 @@ router.post("/webhook", async (req, res) => {
         });
 
         await nuevaReserva.save();
+
+        // 🟣 Enviar emails
+        await enviarEmailsReserva(nuevaReserva);
 
         // Eliminar bloqueo fijo (si existiera)
         await Bloqueo.findOneAndDelete({
