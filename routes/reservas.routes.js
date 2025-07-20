@@ -3,18 +3,7 @@ const router = express.Router();
 const Reserva = require("../models/Reserva");
 const Terapeuta = require("../models/Terapeuta");
 const Servicio = require("../models/Servicio");
-const nodemailer = require("nodemailer");
-
-// Transporter con ZOHO
-const transporter = nodemailer.createTransport({
-  host: "smtp.zoho.com",
-  port: 465,
-  secure: true,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const { enviarEmailsReserva } = require("../utils/emailSender");
 
 router.post("/", async (req, res) => {
   try {
@@ -38,62 +27,27 @@ router.post("/", async (req, res) => {
     });
 
     await nuevaReserva.save();
+    console.log("✅ Reserva guardada");
 
-    console.log("✅ Reserva guardada en la base de datos");
-
-    const asunto = "Nueva reserva confirmada";
-    const html = `
-      <div style="font-family: sans-serif; color: #333;">
-        <h2 style="color: #663399;">Reserva Confirmada</h2>
-        <p>Hola, se ha registrado una nueva reserva.</p>
-        <ul>
-          <li><strong>Usuario:</strong> ${nombreUsuario}</li>
-          <li><strong>Email:</strong> ${emailUsuario}</li>
-          <li><strong>Servicio:</strong> ${servicio.titulo}</li>
-          <li><strong>Fecha:</strong> ${fecha}</li>
-          <li><strong>Hora:</strong> ${hora}</li>
-          <li><strong>Mensaje:</strong> ${mensaje || "(sin mensaje)"}</li>
-        </ul>
-        <p>Gracias por usar Servicios Holísticos ✨</p>
-      </div>
-    `;
-
-    const destinatarios = [terapeuta.email, emailUsuario];
-
-    for (const destinatario of destinatarios) {
-      try {
-        await transporter.sendMail({
-          from: `"Servicios Holísticos" <${process.env.EMAIL_USER}>`,
-          to: destinatario,
-          subject: asunto,
-          html,
-        });
-        console.log("📨 Email enviado a:", destinatario);
-      } catch (err) {
-        console.error("❌ Error al enviar email a", destinatario, err);
-      }
-    }
+    await enviarEmailsReserva({
+      nombreCliente: nombreUsuario,
+      emailCliente: emailUsuario,
+      nombreTerapeuta: terapeuta.nombre,
+      emailTerapeuta: terapeuta.email,
+      whatsappTerapeuta: terapeuta.whatsapp,
+      bancoTerapeuta: terapeuta.banco,
+      cbuTerapeuta: terapeuta.cbu,
+      nombreServicio: servicio.titulo,
+      fecha,
+      hora,
+      duracion: servicio.duracion || "60min",
+      precio: servicio.precio || 0,
+    });
 
     res.status(200).json({ mensaje: "Reserva registrada con éxito" });
   } catch (error) {
     console.error("❌ Error al crear reserva:", error);
     res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
-
-router.get("/test-email", async (req, res) => {
-  try {
-    await transporter.sendMail({
-      from: `"Servicios Holísticos" <${process.env.EMAIL_USER}>`,
-      to: "andigausckus36@gmail.com",
-      subject: "🧘 Test de envío desde el servidor",
-      text: "Este es un email de prueba enviado desde tu servidor con Zoho.",
-    });
-
-    res.send("✅ Email enviado correctamente");
-  } catch (error) {
-    console.error("❌ Error al enviar el email de prueba:", error);
-    res.status(500).send("❌ Falló el envío del correo");
   }
 });
 
