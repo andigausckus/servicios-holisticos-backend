@@ -5,10 +5,11 @@ const Terapeuta = require("../models/Terapeuta");
 const Servicio = require("../models/Servicio");
 const nodemailer = require("nodemailer");
 
+// Transporter con ZOHO
 const transporter = nodemailer.createTransport({
-  host: "smtp.dondominio.com",
-  port: 587,
-  secure: false,
+  host: "smtp.zoho.com",
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -38,39 +39,34 @@ router.post("/", async (req, res) => {
 
     await nuevaReserva.save();
 
-    // 🔵 Email HTML
-    const emailInfo = {
-      asunto: "Nueva reserva confirmada",
-      html: `
-        <div style="font-family: sans-serif; color: #333;">
-          <h2 style="color: #663399;">Reserva Confirmada</h2>
-          <p>Hola, se ha registrado una nueva reserva.</p>
-          <ul>
-            <li><strong>Usuario:</strong> ${nombreUsuario}</li>
-            <li><strong>Email:</strong> ${emailUsuario}</li>
-            <li><strong>Servicio:</strong> ${servicio.titulo}</li>
-            <li><strong>Fecha:</strong> ${fecha}</li>
-            <li><strong>Hora:</strong> ${hora}</li>
-            <li><strong>Mensaje:</strong> ${mensaje || "(sin mensaje)"}</li>
-          </ul>
-          <p>Gracias por usar Servicios Holísticos ✨</p>
-        </div>
-      `,
-    };
+    console.log("✅ Reserva guardada en la base de datos");
 
-    const destinatarios = [
-      terapeuta.email,
-      emailUsuario,
-      "notificaciones@serviciosholisticos.com.ar",
-    ];
+    const asunto = "Nueva reserva confirmada";
+    const html = `
+      <div style="font-family: sans-serif; color: #333;">
+        <h2 style="color: #663399;">Reserva Confirmada</h2>
+        <p>Hola, se ha registrado una nueva reserva.</p>
+        <ul>
+          <li><strong>Usuario:</strong> ${nombreUsuario}</li>
+          <li><strong>Email:</strong> ${emailUsuario}</li>
+          <li><strong>Servicio:</strong> ${servicio.titulo}</li>
+          <li><strong>Fecha:</strong> ${fecha}</li>
+          <li><strong>Hora:</strong> ${hora}</li>
+          <li><strong>Mensaje:</strong> ${mensaje || "(sin mensaje)"}</li>
+        </ul>
+        <p>Gracias por usar Servicios Holísticos ✨</p>
+      </div>
+    `;
+
+    const destinatarios = [terapeuta.email, emailUsuario];
 
     for (const destinatario of destinatarios) {
       try {
         await transporter.sendMail({
-          from: process.env.EMAIL_USER,
+          from: `"Servicios Holísticos" <${process.env.EMAIL_USER}>`,
           to: destinatario,
-          subject: emailInfo.asunto,
-          html: emailInfo.html,
+          subject: asunto,
+          html,
         });
         console.log("📨 Email enviado a:", destinatario);
       } catch (err) {
@@ -87,19 +83,9 @@ router.post("/", async (req, res) => {
 
 router.get("/test-email", async (req, res) => {
   try {
-    const transporter = nodemailer.createTransport({
-      host: "smtp.zoho.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-
     await transporter.sendMail({
       from: `"Servicios Holísticos" <${process.env.EMAIL_USER}>`,
-      to: "andigausckus36@gmail.com", // ← reemplazá esto por un correo tuyo
+      to: "andigausckus36@gmail.com",
       subject: "🧘 Test de envío desde el servidor",
       text: "Este es un email de prueba enviado desde tu servidor con Zoho.",
     });
