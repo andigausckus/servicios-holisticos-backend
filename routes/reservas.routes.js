@@ -85,4 +85,32 @@ router.post("/", async (req, res) => {
   }
 });
 
+const nodemailer = require("nodemailer");
+
+router.get("/test-email", async (req, res) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      host: "smtp.zoho.com",
+      port: 465,
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Servicios Holísticos" <${process.env.EMAIL_USER}>`,
+      to: "andigausckus36@gmail.com", // ← reemplazá esto por un correo tuyo
+      subject: "🧘 Test de envío desde el servidor",
+      text: "Este es un email de prueba enviado desde tu servidor con Zoho.",
+    });
+
+    res.send("✅ Email enviado correctamente");
+  } catch (error) {
+    console.error("❌ Error al enviar el email de prueba:", error);
+    res.status(500).send("❌ Falló el envío del correo");
+  }
+});
+
 module.exports = router;
