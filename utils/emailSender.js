@@ -1,12 +1,12 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  host: "mail.serviciosholisticos.com.ar",
+  host: "smtp.zoho.com", // ✅ Usamos servidor SMTP oficial de Zoho
   port: 465,
   secure: true,
   auth: {
     user: "notificaciones@serviciosholisticos.com.ar",
-    pass: process.env.EMAIL_PASS,
+    pass: process.env.EMAIL_PASS, // Asegurate de usar una contraseña de aplicación
   },
 });
 
