@@ -29,26 +29,24 @@ router.post("/", async (req, res) => {
     await nuevaReserva.save();
     console.log("✅ Reserva guardada");
 
-    await enviarEmailsReserva({
-      nombreCliente: nombreUsuario,
-      emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta.nombre,
-      emailTerapeuta: terapeuta.email,
-      whatsappTerapeuta: terapeuta.whatsapp,
-      bancoTerapeuta: terapeuta.banco,
-      cbuTerapeuta: terapeuta.cbu,
-      nombreServicio: servicio.titulo,
-      fecha,
-      hora,
-      duracion: servicio.duracion || "60min",
-      precio: servicio.precio || 0,
-    });
-
-    res.status(200).json({ mensaje: "Reserva registrada con éxito" });
-  } catch (error) {
-    console.error("❌ Error al crear reserva:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-});
+    try {
+  await enviarEmailsReserva({
+    nombreCliente: nombreUsuario,
+    emailCliente: emailUsuario,
+    nombreTerapeuta: terapeuta.nombre,
+    emailTerapeuta: terapeuta.email,
+    whatsappTerapeuta: terapeuta.whatsapp,
+    bancoTerapeuta: terapeuta.banco,
+    cbuTerapeuta: terapeuta.cbu,
+    nombreServicio: servicio.titulo,
+    fecha,
+    hora,
+    duracion: servicio.duracion || "60min",
+    precio: servicio.precio || 0,
+  });
+  console.log("✅ Emails de reserva enviados correctamente");
+} catch (error) {
+  console.error("❌ Error al enviar emails de reserva:", error);
+}
 
 module.exports = router;
