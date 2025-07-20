@@ -85,8 +85,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-const nodemailer = require("nodemailer");
-
 router.get("/test-email", async (req, res) => {
   try {
     const transporter = nodemailer.createTransport({
