@@ -7,21 +7,15 @@ const { enviarEmailsReserva } = require("../utils/emailSender");
 
 router.post("/", async (req, res) => {
   try {
-    console.log("📩 req.body:", req.body); // muestra todo lo recibido
-
+    console.log("📩 req.body:", req.body);
     const {
       servicioId,
-      fechaReserva,
-      horaReserva,
-      usuarioNombre,
-      usuarioEmail,
+      fechaReserva: fecha,
+      horaReserva: hora,
+      usuarioNombre: nombreUsuario,
+      usuarioEmail: emailUsuario,
       mensaje
     } = req.body;
-
-    const fecha = fechaReserva;
-    const hora = horaReserva;
-    const nombreUsuario = usuarioNombre || "Cliente sin nombre";
-    const emailUsuario = usuarioEmail || "cliente@ejemplo.com";
 
     const servicio = await Servicio.findById(servicioId).lean();
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
@@ -44,7 +38,7 @@ router.post("/", async (req, res) => {
     console.log("✅ Reserva guardada");
 
     try {
-      console.log("🧪 Datos a enviarEmailsReserva:", {
+      console.log("📧 Enviando emails con:", {
         nombreCliente: nombreUsuario,
         emailCliente: emailUsuario,
         nombreTerapeuta: terapeuta.nombre,
