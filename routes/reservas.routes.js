@@ -7,6 +7,7 @@ const { enviarEmailsReserva } = require("../utils/emailSender");
 
 router.post("/", async (req, res) => {
   try {
+    console.log("📩 req.body:", req.body);
     const { servicioId, fecha, hora, nombreUsuario, emailUsuario, mensaje } = req.body;
 
     const servicio = await Servicio.findById(servicioId).lean();
