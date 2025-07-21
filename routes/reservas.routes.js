@@ -17,6 +17,11 @@ router.post("/", async (req, res) => {
       mensaje
     } = req.body;
 
+    console.log("✅ Campos desestructurados:", {
+  nombreUsuario,
+  emailUsuario,
+});
+
     const servicio = await Servicio.findById(servicioId).lean();
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
 
