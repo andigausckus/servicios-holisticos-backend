@@ -1,21 +1,18 @@
 const mongoose = require("mongoose");
 
 const reservaSchema = new mongoose.Schema({
-  servicioId: { type: mongoose.Schema.Types.ObjectId, ref: "Servicio", required: true },
+  usuarioId: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true },
   terapeutaId: { type: mongoose.Schema.Types.ObjectId, ref: "Terapeuta", required: true },
-  usuarioNombre: { type: String, required: true },
-  usuarioEmail: { type: String, required: true },
-  usuarioTelefono: { type: String, required: true },
-  fechaReserva: { type: String, required: true },
-  horaReserva: { type: String, required: true },
-  precio: { type: Number, required: true },
-  plataforma: { type: String },
-
-  estado: { type: String, default: "confirmada" },
-  paymentId: { type: String },        // 🆕 ID del pago en MP
-  preferenceId: { type: String },     // 🆕 ID de preferencia
-
-  creadoEn: { type: Date, default: Date.now },
+  servicioId: { type: mongoose.Schema.Types.ObjectId, ref: "Servicio", required: true },
+  fecha: { type: String, required: true },
+  hora: { type: String, required: true },
+  estado: {
+    type: String,
+    enum: ["en_proceso", "pendiente_de_aprobacion", "confirmada", "cancelada"],
+    default: "en_proceso",
+  },
+  creadaEn: { type: Date, default: Date.now },
+  comprobanteUrl: { type: String, default: "" },
 });
 
 module.exports = mongoose.model("Reserva", reservaSchema);
