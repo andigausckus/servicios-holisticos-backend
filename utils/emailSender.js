@@ -24,6 +24,12 @@ async function enviarEmailsReserva({
   duracion,
   precio,
 }) {
+  console.log("🧪 Datos recibidos para enviarEmailsReserva:", {
+  emailCliente,
+  emailTerapeuta,
+  nombreCliente,
+  nombreTerapeuta,
+});
   const emailAdmin = process.env.EMAIL_ADMIN || "notificaciones@serviciosholisticos.com.ar";
   const asunto = "💖 Nueva sesión confirmada - Servicios Holísticos";
 
