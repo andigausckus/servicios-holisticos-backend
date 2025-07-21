@@ -30,6 +30,7 @@ router.post("/", async (req, res) => {
     console.log("✅ Reserva guardada");
 
     try {
+      console.log("📧 emailCliente:", emailUsuario);
       await enviarEmailsReserva({
         nombreCliente: nombreUsuario,
         emailCliente: emailUsuario,
