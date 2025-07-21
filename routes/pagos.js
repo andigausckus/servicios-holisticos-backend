@@ -121,25 +121,29 @@ router.post("/webhook", async (req, res) => {
         const yaExiste = await Reserva.findOne({ paymentId: payment.id });
         if (yaExiste) return res.sendStatus(200);
 
-        const nuevaReserva = new Reserva({
-          servicioId,
-          terapeutaId,
-          usuarioNombre: payer.name || "Sin nombre",
-          usuarioEmail: payer.email,
-          usuarioTelefono: payer.phone?.number || "No especificado",
-          fechaReserva,
-          horaReserva,
-          precio: payment.transaction_amount || 0,
-          plataforma,
-          estado: "confirmada",
-          paymentId: payment.id,
-          preferenceId: preference_id,
-        });
+        // Buscar terapeuta en la base de datos
+const terapeuta = await Terapeuta.findById(terapeutaId);
 
-        await nuevaReserva.save();
+// Crear la nueva reserva confirmada
+const nuevaReserva = new Reserva({
+  servicioId,
+  terapeutaId,
+  usuarioNombre: payer.name || "Sin nombre",
+  usuarioEmail: payer.email,
+  usuarioTelefono: payer.phone?.number || "No especificado",
+  fechaReserva,
+  horaReserva,
+  precio: payment.transaction_amount || 0,
+  plataforma,
+  estado: "confirmada",
+  paymentId: payment.id,
+  preferenceId: preference_id,
+});
 
-        // 🟣 Enviar emails
-        await enviarEmailsReserva(nuevaReserva);
+await nuevaReserva.save();
+
+// Enviar emails
+await enviarEmailsReserva(nuevaReserva, terapeuta);
 
         // Eliminar bloqueo fijo (si existiera)
         await Bloqueo.findOneAndDelete({
