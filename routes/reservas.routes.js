@@ -10,12 +10,17 @@ router.post("/", async (req, res) => {
     console.log("📩 req.body:", req.body);
     const {
   servicioId,
-  fechaReserva: fecha,
-  horaReserva: hora,
-  usuarioNombre: nombreUsuario,
-  usuarioEmail: emailUsuario,
+  fechaReserva,
+  horaReserva,
+  usuarioNombre,
+  usuarioEmail,
   mensaje
 } = req.body;
+
+const fecha = fechaReserva;
+const hora = horaReserva;
+const nombreUsuario = usuarioNombre || "Cliente sin nombre";
+const emailUsuario = usuarioEmail || "cliente@ejemplo.com";
 
     const servicio = await Servicio.findById(servicioId).lean();
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
