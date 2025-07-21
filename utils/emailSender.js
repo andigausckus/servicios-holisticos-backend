@@ -1,12 +1,12 @@
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.zoho.com", // ✅ Usamos servidor SMTP oficial de Zoho
+  host: "smtp.zoho.com",
   port: 465,
   secure: true,
   auth: {
     user: "notificaciones@serviciosholisticos.com.ar",
-    pass: process.env.EMAIL_PASS, // Asegurate de usar una contraseña de aplicación
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -81,7 +81,7 @@ async function enviarEmailsReserva({
     });
     console.log("✅ Email terapeuta enviado");
 
-    // 🚫 Comentar temporalmente el envío al admin para descartar error:
+    // Comentado temporalmente para evitar errores
     /*
     await transporter.sendMail({
       from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
@@ -91,10 +91,11 @@ async function enviarEmailsReserva({
     });
     console.log("✅ Email admin enviado");
     */
-    
+
   } catch (error) {
     console.error("❌ Error al enviar alguno de los emails:", error);
     throw error;
   }
+}
 
 module.exports = { enviarEmailsReserva };
