@@ -81,6 +81,8 @@ async function enviarEmailsReserva({
     });
     console.log("✅ Email terapeuta enviado");
 
+    // 🚫 Comentar temporalmente el envío al admin para descartar error:
+    /*
     await transporter.sendMail({
       from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
       to: emailAdmin,
@@ -88,10 +90,11 @@ async function enviarEmailsReserva({
       html: cuerpoAdmin,
     });
     console.log("✅ Email admin enviado");
+    */
+    
   } catch (error) {
     console.error("❌ Error al enviar alguno de los emails:", error);
     throw error;
   }
-}
 
 module.exports = { enviarEmailsReserva };
