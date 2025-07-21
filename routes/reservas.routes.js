@@ -8,19 +8,20 @@ const { enviarEmailsReserva } = require("../utils/emailSender");
 router.post("/", async (req, res) => {
   try {
     console.log("📩 req.body:", req.body);
+
     const {
       servicioId,
       fechaReserva: fecha,
       horaReserva: hora,
-      usuarioNombre: nombreUsuario,
-      usuarioEmail: emailUsuario,
+      nombre: nombreUsuario,
+      email: emailUsuario,
       mensaje
     } = req.body;
 
     console.log("✅ Campos desestructurados:", {
-  nombreUsuario,
-  emailUsuario,
-});
+      nombreUsuario,
+      emailUsuario,
+    });
 
     const servicio = await Servicio.findById(servicioId).lean();
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
@@ -42,23 +43,19 @@ router.post("/", async (req, res) => {
     await nuevaReserva.save();
     console.log("✅ Reserva guardada");
 
-    // EMAILS
-    console.log("📧 Enviando emails con:", {
-      nombreCliente: nombreUsuario,
-      emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta.nombre,
-      emailTerapeuta: terapeuta.email,
-    });
-
-    console.log("🔍 Terapeuta encontrado:", terapeuta);
-    console.log("🔍 Reserva encontrada:", nuevaReserva);
-
-    if (!terapeuta || !nuevaReserva) {
-      console.error("❌ No se encontró terapeuta o reserva");
-      return res.status(400).json({ error: "Datos incompletos para enviar emails" });
-    }
-
     try {
+      console.log("📧 Enviando emails con:", {
+        nombreCliente: nombreUsuario,
+        emailCliente: emailUsuario,
+        nombreTerapeuta: terapeuta.nombre,
+        emailTerapeuta: terapeuta.email,
+      });
+
+      if (!terapeuta || !nombreUsuario || !emailUsuario) {
+        console.error("❌ Faltan datos para enviar emails");
+        return res.status(400).json({ error: "Datos incompletos para enviar emails" });
+      }
+
       await enviarEmailsReserva({
         nombreCliente: nombreUsuario,
         emailCliente: emailUsuario,
@@ -84,7 +81,7 @@ router.post("/", async (req, res) => {
 
   } catch (error) {
     console.error("❌ Error al crear reserva:", error);
-    res.status(500).json({ error: "Error al crear reserva" });
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
