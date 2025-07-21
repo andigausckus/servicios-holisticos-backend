@@ -13,14 +13,14 @@ router.post("/", async (req, res) => {
       servicioId,
       fechaReserva: fecha,
       horaReserva: hora,
-      nombre: nombreUsuario,
-      email: emailUsuario,
+      nombre: usuarioNombre,
+      email: usuarioEmail,
       mensaje
     } = req.body;
 
     console.log("✅ Campos desestructurados:", {
-      nombreUsuario,
-      emailUsuario,
+      usuarioNombre,
+      usuarioEmail,
     });
 
     const servicio = await Servicio.findById(servicioId).lean();
@@ -32,8 +32,10 @@ router.post("/", async (req, res) => {
     const nuevaReserva = new Reserva({
       servicioId,
       terapeutaId: terapeuta._id,
-      nombreUsuario,
-      emailUsuario,
+      usuarioNombre,
+      usuarioEmail,
+      terapeutaNombre: terapeuta.nombre,
+      terapeutaEmail: terapeuta.email,
       fecha,
       hora,
       mensaje,
@@ -45,20 +47,20 @@ router.post("/", async (req, res) => {
 
     try {
       console.log("📧 Enviando emails con:", {
-        nombreCliente: nombreUsuario,
-        emailCliente: emailUsuario,
+        nombreCliente: usuarioNombre,
+        emailCliente: usuarioEmail,
         nombreTerapeuta: terapeuta.nombre,
         emailTerapeuta: terapeuta.email,
       });
 
-      if (!terapeuta || !nombreUsuario || !emailUsuario) {
+      if (!terapeuta || !usuarioNombre || !usuarioEmail) {
         console.error("❌ Faltan datos para enviar emails");
         return res.status(400).json({ error: "Datos incompletos para enviar emails" });
       }
 
       await enviarEmailsReserva({
-        nombreCliente: nombreUsuario,
-        emailCliente: emailUsuario,
+        nombreCliente: usuarioNombre,
+        emailCliente: usuarioEmail,
         nombreTerapeuta: terapeuta.nombre,
         emailTerapeuta: terapeuta.email,
         whatsappTerapeuta: terapeuta.whatsapp,
