@@ -25,11 +25,21 @@ async function enviarEmailsReserva({
   precio,
 }) {
   console.log("🧪 Datos recibidos para enviarEmailsReserva:", {
-  emailCliente,
-  emailTerapeuta,
-  nombreCliente,
-  nombreTerapeuta,
-});
+    emailCliente,
+    emailTerapeuta,
+    nombreCliente,
+    nombreTerapeuta,
+  });
+
+  // Validación previa
+  if (!emailCliente || !emailTerapeuta) {
+    console.error("❌ Faltan datos para enviar el correo:", {
+      emailCliente,
+      emailTerapeuta,
+    });
+    return;
+  }
+
   const emailAdmin = process.env.EMAIL_ADMIN || "notificaciones@serviciosholisticos.com.ar";
   const asunto = "💖 Nueva sesión confirmada - Servicios Holísticos";
 
@@ -44,11 +54,12 @@ async function enviarEmailsReserva({
       <li><strong>Duración:</strong> ${duracion}</li>
       <li><strong>Monto abonado:</strong> $${precio}</li>
     </ul>
+    <p>En breve el/la terapeuta se pondrá en contacto con vos para coordinar detalles 🙌</p>
   `;
 
   const cuerpoTerapeuta = `
     <p>👋 Hola ${nombreTerapeuta},</p>
-    <p>${nombreCliente} reservó una sesión con vos:</p>
+    <p><strong>${nombreCliente}</strong> reservó una sesión con vos:</p>
     <ul>
       <li><strong>Cliente:</strong> ${nombreCliente} (${emailCliente})</li>
       <li><strong>Servicio:</strong> ${nombreServicio}</li>
@@ -56,6 +67,7 @@ async function enviarEmailsReserva({
       <li><strong>Hora:</strong> ${hora}</li>
       <li><strong>Monto recibido:</strong> $${precio}</li>
     </ul>
+    <p>Por favor, contactalo/a a la brevedad para confirmar.</p>
   `;
 
   const cuerpoAdmin = `
@@ -71,23 +83,25 @@ async function enviarEmailsReserva({
   `;
 
   try {
+    // Email para el cliente
     await transporter.sendMail({
       from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
       to: emailCliente,
       subject: asunto,
       html: cuerpoCliente,
     });
-    console.log("✅ Email cliente enviado");
+    console.log("✅ Email al cliente enviado");
 
+    // Email para el terapeuta
     await transporter.sendMail({
       from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
       to: emailTerapeuta,
       subject: asunto,
       html: cuerpoTerapeuta,
     });
-    console.log("✅ Email terapeuta enviado");
+    console.log("✅ Email al terapeuta enviado");
 
-    // Comentado temporalmente para evitar errores
+    // Email al admin (opcional)
     /*
     await transporter.sendMail({
       from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
@@ -95,7 +109,7 @@ async function enviarEmailsReserva({
       subject: "📥 Nueva reserva confirmada",
       html: cuerpoAdmin,
     });
-    console.log("✅ Email admin enviado");
+    console.log("✅ Email al admin enviado");
     */
 
   } catch (error) {
