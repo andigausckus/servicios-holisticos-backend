@@ -37,44 +37,50 @@ router.post("/", async (req, res) => {
     await nuevaReserva.save();
     console.log("✅ Reserva guardada");
 
+    // EMAILS
+    console.log("📧 Enviando emails con:", {
+      nombreCliente: nombreUsuario,
+      emailCliente: emailUsuario,
+      nombreTerapeuta: terapeuta.nombre,
+      emailTerapeuta: terapeuta.email,
+    });
+
+    console.log("🔍 Terapeuta encontrado:", terapeuta);
+    console.log("🔍 Reserva encontrada:", nuevaReserva);
+
+    if (!terapeuta || !nuevaReserva) {
+      console.error("❌ No se encontró terapeuta o reserva");
+      return res.status(400).json({ error: "Datos incompletos para enviar emails" });
+    }
+
     try {
-      console.log("📧 Enviando emails con:", {
+      await enviarEmailsReserva({
         nombreCliente: nombreUsuario,
         emailCliente: emailUsuario,
         nombreTerapeuta: terapeuta.nombre,
         emailTerapeuta: terapeuta.email,
+        whatsappTerapeuta: terapeuta.whatsapp,
+        bancoTerapeuta: terapeuta.banco,
+        cbuTerapeuta: terapeuta.cbu,
+        nombreServicio: servicio.titulo,
+        fecha,
+        hora,
+        duracion: servicio.duracion || "60min",
+        precio: servicio.precio || 0,
       });
 
-      console.log("🔍 Terapeuta encontrado:", terapeuta);
-console.log("🔍 Reserva encontrada:", reserva);
+      console.log("✅ Emails de reserva enviados correctamente");
+      res.status(200).json({ mensaje: "Reserva registrada con éxito" });
 
-if (!terapeuta || !reserva) {
-  console.error("❌ No se encontró terapeuta o reserva");
-  return res.status(400).json({ error: "Datos incompletos para enviar emails" });
-}
+    } catch (error) {
+      console.error("❌ Error al enviar emails de reserva:", error);
+      res.status(500).json({ error: "Error al enviar emails" });
+    }
 
-try {
-  await enviarEmailsReserva({
-    nombreCliente: nombreUsuario,
-    emailCliente: emailUsuario,
-    nombreTerapeuta: terapeuta.nombre,
-    emailTerapeuta: terapeuta.email,
-    whatsappTerapeuta: terapeuta.whatsapp,
-    bancoTerapeuta: terapeuta.banco,
-    cbuTerapeuta: terapeuta.cbu,
-    nombreServicio: servicio.titulo,
-    fecha,
-    hora,
-    duracion: servicio.duracion || "60min",
-    precio: servicio.precio || 0,
-  });
-
-  console.log("✅ Emails de reserva enviados correctamente");
-  res.status(200).json({ mensaje: "Reserva registrada con éxito" });
-
-} catch (error) {
-  console.error("❌ Error al enviar emails de reserva:", error);
-  res.status(500).json({ error: "Error al enviar emails" });
-}
+  } catch (error) {
+    console.error("❌ Error al crear reserva:", error);
+    res.status(500).json({ error: "Error al crear reserva" });
+  }
+});
 
 module.exports = router;
