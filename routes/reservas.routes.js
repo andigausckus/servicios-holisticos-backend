@@ -7,20 +7,21 @@ const { enviarEmailsReserva } = require("../utils/emailSender");
 
 router.post("/", async (req, res) => {
   try {
-    console.log("📩 req.body:", req.body);
-    const {
-  servicioId,
-  fechaReserva,
-  horaReserva,
-  usuarioNombre,
-  usuarioEmail,
-  mensaje
-} = req.body;
+    console.log("📩 req.body:", req.body); // muestra todo lo recibido
 
-const fecha = fechaReserva;
-const hora = horaReserva;
-const nombreUsuario = usuarioNombre || "Cliente sin nombre";
-const emailUsuario = usuarioEmail || "cliente@ejemplo.com";
+    const {
+      servicioId,
+      fechaReserva,
+      horaReserva,
+      usuarioNombre,
+      usuarioEmail,
+      mensaje
+    } = req.body;
+
+    const fecha = fechaReserva;
+    const hora = horaReserva;
+    const nombreUsuario = usuarioNombre || "Cliente sin nombre";
+    const emailUsuario = usuarioEmail || "cliente@ejemplo.com";
 
     const servicio = await Servicio.findById(servicioId).lean();
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
@@ -43,7 +44,13 @@ const emailUsuario = usuarioEmail || "cliente@ejemplo.com";
     console.log("✅ Reserva guardada");
 
     try {
-      console.log("📧 emailCliente:", emailUsuario);
+      console.log("🧪 Datos a enviarEmailsReserva:", {
+        nombreCliente: nombreUsuario,
+        emailCliente: emailUsuario,
+        nombreTerapeuta: terapeuta.nombre,
+        emailTerapeuta: terapeuta.email,
+      });
+
       await enviarEmailsReserva({
         nombreCliente: nombreUsuario,
         emailCliente: emailUsuario,
@@ -58,6 +65,7 @@ const emailUsuario = usuarioEmail || "cliente@ejemplo.com";
         duracion: servicio.duracion || "60min",
         precio: servicio.precio || 0,
       });
+
       console.log("✅ Emails de reserva enviados correctamente");
     } catch (error) {
       console.error("❌ Error al enviar emails de reserva:", error);
