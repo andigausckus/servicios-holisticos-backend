@@ -8,7 +8,14 @@ const { enviarEmailsReserva } = require("../utils/emailSender");
 router.post("/", async (req, res) => {
   try {
     console.log("📩 req.body:", req.body);
-    const { servicioId, fecha, hora, nombreUsuario, emailUsuario, mensaje } = req.body;
+    const {
+  servicioId,
+  fechaReserva: fecha,
+  horaReserva: hora,
+  usuarioNombre: nombreUsuario,
+  usuarioEmail: emailUsuario,
+  mensaje
+} = req.body;
 
     const servicio = await Servicio.findById(servicioId).lean();
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
