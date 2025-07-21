@@ -87,4 +87,36 @@ router.post("/", async (req, res) => {
   }
 });
 
+// Subir comprobante
+router.post("/:id/comprobante", async (req, res) => {
+  const { comprobanteUrl } = req.body;
+  try {
+    const reserva = await Reserva.findById(req.params.id);
+    if (!reserva) return res.status(404).json({ mensaje: "Reserva no encontrada" });
+
+    reserva.comprobanteUrl = comprobanteUrl;
+    reserva.estado = "pendiente_de_aprobacion";
+    await reserva.save();
+
+    res.status(200).json({ mensaje: "Comprobante cargado con éxito", reserva });
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al subir comprobante", error });
+  }
+});
+
+// Confirmar manualmente (admin)
+router.post("/:id/confirmar", async (req, res) => {
+  try {
+    const reserva = await Reserva.findById(req.params.id);
+    if (!reserva) return res.status(404).json({ mensaje: "Reserva no encontrada" });
+
+    reserva.estado = "confirmada";
+    await reserva.save();
+
+    res.status(200).json({ mensaje: "Reserva confirmada", reserva });
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al confirmar", error });
+  }
+});
+
 module.exports = router;
