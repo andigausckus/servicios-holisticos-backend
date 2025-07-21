@@ -90,16 +90,23 @@ router.post("/", async (req, res) => {
 // Subir comprobante
 router.post("/:id/comprobante", async (req, res) => {
   const { comprobanteUrl } = req.body;
+  console.log("📥 Comprobante recibido:", comprobanteUrl);
+
   try {
     const reserva = await Reserva.findById(req.params.id);
-    if (!reserva) return res.status(404).json({ mensaje: "Reserva no encontrada" });
+    if (!reserva) {
+      console.log("❌ Reserva no encontrada:", req.params.id);
+      return res.status(404).json({ mensaje: "Reserva no encontrada" });
+    }
 
     reserva.comprobanteUrl = comprobanteUrl;
     reserva.estado = "pendiente_de_aprobacion";
     await reserva.save();
 
+    console.log("✅ Reserva actualizada con comprobante");
     res.status(200).json({ mensaje: "Comprobante cargado con éxito", reserva });
   } catch (error) {
+    console.error("❌ Error al subir comprobante:", error);
     res.status(500).json({ mensaje: "Error al subir comprobante", error });
   }
 });
