@@ -54,8 +54,13 @@ router.post("/", verificarToken, async (req, res) => {
     await nuevoServicio.save();
 
     await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
-      $push: { servicios: nuevoServicio._id },
-    });
+  $push: {
+    servicios: {
+      _id: nuevoServicio._id,
+      titulo: nuevoServicio.titulo
+    }
+  },
+});
 
     res.status(201).json({ id: nuevoServicio._id });
   } catch (err) {
