@@ -18,7 +18,11 @@ const crearReservaConComprobante = async (req, res) => {
     } = req.body;
 
     const servicio = await Servicio.findById(servicioId).lean();
-    const servicioObjectId = new mongoose.Types.ObjectId(servicioId); // ✅ Conversión necesaria
+    const servicioObjectId = new mongoose.Types.ObjectId(servicioId);
+
+const terapeuta = await Terapeuta.findOne({
+  servicios: { $elemMatch: { _id: servicioObjectId } },
+}).lean();
     const terapeuta = await Terapeuta.findOne({ "servicios._id": servicioObjectId }).lean();
 
     if (!servicio || !terapeuta) {
