@@ -126,4 +126,16 @@ router.post("/:id/confirmar", async (req, res) => {
   }
 });
 
+const {
+  crearReservaConComprobante,
+  obtenerReservas,
+  aprobarReserva,
+  cancelarReserva,
+} = require("../controllers/reservasController");
+
+router.post("/con-comprobante", crearReservaConComprobante);
+router.get("/", obtenerReservas);
+router.patch("/:id/aprobar", aprobarReserva);
+router.patch("/:id/cancelar", cancelarReserva);
+
 module.exports = router;
