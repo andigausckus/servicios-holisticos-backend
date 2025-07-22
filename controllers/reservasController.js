@@ -18,16 +18,17 @@ const crearReservaConComprobante = async (req, res) => {
     } = req.body;
 
     const servicio = await Servicio.findById(servicioId).lean();
-    const servicioObjectId = new mongoose.Types.ObjectId(servicioId);
+const servicioObjectId = new mongoose.Types.ObjectId(servicioId);
 
 const terapeuta = await Terapeuta.findOne({
   servicios: { $elemMatch: { _id: servicioObjectId } },
 }).lean();
-    const terapeuta = await Terapeuta.findOne({ "servicios._id": servicioObjectId }).lean();
 
-    if (!servicio || !terapeuta) {
-      return res.status(404).json({ error: "Servicio o terapeuta no encontrado" });
-    }
+if (!servicio || !terapeuta) {
+  return res
+    .status(404)
+    .json({ error: "Servicio o terapeuta no encontrado" });
+}
 
     const nuevaReserva = new Reserva({
       servicioId,
