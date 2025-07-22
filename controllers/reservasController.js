@@ -2,6 +2,7 @@ const Reserva = require("../models/Reserva");
 const Terapeuta = require("../models/Terapeuta");
 const Servicio = require("../models/Servicio");
 const { enviarEmailsReserva } = require("../utils/emailSender");
+const mongoose = require("mongoose"); // asegurate de tener esto arriba
 
 // Crear reserva con comprobante
 const crearReservaConComprobante = async (req, res) => {
@@ -17,7 +18,8 @@ const crearReservaConComprobante = async (req, res) => {
     } = req.body;
 
     const servicio = await Servicio.findById(servicioId).lean();
-    const terapeuta = await Terapeuta.findById(servicio?.terapeutaId).lean();
+    const servicioObjectId = new mongoose.Types.ObjectId(servicioId); // ✅ Conversión necesaria
+    const terapeuta = await Terapeuta.findOne({ "servicios._id": servicioObjectId }).lean();
 
     if (!servicio || !terapeuta) {
       return res.status(404).json({ error: "Servicio o terapeuta no encontrado" });
