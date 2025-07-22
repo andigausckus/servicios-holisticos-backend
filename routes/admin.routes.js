@@ -3,6 +3,7 @@ const router = express.Router();
 const Terapeuta = require("../models/Terapeuta");
 const Servicio = require("../models/Servicio");
 const Resena = require("../models/Resena");
+const Reserva = require("../models/Reserva"); // ⬅️ Asegurate de importar el modelo
 
 // --- TERAPEUTAS ---
 
@@ -88,6 +89,41 @@ router.put("/aprobar-resena/:id", async (req, res) => {
   } catch (error) {
     console.error("❌ Error al actualizar reseña:", error);
     res.status(500).json({ mensaje: "Error al actualizar reseña", error });
+  }
+});
+
+// Obtener reservas en proceso (pagos no verificados aún)
+router.get("/reservas-pendientes", async (req, res) => {
+  try {
+    const pendientes = await Reserva.find({ estado: "en_proceso" })
+      .sort({ creadaEn: -1 })
+      .populate("terapeuta servicio");
+
+    res.json(pendientes);
+  } catch (error) {
+    console.error("❌ Error al obtener reservas pendientes:", error);
+    res.status(500).json({ mensaje: "Error al obtener reservas pendientes", error });
+  }
+});
+
+// Actualizar el estado de una reserva (confirmada o cancelada)
+router.put("/reserva/:id", async (req, res) => {
+  try {
+    const { estado } = req.body;
+    const reserva = await Reserva.findByIdAndUpdate(
+      req.params.id,
+      { estado },
+      { new: true }
+    ).populate("terapeuta servicio");
+
+    if (!reserva) {
+      return res.status(404).json({ mensaje: "Reserva no encontrada" });
+    }
+
+    res.json({ mensaje: "✅ Estado actualizado", reserva });
+  } catch (error) {
+    console.error("❌ Error al actualizar reserva:", error);
+    res.status(500).json({ mensaje: "Error al actualizar reserva", error });
   }
 });
 
