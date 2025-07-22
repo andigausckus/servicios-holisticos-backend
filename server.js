@@ -6,8 +6,9 @@ require("dotenv").config();
 const app = express();
 
 // ✅ Middlewares
-app.use(cors());
 app.use(express.json());
+app.use(cors());
+origin: "https://serviciosholisticos.com.ar"
 
 // ✅ Conexión a MongoDB
 mongoose
