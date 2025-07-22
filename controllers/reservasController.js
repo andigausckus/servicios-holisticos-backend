@@ -17,7 +17,7 @@ const crearReservaConComprobante = async (req, res) => {
     } = req.body;
 
     const servicio = await Servicio.findById(servicioId).lean();
-    const terapeuta = await Terapeuta.findOne({ "servicios._id": servicioId }).lean();
+    const terapeuta = await Terapeuta.findById(servicio?.terapeutaId).lean();
 
     if (!servicio || !terapeuta) {
       return res.status(404).json({ error: "Servicio o terapeuta no encontrado" });
