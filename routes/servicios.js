@@ -307,4 +307,35 @@ router.put("/:id/horarios", verificarToken, async (req, res) => {
   }
 });
 
+// ✅ Actualizar estado de un horario específico
+router.put("/actualizar-horario", async (req, res) => {
+  const { servicioId, fecha, hora, nuevoEstado } = req.body;
+
+  try {
+    const servicio = await Servicio.findById(servicioId);
+    if (!servicio) {
+      return res.status(404).json({ error: "Servicio no encontrado" });
+    }
+
+    const dia = servicio.horariosDisponibles.find((d) => d.fecha === fecha);
+    if (!dia) {
+      return res.status(404).json({ error: "Fecha no encontrada en horariosDisponibles" });
+    }
+
+    const horario = dia.horariosFijos.find((h) => h.desde === hora);
+    if (!horario) {
+      return res.status(404).json({ error: "Hora no encontrada en horariosFijos" });
+    }
+
+    horario.estado = nuevoEstado;
+
+    await servicio.save();
+
+    res.json({ ok: true, mensaje: "Estado del horario actualizado correctamente" });
+  } catch (error) {
+    console.error("❌ Error al actualizar horario:", error);
+    res.status(500).json({ error: "Error interno al actualizar horario" });
+  }
+});
+
 module.exports = router;
