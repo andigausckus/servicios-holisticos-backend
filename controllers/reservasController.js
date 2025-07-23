@@ -162,4 +162,5 @@ module.exports = {
   obtenerReservas,
   aprobarReserva,
   cancelarReserva,
+  crearReservaTemporal, // <-- nuevo
 };
