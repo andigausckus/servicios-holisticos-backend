@@ -11,7 +11,7 @@ const {
 router.post("/con-comprobante", crearReservaConComprobante);
 
 // Crear reserva temporal sin comprobante
-const { crearReservaTemporal } = require("../controllers/reservasTemporales.controller");
+const { crearReservaTemporal } = require("../controllers/reservasController");
 router.post("/temporal", crearReservaTemporal);
 
 // Obtener todas las reservas (admin)
