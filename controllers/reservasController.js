@@ -124,6 +124,39 @@ const cancelarReserva = async (req, res) => {
   }
 };
 
+// Crear reserva temporal al hacer clic en "Reservar sesión"
+const crearReservaTemporal = async (req, res) => {
+  try {
+    const { servicioId, fecha, hora } = req.body;
+
+    // Verificamos si ya hay una reserva activa para ese servicio/fecha/hora
+    const reservaExistente = await Reserva.findOne({
+      servicioId,
+      fecha,
+      hora,
+      estado: { $in: ["en_proceso", "pendiente_de_aprobacion", "confirmada"] },
+    });
+
+    if (reservaExistente) {
+      return res.status(409).json({ mensaje: "Ese horario ya fue reservado" });
+    }
+
+    const nuevaTemporal = new Reserva({
+      servicioId,
+      fecha,
+      hora,
+      estado: "en_proceso",
+      creadaEn: new Date(), // obligatorio para limpieza automática
+    });
+
+    await nuevaTemporal.save();
+    res.status(201).json({ ok: true, reservaId: nuevaTemporal._id });
+  } catch (error) {
+    console.error("❌ Error al crear reserva temporal:", error);
+    res.status(500).json({ error: "Error al crear reserva temporal" });
+  }
+};
+
 module.exports = {
   crearReservaConComprobante,
   obtenerReservas,
