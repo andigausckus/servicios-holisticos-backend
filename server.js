@@ -39,7 +39,7 @@ const bloqueosRouter = require("./routes/bloqueos");
 app.use("/api/terapeutas", terapeutasRoutes);
 app.use("/api/servicios", serviciosRoutes);
 app.use("/api/resenas", resenasRoutes);
-app.use("/api/reservas", reservasRoutes);
+app.use("/reservas", require("./routes/reservas.routes"));
 app.use("/api/pagos", pagosRoutes); // clave para que MercadoPago funcione
 app.use("/api/disponibilidad", rutaDisponibilidad);
 app.use("/api/mensaje-global", mensajeGlobalRoutes);
