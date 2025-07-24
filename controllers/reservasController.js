@@ -8,56 +8,37 @@ const mongoose = require("mongoose"); // asegurate de tener esto arriba
 const crearReservaConComprobante = async (req, res) => {
   try {
     const {
-      servicioId,
-      fecha,
-      hora,
+      reservaId, // ⚠️ ahora necesitamos este ID
       nombre,
       email,
       mensaje,
       comprobanteUrl,
     } = req.body;
-    
-console.log("📌 Buscando servicio con ID:", servicioId);
 
-const servicio = await Servicio.findById(servicioId).lean();
-if (!servicio) {
-  return res.status(404).json({ error: "Servicio no encontrado" });
-}
+    const reserva = await Reserva.findById(reservaId);
+    if (!reserva || reserva.estado !== "en_proceso") {
+      return res.status(404).json({ error: "Reserva temporal no encontrada o ya procesada" });
+    }
 
-const terapeuta = await Terapeuta.findOne({
-  $or: [
-    { servicios: servicio._id },
-    { 'servicios._id': servicio._id }
-  ]
-}).lean();
+    const servicio = await Servicio.findById(reserva.servicioId).lean();
+    const terapeuta = await Terapeuta.findById(reserva.terapeutaId).lean();
 
-if (!terapeuta) {
-  return res.status(404).json({ error: "Terapeuta no encontrado para este servicio" });
-}
+    if (!servicio || !terapeuta) {
+      return res.status(404).json({ error: "Datos incompletos" });
+    }
 
-console.log("✅ Servicio y terapeuta encontrados");
-    
-console.log("✅ Servicio encontrado:", servicio);
-    
-    const nuevaReserva = new Reserva({
-      servicioId,
-      terapeutaId: terapeuta._id,
-      usuarioNombre: nombre,
-      usuarioEmail: email,
-      terapeutaNombre: terapeuta.nombre,
-      terapeutaEmail: terapeuta.email,
-      fecha,
-      hora,
-      mensaje,
-      comprobanteUrl,
-      estado: "pendiente_de_aprobacion",
-    });
+    reserva.usuarioNombre = nombre;
+    reserva.usuarioEmail = email;
+    reserva.mensaje = mensaje;
+    reserva.comprobanteUrl = comprobanteUrl;
+    reserva.estado = "pendiente_de_aprobacion";
 
-    await nuevaReserva.save();
-    res.status(201).json({ ok: true, reservaId: nuevaReserva._id });
+    await reserva.save();
+
+    res.status(200).json({ ok: true, reservaId: reserva._id });
   } catch (error) {
-    console.error("❌ Error al crear reserva:", error);
-    res.status(500).json({ error: "Error al crear reserva con comprobante" });
+    console.error("❌ Error al actualizar reserva con comprobante:", error);
+    res.status(500).json({ error: "Error al procesar comprobante" });
   }
 };
 
