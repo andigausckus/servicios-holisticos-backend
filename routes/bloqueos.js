@@ -54,25 +54,26 @@ router.get("/todos", async (req, res) => {
       return res.status(400).json({ mensaje: "Faltan parámetros: servicioId, desde, hasta" });
     }
 
-    // Horarios bloqueados temporalmente
+    // Horarios bloqueados manualmente
     const bloqueos = await Bloqueo.find({
       servicioId,
       fecha: { $gte: desde, $lte: hasta },
     }).select("fecha hora");
 
-    // Reservas confirmadas
-    const reservasConfirmadas = await Reserva.find({
-  servicioId,
-  fechaReserva: { $gte: desde, $lte: hasta },
-  estado: "confirmada",
-}).select("fechaReserva horaReserva");
+    // Todas las reservas que deben bloquear el horario
+    const reservas = await Reserva.find({
+      servicioId,
+      fechaReserva: { $gte: desde, $lte: hasta },
+      estado: { $in: ["confirmada", "en_proceso", "pendiente_de_aprobacion"] },
+    }).select("fechaReserva horaReserva estado");
 
     res.json({
       bloqueos: bloqueos.map(b => ({ fecha: b.fecha, hora: b.hora })),
-      reservas: reservasConfirmadas.map(r => ({
-  fecha: r.fechaReserva,
-  hora: r.horaReserva,
-}))
+      reservas: reservas.map(r => ({
+        fecha: r.fechaReserva,
+        hora: r.horaReserva,
+        estado: r.estado,
+      }))
     });
   } catch (error) {
     console.error("❌ Error al obtener bloqueos y reservas:", error);
