@@ -111,10 +111,12 @@ const crearReservaTemporal = async (req, res) => {
     console.log("📥 Body recibido en reserva temporal:", req.body);
     const { servicioId, fecha, hora } = req.body;
 
+    // ✅ Validar ID
     if (!mongoose.Types.ObjectId.isValid(servicioId)) {
       return res.status(400).json({ error: "ID de servicio inválido" });
     }
 
+    // Verificar si ya hay una reserva en ese horario
     const reservaExistente = await Reserva.findOne({
       servicioId,
       fecha,
@@ -126,23 +128,31 @@ const crearReservaTemporal = async (req, res) => {
       return res.status(409).json({ mensaje: "Ese horario ya fue reservado" });
     }
 
-    const servicio = await Servicio.findById(servicioId).lean();
+    // Buscar el servicio y obtener el terapeuta
+    const servicio = await Servicio.findById(servicioId).lean(); // más eficiente
     if (!servicio) {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
+    // Compatibilidad: terapeuta puede estar en `terapeutaId` o `terapeuta`
+    const terapeutaId = servicio.terapeutaId || servicio.terapeuta?._id;
+
+    if (!terapeutaId) {
+      return res.status(500).json({ error: "El servicio no tiene terapeuta asociado" });
+    }
+
     const nuevaTemporal = new Reserva({
       servicioId,
-      terapeutaId: servicio.terapeutaId,
+      terapeutaId,
       fecha,
       hora,
       estado: "en_proceso",
       creadaEn: new Date(),
-      expiracion: new Date(Date.now() + 1 * 60 * 1000), // ✅ AGREGADO
     });
 
     await nuevaTemporal.save();
     res.status(201).json({ ok: true, reservaId: nuevaTemporal._id });
+
   } catch (error) {
     console.error("❌ Error al crear reserva temporal:", error);
     res.status(500).json({ error: "Error al crear reserva temporal" });
