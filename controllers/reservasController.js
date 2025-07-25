@@ -108,6 +108,7 @@ const cancelarReserva = async (req, res) => {
 // Crear reserva temporal al hacer clic en "Reservar sesión"
 const crearReservaTemporal = async (req, res) => {
   try {
+    console.log("📥 Body recibido en reserva temporal:", req.body);
     const { servicioId, fecha, hora } = req.body;
 
     // Verificar si ya hay una reserva activa en ese horario
