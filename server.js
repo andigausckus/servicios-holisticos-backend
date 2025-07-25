@@ -8,7 +8,11 @@ const app = express();
 // ✅ Middlewares
 app.use(express.json());
 app.use(cors({
-  origin: ["https://serviciosholisticos.com.ar", "http://localhost:3000"]
+  origin: [
+    "https://serviciosholisticos.com.ar",
+    "http://localhost:3000",
+    "https://3208886a-de73-4516-9666-69429cbec340-00-2a93ubjurfokp.janeway.replit.dev"
+  ]
 }));
 
 // ✅ Conexión a MongoDB
