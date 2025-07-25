@@ -110,7 +110,7 @@ const crearReservaTemporal = async (req, res) => {
   try {
     const { servicioId, fecha, hora } = req.body;
 
-    // Verificamos si ya hay una reserva activa para ese servicio/fecha/hora
+    // Verificar si ya hay una reserva activa en ese horario
     const reservaExistente = await Reserva.findOne({
       servicioId,
       fecha,
@@ -122,12 +122,19 @@ const crearReservaTemporal = async (req, res) => {
       return res.status(409).json({ mensaje: "Ese horario ya fue reservado" });
     }
 
+    // Obtener el terapeutaId desde el servicio
+    const servicio = await Servicio.findById(servicioId);
+    if (!servicio) {
+      return res.status(404).json({ error: "Servicio no encontrado" });
+    }
+
     const nuevaTemporal = new Reserva({
       servicioId,
+      terapeutaId: servicio.terapeutaId, // <--- acá el fix
       fecha,
       hora,
       estado: "en_proceso",
-      creadaEn: new Date(), // obligatorio para limpieza automática
+      creadaEn: new Date(),
     });
 
     await nuevaTemporal.save();
