@@ -63,15 +63,15 @@ router.get("/todos", async (req, res) => {
     // Todas las reservas que deben bloquear el horario
     const reservas = await Reserva.find({
       servicioId,
-      fechaReserva: { $gte: desde, $lte: hasta },
+      fecha: { $gte: desde, $lte: hasta },
       estado: { $in: ["confirmada", "en_proceso", "pendiente_de_aprobacion"] },
-    }).select("fechaReserva horaReserva estado");
+    }).select("fecha hora estado");
 
     res.json({
       bloqueos: bloqueos.map(b => ({ fecha: b.fecha, hora: b.hora })),
       reservas: reservas.map(r => ({
-        fecha: r.fechaReserva,
-        hora: r.horaReserva,
+        fecha: r.fecha,
+        hora: r.hora,
         estado: r.estado,
       }))
     });
