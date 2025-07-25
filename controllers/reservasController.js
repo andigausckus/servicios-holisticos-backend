@@ -126,7 +126,7 @@ const crearReservaTemporal = async (req, res) => {
       return res.status(409).json({ mensaje: "Ese horario ya fue reservado" });
     }
 
-    const servicio = await Servicio.findById(servicioId);
+    const servicio = await Servicio.findById(servicioId).lean();
     if (!servicio) {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
