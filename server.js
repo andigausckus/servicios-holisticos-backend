@@ -8,7 +8,7 @@ const app = express();
 // ✅ Middlewares
 app.use(express.json());
 app.use(cors({
-  origin: "https://serviciosholisticos.com.ar"
+  origin: ["https://serviciosholisticos.com.ar", "http://localhost:3000"]
 }));
 
 // ✅ Conexión a MongoDB
