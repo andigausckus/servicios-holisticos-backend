@@ -111,6 +111,11 @@ const crearReservaTemporal = async (req, res) => {
     console.log("📥 Body recibido en reserva temporal:", req.body);
     const { servicioId, fecha, hora } = req.body;
 
+    // ✅ Validación extra: que servicioId sea válido
+    if (!mongoose.Types.ObjectId.isValid(servicioId)) {
+      return res.status(400).json({ error: "ID de servicio inválido" });
+    }
+
     // Verificar si ya hay una reserva activa en ese horario
     const reservaExistente = await Reserva.findOne({
       servicioId,
