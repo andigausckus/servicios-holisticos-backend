@@ -44,7 +44,7 @@ app.use("/api/pagos", pagosRoutes); // clave para que MercadoPago funcione
 app.use("/api/disponibilidad", rutaDisponibilidad);
 app.use("/api/mensaje-global", mensajeGlobalRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/bloqueos", bloqueosRouter);
+app.use("/api/bloqueos", require("./routes/bloqueos"));
 
 
 // ✅ Ruta de prueba
