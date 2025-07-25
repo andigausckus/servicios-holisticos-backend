@@ -7,8 +7,11 @@ const app = express();
 
 // ✅ Middlewares
 app.use(express.json());
-app.use(cors());
-origin: "https://serviciosholisticos.com.ar"
+app.use(
+  cors({
+    origin: "https://serviciosholisticos.com.ar",
+  })
+);
 
 // ✅ Conexión a MongoDB
 mongoose
@@ -34,18 +37,16 @@ const mensajeGlobalRoutes = require("./routes/mensajeGlobal.routes");
 const adminRoutes = require("./routes/admin.routes");
 const bloqueosRouter = require("./routes/bloqueos");
 
-
-// ✅ Uso de rutas
+// ✅ Uso de rutas con prefijo /api
 app.use("/api/terapeutas", terapeutasRoutes);
 app.use("/api/servicios", serviciosRoutes);
 app.use("/api/resenas", resenasRoutes);
-app.use("/api/reservas", require("./routes/reservas.routes"));
+app.use("/api/reservas", reservasRoutes);
 app.use("/api/pagos", pagosRoutes); // clave para que MercadoPago funcione
 app.use("/api/disponibilidad", rutaDisponibilidad);
 app.use("/api/mensaje-global", mensajeGlobalRoutes);
 app.use("/api/admin", adminRoutes);
-app.use("/api/bloqueos", require("./routes/bloqueos"));
-
+app.use("/api/bloqueos", bloqueosRouter);
 
 // ✅ Ruta de prueba
 app.get("/", (req, res) => {
