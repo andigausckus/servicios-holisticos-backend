@@ -144,4 +144,35 @@ router.get("/temporales", async (req, res) => {
   }
 });
 
+// Obtener expiración de un bloqueo temporal
+router.get("/temporales/expiracion", async (req, res) => {
+  const { servicioId, fecha, hora } = req.query;
+  console.log("📅 Buscando bloqueo para:", { servicioId, fecha, hora });
+
+  if (!servicioId || !fecha || !hora) {
+    return res.status(400).json({ error: "Faltan parámetros" });
+  }
+
+  try {
+    const ahora = new Date();
+
+    // Buscar solo si aún está vigente
+    const bloqueo = await BloqueoTemporal.findOne({
+      servicioId,
+      fecha,
+      hora,
+      expiracion: { $gt: ahora },
+    });
+
+    if (!bloqueo) {
+      return res.status(404).json({ error: "Bloqueo no encontrado o expirado" });
+    }
+
+    res.json({ expiracion: bloqueo.expiracion });
+  } catch (err) {
+    console.error("❌ Error al buscar expiración:", err);
+    res.status(500).json({ error: "Error al buscar la expiración" });
+  }
+});
+
 module.exports = router;
