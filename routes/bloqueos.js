@@ -102,8 +102,9 @@ router.post("/temporales", async (req, res) => {
     // Verificar si ya existe uno activo
     const existente = await BloqueoTemporal.findOne({ servicioId, fecha, hora });
     if (existente && existente.expiracion > ahora) {
-      return res.status(409).json({ error: "Ya existe un bloqueo activo para ese horario" });
-    }
+  console.log("⏰ Bloqueo activo hasta:", existente.expiracion, "⏳ Ahora:", ahora);
+  return res.status(409).json({ error: "Ya existe un bloqueo activo para ese horario" });
+}
 
     await BloqueoTemporal.create({ servicioId, fecha, hora, expiracion });
     res.status(201).json({ ok: true, expiracion });
