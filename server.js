@@ -11,7 +11,7 @@ app.use(cors({
   origin: [
     "https://serviciosholisticos.com.ar",
     "http://localhost:3000",
-    "https://3208886a-de73-4516-9666-69429cbec340-00-2a93ubjurfokp.janeway.replit.dev"
+    "https://28bc2de7-6bbd-4dd9-9f49-afa273faafcc-00-2dnc5fn90yceh.riker.replit.dev/"
   ]
 }));
 
