@@ -92,6 +92,7 @@ router.post("/temporales", async (req, res) => {
     return res.status(400).json({ error: "Faltan datos" });
   }
 
+  const horaNormalizada = hora.trim().slice(0, 5); // "14:00:00" → "14:00"
   const ahora = new Date();
   const expiracion = new Date(ahora.getTime() + 2 * 60000); // 2 minutos
 
@@ -100,13 +101,15 @@ router.post("/temporales", async (req, res) => {
     await BloqueoTemporal.deleteMany({ expiracion: { $lt: ahora } });
 
     // Verificar si ya existe uno activo
-    const existente = await BloqueoTemporal.findOne({ servicioId, fecha, hora });
-    if (existente && existente.expiracion > ahora) {
-  console.log("⏰ Bloqueo activo hasta:", existente.expiracion, "⏳ Ahora:", ahora);
-  return res.status(409).json({ error: "Ya existe un bloqueo activo para ese horario" });
-}
+    console.log("📅 Buscando bloqueo para:", { servicioId, fecha, hora: horaNormalizada });
+    const existente = await BloqueoTemporal.findOne({ servicioId, fecha, hora: horaNormalizada });
 
-    await BloqueoTemporal.create({ servicioId, fecha, hora, expiracion });
+    if (existente && existente.expiracion > ahora) {
+      console.log("⏰ Bloqueo activo hasta:", existente.expiracion, "⏳ Ahora:", ahora);
+      return res.status(409).json({ error: "Ya existe un bloqueo activo para ese horario" });
+    }
+
+    await BloqueoTemporal.create({ servicioId, fecha, hora: horaNormalizada, expiracion });
     res.status(201).json({ ok: true, expiracion });
   } catch (err) {
     console.error("❌ Error al crear bloqueo temporal:", err);
