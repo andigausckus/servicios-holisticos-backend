@@ -1,4 +1,3 @@
-// models/ReservaTemporal.js
 const mongoose = require("mongoose");
 
 const reservaTemporalSchema = new mongoose.Schema({
@@ -9,9 +8,7 @@ const reservaTemporalSchema = new mongoose.Schema({
   mensaje: String,
   fecha: String,
   hora: String,
-  preferenceId: String, // devuelto por MercadoPago
-  creadaEn: { type: Date, default: Date.now },
-  expiracion: { type: Date, required: true }, // 👈 necesario
+  creadaEn: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model("ReservaTemporal", reservaTemporalSchema);
