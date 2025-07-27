@@ -1,11 +1,10 @@
-const express = require("express");
-const router = express.Router();
 const {
   crearReservaConComprobante,
-  crearReservaTemporal,
   obtenerReservas,
   aprobarReserva,
   cancelarReserva,
+  crearReservaTemporal,
+  verificarExpiracionReserva, // 👈 asegurate de incluir esto
 } = require("../controllers/reservasController");
 
 // Crear reserva con comprobante
