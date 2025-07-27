@@ -152,10 +152,42 @@ const crearReservaTemporal = async (req, res) => {
   }
 };
 
+// Verificar si la reserva en_proceso ya expiró (más de 2 minutos)
+const verificarExpiracionReserva = async (req, res) => {
+  try {
+    const { servicioId, fecha, hora } = req.query;
+
+    const reserva = await Reserva.findOne({
+      servicioId,
+      fecha,
+      hora,
+      estado: "en_proceso",
+    });
+
+    if (!reserva) {
+      return res.json({ disponible: true }); // Si no hay reserva, está libre
+    }
+
+    const ahora = new Date();
+    const diferenciaMinutos = (ahora - reserva.creadaEn) / (1000 * 60);
+
+    if (diferenciaMinutos > 2) {
+      await Reserva.deleteOne({ _id: reserva._id });
+      return res.json({ disponible: true }); // Se venció, está libre
+    }
+
+    res.json({ disponible: false }); // Aún está en proceso
+  } catch (error) {
+    console.error("❌ Error al verificar expiración:", error);
+    res.status(500).json({ error: "Error al verificar expiración" });
+  }
+};
+
 module.exports = {
   crearReservaConComprobante,
   obtenerReservas,
   aprobarReserva,
   cancelarReserva,
-  crearReservaTemporal, // <-- nuevo
+  crearReservaTemporal,
+  verificarExpiracionReserva, // 👈 agregado
 };
