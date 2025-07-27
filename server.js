@@ -33,7 +33,6 @@ const terapeutasRoutes = require("./routes/terapeutas");
 const serviciosRoutes = require("./routes/servicios");
 const resenasRoutes = require("./routes/resenas");
 const reservasRoutes = require("./routes/reservas.routes");
-const pagosRoutes = require("./routes/pagos");
 const rutaDisponibilidad = require("./routes/disponibilidad");
 const mensajeGlobalRoutes = require("./routes/mensajeGlobal.routes");
 const adminRoutes = require("./routes/admin.routes");
@@ -44,7 +43,6 @@ app.use("/api/terapeutas", terapeutasRoutes);
 app.use("/api/servicios", serviciosRoutes);
 app.use("/api/resenas", resenasRoutes);
 app.use("/api/reservas", reservasRoutes);
-app.use("/api/pagos", pagosRoutes); // clave para que MercadoPago funcione
 app.use("/api/disponibilidad", rutaDisponibilidad);
 app.use("/api/mensaje-global", mensajeGlobalRoutes);
 app.use("/api/admin", adminRoutes);
