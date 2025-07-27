@@ -14,6 +14,8 @@ router.post("/con-comprobante", crearReservaConComprobante);
 // Crear reserva temporal sin comprobante (usado antes de subir comprobante)
 router.post("/temporal", crearReservaTemporal);
 
+router.get('/temporales/expiracion', verificarExpiracionReserva);
+
 // Obtener todas las reservas (admin)
 router.get("/", obtenerReservas);
 
