@@ -4,6 +4,14 @@ const Bloqueo = require("../models/Bloqueo");
 const Reserva = require("../models/Reserva");
 const pusher = require("../utils/pusher");
 
+const pusher = new Pusher({
+  appId: "2028838",
+  key: "495b1e4631e1fe038642",
+  secret: "3f820a899d4ee43aa087",
+  cluster: "sa1",
+  useTLS: true,
+});
+
 // Crear bloqueo
 router.post("/", async (req, res) => {
   const { servicioId, fecha, hora } = req.body;
