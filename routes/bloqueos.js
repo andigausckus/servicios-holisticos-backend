@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Bloqueo = require("../models/Bloqueo");
 const Reserva = require("../models/Reserva");
-const Pusher = require("pusher");
+const pusher = require("../utils/pusher");
 
 // Crear bloqueo
 router.post("/", async (req, res) => {
