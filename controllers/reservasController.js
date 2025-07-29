@@ -227,4 +227,5 @@ module.exports = {
   crearReservaTemporal,
   verificarExpiracionReserva,
   obtenerEstadoReserva,
+  obtenerBloqueosYReservas, // 👈 asegurate de que esto esté
 };
