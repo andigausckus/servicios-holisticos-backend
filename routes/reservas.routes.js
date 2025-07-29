@@ -9,6 +9,7 @@ const {
   crearReservaTemporal,
   verificarExpiracionReserva,
   obtenerEstadoReserva,
+  obtenerBloqueosYReservas, // 👈 agregá esto
 } = require("../controllers/reservasController");
 
 // Crear reserva con comprobante
