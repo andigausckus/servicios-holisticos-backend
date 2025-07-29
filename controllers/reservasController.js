@@ -206,5 +206,6 @@ module.exports = {
   aprobarReserva,
   cancelarReserva,
   crearReservaTemporal,
-  verificarExpiracionReserva, // 👈 agregado
+  verificarExpiracionReserva,
+  obtenerEstadoReserva,
 };
