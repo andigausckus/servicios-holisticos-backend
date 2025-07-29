@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const {
   crearReservaConComprobante,
   obtenerReservas,
@@ -9,57 +8,53 @@ const {
   crearReservaTemporal,
   verificarExpiracionReserva,
   obtenerEstadoReserva,
-  obtenerBloqueosYReservas, // 👈 agregá esto
 } = require("../controllers/reservasController");
 
-// Crear reserva con comprobante
-router.post("/con-comprobante", crearReservaConComprobante);
-
-// Crear reserva temporal sin comprobante (usado antes de subir comprobante)
-router.post("/temporal", crearReservaTemporal);
-
-router.get('/temporales/expiracion', verificarExpiracionReserva);
-
-// Obtener todas las reservas (admin)
+router.post("/", crearReservaConComprobante);
 router.get("/", obtenerReservas);
+router.post("/temporal", crearReservaTemporal);
+router.post("/verificar-expiracion", verificarExpiracionReserva);
+router.get("/estado", obtenerEstadoReserva);
+router.post("/aprobar/:id", aprobarReserva);
+router.post("/cancelar/:id", cancelarReserva);
 
-// Confirmar manualmente una reserva
-router.patch("/:id/aprobar", aprobarReserva);
-
-// Cancelar una reserva
-router.patch("/:id/cancelar", cancelarReserva);
-
-router.get('/estado', obtenerEstadoReserva);
-
-// Obtener estado actual de bloqueos y reservas para un servicio
+// Ruta para obtener bloqueos y reservas (formato clave fecha-hora)
 router.get("/estado-actual/:servicioId", async (req, res) => {
   const { servicioId } = req.params;
   const ahora = new Date();
   const desde = new Date(ahora);
   const hasta = new Date(ahora);
-  hasta.setDate(hasta.getDate() + 7); // próximos 7 días
+  hasta.setDate(hasta.getDate() + 7);
 
   try {
-    const reservas = await Reserva.find({
+    const reservas = await require("../models/Reserva").find({
       servicioId,
-      fecha: { $gte: desde.toISOString().slice(0, 10), $lte: hasta.toISOString().slice(0, 10) }
+      fecha: {
+        $gte: desde.toISOString().slice(0, 10),
+        $lte: hasta.toISOString().slice(0, 10),
+      },
+      estado: "confirmada",
     });
 
-    const bloqueos = await Bloqueo.find({
+    const bloqueos = await require("../models/Reserva").find({
       servicioId,
-      fecha: { $gte: desde.toISOString().slice(0, 10), $lte: hasta.toISOString().slice(0, 10) }
+      fecha: {
+        $gte: desde.toISOString().slice(0, 10),
+        $lte: hasta.toISOString().slice(0, 10),
+      },
+      estado: "en_proceso",
     });
 
     const reservasMap = {};
     reservas.forEach((r) => {
       const key = `${r.fecha}-${r.hora}`;
-      reservasMap[key] = r;
+      reservasMap[key] = true;
     });
 
     const bloqueosMap = {};
     bloqueos.forEach((b) => {
       const key = `${b.fecha}-${b.hora}`;
-      bloqueosMap[key] = b;
+      bloqueosMap[key] = true;
     });
 
     res.json({
@@ -71,7 +66,5 @@ router.get("/estado-actual/:servicioId", async (req, res) => {
     res.status(500).json({ error: "Error al obtener bloqueos y reservas" });
   }
 });
-
-router.get("/estado-actual/:id", obtenerBloqueosYReservas);
 
 module.exports = router;

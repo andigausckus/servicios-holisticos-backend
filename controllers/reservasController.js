@@ -2,183 +2,133 @@ const Reserva = require("../models/Reserva");
 const Terapeuta = require("../models/Terapeuta");
 const Servicio = require("../models/Servicio");
 const { enviarEmailsReserva } = require("../utils/emailSender");
-const mongoose = require("mongoose"); // asegurate de tener esto arriba
+const mongoose = require("mongoose");
 
-// Crear reserva con comprobante
 const crearReservaConComprobante = async (req, res) => {
   try {
-    const {
-      reservaId, // ⚠️ ahora necesitamos este ID
-      nombre,
-      email,
-      mensaje,
-      comprobanteUrl,
-    } = req.body;
+    const { servicioId, fecha, hora, nombreUsuario, emailUsuario, comprobantePago } = req.body;
 
-    const reserva = await Reserva.findById(reservaId);
-    if (!reserva || reserva.estado !== "en_proceso") {
-      return res.status(404).json({ error: "Reserva temporal no encontrada o ya procesada" });
+    const nuevaReserva = new Reserva({
+      servicioId,
+      fecha,
+      hora,
+      nombreUsuario,
+      emailUsuario,
+      comprobantePago,
+      estado: "confirmada",
+    });
+
+    await nuevaReserva.save();
+
+    // Obtener datos del terapeuta y servicio para el mail
+    const servicio = await Servicio.findById(servicioId).populate("terapeutaId");
+    if (servicio && servicio.terapeutaId && servicio.terapeutaId.email) {
+      const terapeutaEmail = servicio.terapeutaId.email;
+      await enviarEmailsReserva(terapeutaEmail, {
+        nombreUsuario,
+        emailUsuario,
+        fecha,
+        hora,
+        servicio: servicio.nombre,
+      });
     }
 
-    const servicio = await Servicio.findById(reserva.servicioId).lean();
-    const terapeuta = await Terapeuta.findById(reserva.terapeutaId).lean();
-
-    if (!servicio || !terapeuta) {
-      return res.status(404).json({ error: "Datos incompletos" });
-    }
-
-    reserva.usuarioNombre = nombre;
-    reserva.usuarioEmail = email;
-    reserva.mensaje = mensaje;
-    reserva.comprobanteUrl = comprobanteUrl;
-    reserva.estado = "pendiente_de_aprobacion";
-
-    await reserva.save();
-
-    res.status(200).json({ ok: true, reservaId: reserva._id });
+    res.status(201).json({ mensaje: "Reserva creada exitosamente", reserva: nuevaReserva });
   } catch (error) {
-    console.error("❌ Error al actualizar reserva con comprobante:", error);
-    res.status(500).json({ error: "Error al procesar comprobante" });
+    console.error("Error al crear reserva con comprobante:", error);
+    res.status(500).json({ error: "Error al crear la reserva" });
   }
 };
 
-// Obtener reservas (admin)
 const obtenerReservas = async (req, res) => {
   try {
-    const reservas = await Reserva.find().sort({ fecha: -1 });
+    const reservas = await Reserva.find();
     res.json(reservas);
   } catch (error) {
+    console.error("Error al obtener reservas:", error);
     res.status(500).json({ error: "Error al obtener reservas" });
   }
 };
 
-// Aprobar (confirmar) una reserva y enviar emails
 const aprobarReserva = async (req, res) => {
   try {
-    const reserva = await Reserva.findById(req.params.id);
-    if (!reserva) return res.status(404).json({ mensaje: "Reserva no encontrada" });
-
-    const servicio = await Servicio.findById(reserva.servicioId).lean();
-    const terapeuta = await Terapeuta.findById(reserva.terapeutaId).lean();
-
-    if (!servicio || !terapeuta) {
-      return res.status(404).json({ mensaje: "Datos incompletos" });
+    const reservaId = req.params.id;
+    const reserva = await Reserva.findByIdAndUpdate(reservaId, { estado: "confirmada" }, { new: true });
+    if (!reserva) {
+      return res.status(404).json({ error: "Reserva no encontrada" });
     }
-
-    reserva.estado = "confirmada";
-    await reserva.save();
-
-    await enviarEmailsReserva({
-      nombreCliente: reserva.usuarioNombre,
-      emailCliente: reserva.usuarioEmail,
-      nombreTerapeuta: terapeuta.nombre,
-      emailTerapeuta: terapeuta.email,
-      whatsappTerapeuta: terapeuta.whatsapp,
-      bancoTerapeuta: terapeuta.banco,
-      cbuTerapeuta: terapeuta.cbu,
-      nombreServicio: servicio.titulo,
-      fecha: reserva.fecha,
-      hora: reserva.hora,
-      duracion: servicio.duracion || "60min",
-      precio: servicio.precio || 0,
-    });
-
-    res.json({ mensaje: "Reserva confirmada y emails enviados", reserva });
+    res.json({ mensaje: "Reserva aprobada", reserva });
   } catch (error) {
-    console.error("❌ Error al confirmar reserva:", error);
-    res.status(500).json({ mensaje: "Error al confirmar", error });
+    console.error("Error al aprobar reserva:", error);
+    res.status(500).json({ error: "Error al aprobar reserva" });
   }
 };
 
-// Cancelar reserva (admin o usuario)
 const cancelarReserva = async (req, res) => {
   try {
-    const reserva = await Reserva.findById(req.params.id);
-    if (!reserva) return res.status(404).json({ mensaje: "Reserva no encontrada" });
-
-    reserva.estado = "cancelada";
-    await reserva.save();
-
+    const reservaId = req.params.id;
+    const reserva = await Reserva.findByIdAndUpdate(reservaId, { estado: "cancelada" }, { new: true });
+    if (!reserva) {
+      return res.status(404).json({ error: "Reserva no encontrada" });
+    }
     res.json({ mensaje: "Reserva cancelada", reserva });
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al cancelar", error });
+    console.error("Error al cancelar reserva:", error);
+    res.status(500).json({ error: "Error al cancelar reserva" });
   }
 };
 
-// Crear reserva temporal al hacer clic en "Reservar sesión"
 const crearReservaTemporal = async (req, res) => {
   try {
-    console.log("📥 Body recibido en reserva temporal:", req.body);
     const { servicioId, fecha, hora } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(servicioId)) {
-      return res.status(400).json({ error: "ID de servicio inválido" });
-    }
-
-    const reservaExistente = await Reserva.findOne({
+    const yaExiste = await Reserva.findOne({
       servicioId,
       fecha,
       hora,
-      estado: { $in: ["en_proceso", "pendiente_de_aprobacion", "confirmada"] },
+      estado: { $in: ["en_proceso", "confirmada"] },
     });
 
-    if (reservaExistente) {
-      return res.status(409).json({ mensaje: "Ese horario ya fue reservado" });
+    if (yaExiste) {
+      return res.status(400).json({ error: "Ese turno ya está ocupado o en proceso" });
     }
 
-    const servicio = await Servicio.findById(servicioId).lean();
-    if (!servicio) {
-      return res.status(404).json({ error: "Servicio no encontrado" });
-    }
-
-    // 👇 Campo correcto del modelo
-    const terapeutaId = servicio.terapeuta;
-
-    const nuevaTemporal = new Reserva({
+    const nuevaReserva = new Reserva({
       servicioId,
-      terapeutaId,
       fecha,
       hora,
       estado: "en_proceso",
-      creadaEn: new Date(),
     });
 
-    await nuevaTemporal.save();
-    res.status(201).json({ ok: true, reservaId: nuevaTemporal._id });
+    await nuevaReserva.save();
 
+    res.status(201).json({ mensaje: "Reserva temporal creada", reservaId: nuevaReserva._id });
   } catch (error) {
-    console.error("❌ Error al crear reserva temporal:", error);
+    console.error("Error al crear reserva temporal:", error);
     res.status(500).json({ error: "Error al crear reserva temporal" });
   }
 };
 
-// Verificar si la reserva en_proceso ya expiró (más de 2 minutos)
 const verificarExpiracionReserva = async (req, res) => {
   try {
-    const { servicioId, fecha, hora } = req.query;
-
-    const reserva = await Reserva.findOne({
-      servicioId,
-      fecha,
-      hora,
-      estado: "en_proceso",
-    });
+    const { reservaId } = req.body;
+    const reserva = await Reserva.findById(reservaId);
 
     if (!reserva) {
-      return res.json({ disponible: true }); // Si no hay reserva, está libre
+      return res.status(404).json({ error: "Reserva no encontrada" });
     }
 
     const ahora = new Date();
-    const diferenciaMinutos = (ahora - reserva.creadaEn) / (1000 * 60);
+    const creadaHace = (ahora - reserva.createdAt) / 1000 / 60; // minutos
 
-    if (diferenciaMinutos > 2) {
-      await Reserva.deleteOne({ _id: reserva._id });
-      return res.json({ disponible: true }); // Se venció, está libre
+    if (reserva.estado === "en_proceso" && creadaHace > 2) {
+      await Reserva.findByIdAndDelete(reservaId);
+      return res.json({ mensaje: "Reserva temporal eliminada por vencimiento" });
     }
 
-    res.json({ disponible: false }); // Aún está en proceso
+    res.json({ mensaje: "Reserva sigue activa", reserva });
   } catch (error) {
-    console.error("❌ Error al verificar expiración:", error);
+    console.error("Error al verificar expiración:", error);
     res.status(500).json({ error: "Error al verificar expiración" });
   }
 };
@@ -188,34 +138,15 @@ const obtenerEstadoReserva = async (req, res) => {
     const { servicioId, fecha, hora } = req.query;
     const reserva = await Reserva.findOne({ servicioId, fecha, hora });
     if (!reserva) {
-      return res.json({ estado: 'disponible' });
+      return res.json({ estado: "disponible" });
     }
-    if (reserva.estado === 'en_proceso') {
-      return res.json({ estado: 'temporalmente-bloqueado' });
+    if (reserva.estado === "en_proceso") {
+      return res.json({ estado: "temporalmente-bloqueado" });
     }
     return res.json({ estado: reserva.estado });
   } catch (error) {
-    console.error('Error al obtener estado de reserva:', error);
-    res.status(500).json({ error: 'Error al obtener estado de reserva' });
-  }
-};
-
-const obtenerBloqueosYReservas = async (req, res) => {
-  try {
-    const servicioId = req.params.id;
-
-    console.log("➡️ Obteniendo bloqueos y reservas para servicio:", servicioId);
-
-    const reservas = await Reserva.find({ servicio: servicioId, estado: "confirmada" });
-    const bloqueos = await Reserva.find({ servicio: servicioId, estado: "en_proceso" });
-
-    res.json({
-      reservas,
-      bloqueos,
-    });
-  } catch (error) {
-    console.error("Error al obtener bloqueos + reservas:", error);
-    res.status(500).json({ error: "Error al obtener bloqueos y reservas" });
+    console.error("Error al obtener estado de reserva:", error);
+    res.status(500).json({ error: "Error al obtener estado de reserva" });
   }
 };
 
@@ -227,5 +158,4 @@ module.exports = {
   crearReservaTemporal,
   verificarExpiracionReserva,
   obtenerEstadoReserva,
-  obtenerBloqueosYReservas, // 👈 asegurate de que esto esté
 };
