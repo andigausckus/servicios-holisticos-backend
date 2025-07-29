@@ -9,7 +9,6 @@ const app = express();
 app.use(express.json());
 app.use(cors({
   origin: [
-    "https://serviciosholisticos.com.ar",
     "http://localhost:3000",
     "https://28bc2de7-6bbd-4dd9-9f49-afa273faafcc-00-2dnc5fn90yceh.riker.replit.dev"
   ]
