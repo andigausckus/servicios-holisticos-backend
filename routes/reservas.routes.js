@@ -71,4 +71,6 @@ router.get("/estado-actual/:servicioId", async (req, res) => {
   }
 });
 
+router.get("/estado-actual/:id", obtenerBloqueosYReservas);
+
 module.exports = router;

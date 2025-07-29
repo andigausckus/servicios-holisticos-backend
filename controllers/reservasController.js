@@ -200,6 +200,25 @@ const obtenerEstadoReserva = async (req, res) => {
   }
 };
 
+const obtenerBloqueosYReservas = async (req, res) => {
+  try {
+    const servicioId = req.params.id;
+
+    console.log("➡️ Obteniendo bloqueos y reservas para servicio:", servicioId);
+
+    const reservas = await Reserva.find({ servicio: servicioId, estado: "confirmada" });
+    const bloqueos = await Reserva.find({ servicio: servicioId, estado: "en_proceso" });
+
+    res.json({
+      reservas,
+      bloqueos,
+    });
+  } catch (error) {
+    console.error("Error al obtener bloqueos + reservas:", error);
+    res.status(500).json({ error: "Error al obtener bloqueos y reservas" });
+  }
+};
+
 module.exports = {
   crearReservaConComprobante,
   obtenerReservas,
