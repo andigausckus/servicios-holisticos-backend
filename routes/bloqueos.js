@@ -2,15 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Bloqueo = require("../models/Bloqueo");
 const Reserva = require("../models/Reserva");
-const pusher = require("../utils/pusher");
-
-const pusher = new Pusher({
-  appId: "2028838",
-  key: "495b1e4631e1fe038642",
-  secret: "3f820a899d4ee43aa087",
-  cluster: "sa1",
-  useTLS: true,
-});
+const BloqueoTemporal = require("../models/BloqueoTemporal");
 
 // Crear bloqueo
 router.post("/", async (req, res) => {
@@ -90,8 +82,7 @@ router.get("/todos", async (req, res) => {
   }
 });
 
-        // --- BLOQUEOS TEMPORALES (2 minutos) ---
-const BloqueoTemporal = require("../models/BloqueoTemporal");
+// --- BLOQUEOS TEMPORALES (2 minutos) ---
 
 // Crear bloqueo temporal (visible para todos)
 router.post("/temporales", async (req, res) => {
@@ -115,13 +106,6 @@ router.post("/temporales", async (req, res) => {
     }
 
     await BloqueoTemporal.create({ servicioId, fecha, hora: horaNormalizada, expiracion });
-
-    // 👉 Aquí se notifica con Pusher
-    pusher.trigger(`reservas-${servicioId}`, "bloqueo-creado", {
-      fecha,
-      hora: horaNormalizada,
-      expiracion,
-    });
 
     res.status(201).json({ ok: true, expiracion });
   } catch (err) {

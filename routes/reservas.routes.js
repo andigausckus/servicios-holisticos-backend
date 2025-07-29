@@ -27,4 +27,6 @@ router.patch("/:id/aprobar", aprobarReserva);
 // Cancelar una reserva
 router.patch("/:id/cancelar", cancelarReserva);
 
+router.get('/estado', obtenerEstadoReserva);
+
 module.exports = router;

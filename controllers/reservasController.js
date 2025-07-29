@@ -183,6 +183,23 @@ const verificarExpiracionReserva = async (req, res) => {
   }
 };
 
+const obtenerEstadoReserva = async (req, res) => {
+  try {
+    const { servicioId, fecha, hora } = req.query;
+    const reserva = await Reserva.findOne({ servicioId, fecha, hora });
+    if (!reserva) {
+      return res.json({ estado: 'disponible' });
+    }
+    if (reserva.estado === 'en_proceso') {
+      return res.json({ estado: 'temporalmente-bloqueado' });
+    }
+    return res.json({ estado: reserva.estado });
+  } catch (error) {
+    console.error('Error al obtener estado de reserva:', error);
+    res.status(500).json({ error: 'Error al obtener estado de reserva' });
+  }
+};
+
 module.exports = {
   crearReservaConComprobante,
   obtenerReservas,
