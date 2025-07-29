@@ -46,6 +46,7 @@ app.use("/api/disponibilidad", rutaDisponibilidad);
 app.use("/api/mensaje-global", mensajeGlobalRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/bloqueos", bloqueosRouter);
+app.use(express.static("public"));
 
 // ✅ Ruta de prueba
 app.get("/", (req, res) => {
