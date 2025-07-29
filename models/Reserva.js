@@ -6,6 +6,10 @@ const reservaSchema = new mongoose.Schema({
   servicioId: { type: mongoose.Schema.Types.ObjectId, ref: "Servicio", required: true },
   fecha: { type: String, required: true },
   hora: { type: String, required: true },
+  duracion: { type: Number, required: true },
+  precio: { type: Number, required: true },
+  nombreUsuario: { type: String, required: true },
+  emailUsuario: { type: String, required: true },
   estado: {
     type: String,
     enum: ["en_proceso", "pendiente_de_aprobacion", "confirmada", "cancelada"],

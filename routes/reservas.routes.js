@@ -16,7 +16,8 @@ router.post("/temporal", crearReservaTemporal);
 router.post("/verificar-expiracion", verificarExpiracionReserva);
 router.get("/estado", obtenerEstadoReserva);
 router.post("/aprobar/:id", aprobarReserva);
-router.post("/cancelar/:id", cancelarReserva);
+router.post("/cancelar/:id",
+cancelarReserva);
 
 // Ruta para obtener bloqueos y reservas (formato clave fecha-hora)
 router.get("/estado-actual/:servicioId", async (req, res) => {
