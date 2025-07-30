@@ -172,4 +172,10 @@ router.get("/temporales/expiracion", async (req, res) => {
   }
 });
 
+  // Ruta DEBUG: ver todos los bloqueos actuales
+router.get("/debug", async (req, res) => {
+  const bloqueos = await BloqueoTemporal.find();
+  res.json(bloqueos);
+});
+
 module.exports = router;
