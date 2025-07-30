@@ -19,7 +19,7 @@ router.post("/aprobar/:id", aprobarReserva);
 router.post("/cancelar/:id",
 cancelarReserva);
 
-// Ruta para obtener bloqueos y reservas (formato clave fecha-hora)
+// Ruta para obtener reservas confirmadas y bloqueos (incluye bloqueos temporales)
 router.get("/estado-actual/:servicioId", async (req, res) => {
   const { servicioId } = req.params;
   const ahora = new Date();
@@ -28,7 +28,10 @@ router.get("/estado-actual/:servicioId", async (req, res) => {
   hasta.setDate(hasta.getDate() + 7);
 
   try {
-    const reservas = await require("../models/Reserva").find({
+    const Reserva = require("../models/Reserva");
+    const BloqueoTemporal = require("../models/BloqueoTemporal");
+
+    const reservas = await Reserva.find({
       servicioId,
       fecha: {
         $gte: desde.toISOString().slice(0, 10),
@@ -37,13 +40,22 @@ router.get("/estado-actual/:servicioId", async (req, res) => {
       estado: "confirmada",
     });
 
-    const bloqueos = await require("../models/Reserva").find({
+    const bloqueosEnProceso = await Reserva.find({
       servicioId,
       fecha: {
         $gte: desde.toISOString().slice(0, 10),
         $lte: hasta.toISOString().slice(0, 10),
       },
       estado: "en_proceso",
+    });
+
+    const bloqueosTemporales = await BloqueoTemporal.find({
+      servicioId,
+      fecha: {
+        $gte: desde.toISOString().slice(0, 10),
+        $lte: hasta.toISOString().slice(0, 10),
+      },
+      expiracion: { $gt: ahora },
     });
 
     const reservasMap = {};
@@ -53,7 +65,12 @@ router.get("/estado-actual/:servicioId", async (req, res) => {
     });
 
     const bloqueosMap = {};
-    bloqueos.forEach((b) => {
+    bloqueosEnProceso.forEach((b) => {
+      const key = `${b.fecha}-${b.hora}`;
+      bloqueosMap[key] = true;
+    });
+
+    bloqueosTemporales.forEach((b) => {
       const key = `${b.fecha}-${b.hora}`;
       bloqueosMap[key] = true;
     });
