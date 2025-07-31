@@ -150,10 +150,11 @@ const horariosConEstado = Array.isArray(servicio.horariosDisponibles)
   : [];
     
     res.json({
-      ...servicio.toObject(),
-      horariosDisponibles: horariosConEstado,
-      plataformas: servicio.plataformas || [],
-    });
+  ...servicio.toObject(),
+  terapeutaId: servicio.terapeuta?._id, // ⬅️ agregás esto
+  horariosDisponibles: horariosConEstado,
+  plataformas: servicio.plataformas || [],
+});
 
   } catch (err) {
     console.error("❌ Error al obtener servicio público:", err);
