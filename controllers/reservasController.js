@@ -7,9 +7,9 @@ const mongoose = require("mongoose");
 const crearReservaConComprobante = async (req, res) => {
   try {
 
-    const { nombre, email, comprobante } = req.body;
+    const { nombreUsuario, emailUsuario, comprobantePago } = req.body;
 
-if (!nombre || !email || !comprobante) {
+if (!nombreUsuario || !emailUsuario || !comprobantePago) {
   return res.status(400).json({ error: "Todos los campos son obligatorios: nombre, email y comprobante." });
 }
     
