@@ -15,7 +15,7 @@ const reservaSchema = new mongoose.Schema({
     enum: ["en_proceso", "pendiente_de_aprobacion", "confirmada", "cancelada"],
     default: "en_proceso",
   },
-  comprobantePago: { type: String, default: "" },
+  comprobantePago: { type: String, required: true },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Reserva", reservaSchema);
