@@ -36,7 +36,7 @@ const crearReservaConComprobante = async (req, res) => {
 
     await nuevaReserva.save();
 
-    const servicio = await Servicio.findById(servicioId).populate("terapeutaId");
+    const servicio = await Servicio.findById(servicioId).populate("terapeuta");
     if (servicio && servicio.terapeutaId && servicio.terapeutaId.email) {
       const terapeutaEmail = servicio.terapeutaId.email;
       await enviarEmailsReserva(terapeutaEmail, {
