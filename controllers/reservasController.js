@@ -37,7 +37,7 @@ const crearReservaConComprobante = async (req, res) => {
   comprobantePago,
   precio,
   duracion,
-  estado: "pendiente", // ✅ Estado correcto al recibir el pago
+  estado: "en_proceso",
 });
 
     await nuevaReserva.save();
