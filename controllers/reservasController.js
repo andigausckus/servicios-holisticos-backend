@@ -6,6 +6,13 @@ const mongoose = require("mongoose");
 
 const crearReservaConComprobante = async (req, res) => {
   try {
+
+    const { nombre, email, comprobante } = req.body;
+
+if (!nombre || !email || !comprobante) {
+  return res.status(400).json({ error: "Todos los campos son obligatorios: nombre, email y comprobante." });
+}
+    
     const {
       servicioId,
       terapeutaId,
