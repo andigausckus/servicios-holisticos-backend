@@ -50,19 +50,22 @@ router.get("/estado-actual/:servicioId", async (req, res) => {
     });
 
     const bloqueosTemporales = await BloqueoTemporal.find({
-      servicioId,
-      fecha: {
-        $gte: desde.toISOString().slice(0, 10),
-        $lte: hasta.toISOString().slice(0, 10),
-      },
-      expiracion: { $gt: ahora },
-    });
+  servicioId,
+  fecha: {
+    $gte: desde.toISOString().slice(0, 10),
+    $lte: hasta.toISOString().slice(0, 10),
+  },
+  expiracion: { $gt: ahora },
+});
 
-    const reservasMap = {};
-    reservas.forEach((r) => {
-      const key = `${r.fecha}-${r.hora}`;
-      reservasMap[key] = true;
-    });
+const reservasMap = {};
+reservas.forEach((r) => {
+  const key = `${r.fecha}-${r.hora}`;
+  reservasMap[key] = {
+    estado: "confirmada",
+    userId: r.userId?.toString(),
+  };
+});
 
     const bloqueosMap = {};
     bloqueosEnProceso.forEach((b) => {
