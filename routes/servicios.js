@@ -151,7 +151,8 @@ const horariosConEstado = Array.isArray(servicio.horariosDisponibles)
     
     res.json({
   ...servicio.toObject(),
-  terapeutaId: servicio.terapeuta?._id, // ⬅️ agregás esto
+  duracion: servicio.duracionMinutos, // alias útil
+  terapeutaId: servicio.terapeuta?._id,
   horariosDisponibles: horariosConEstado,
   plataformas: servicio.plataformas || [],
 });
