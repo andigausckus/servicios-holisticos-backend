@@ -6,13 +6,6 @@ const mongoose = require("mongoose");
 
 const crearReservaConComprobante = async (req, res) => {
   try {
-
-    const { nombreUsuario, emailUsuario, comprobantePago } = req.body;
-
-if (!nombreUsuario || !emailUsuario || !comprobantePago) {
-  return res.status(400).json({ error: "Todos los campos son obligatorios: nombre, email y comprobante." });
-}
-    
     const {
       servicioId,
       terapeutaId,
@@ -24,6 +17,12 @@ if (!nombreUsuario || !emailUsuario || !comprobantePago) {
       precio,
       duracion,
     } = req.body;
+
+    if (!nombreUsuario || !emailUsuario || !comprobantePago) {
+      return res.status(400).json({
+        error: "Todos los campos son obligatorios: nombre, email y comprobante.",
+      });
+    }
 
     console.log("📥 Datos recibidos para nueva reserva con comprobante:");
     console.log({ servicioId, terapeutaId, precio, duracion });
@@ -55,7 +54,10 @@ if (!nombreUsuario || !emailUsuario || !comprobantePago) {
       });
     }
 
-    res.status(201).json({ mensaje: "Reserva creada exitosamente", reserva: nuevaReserva });
+    res.status(201).json({
+      mensaje: "Reserva creada exitosamente",
+      reserva: nuevaReserva,
+    });
   } catch (error) {
     console.error("Error al crear reserva con comprobante:", error);
     res.status(500).json({ error: "Error al crear la reserva" });
