@@ -6,21 +6,36 @@ const mongoose = require("mongoose");
 
 const crearReservaConComprobante = async (req, res) => {
   try {
-    const { servicioId, fecha, hora, nombreUsuario, emailUsuario, comprobantePago } = req.body;
-
-    const nuevaReserva = new Reserva({
+    const {
       servicioId,
+      terapeutaId,
       fecha,
       hora,
       nombreUsuario,
       emailUsuario,
       comprobantePago,
+      precio,
+      duracion,
+    } = req.body;
+
+    console.log("📥 Datos recibidos para nueva reserva con comprobante:");
+    console.log({ servicioId, terapeutaId, precio, duracion });
+
+    const nuevaReserva = new Reserva({
+      servicioId,
+      terapeutaId,
+      fecha,
+      hora,
+      nombreUsuario,
+      emailUsuario,
+      comprobantePago,
+      precio,
+      duracion,
       estado: "confirmada",
     });
 
     await nuevaReserva.save();
 
-    // Obtener datos del terapeuta y servicio para el mail
     const servicio = await Servicio.findById(servicioId).populate("terapeutaId");
     if (servicio && servicio.terapeutaId && servicio.terapeutaId.email) {
       const terapeutaEmail = servicio.terapeutaId.email;
