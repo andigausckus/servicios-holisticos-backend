@@ -8,6 +8,7 @@ const {
   crearReservaTemporal,
   verificarExpiracionReserva,
   obtenerEstadoReserva,
+  obtenerReservasConfirmadas,
 } = require("../controllers/reservasController");
 
 router.post("/", crearReservaConComprobante);
