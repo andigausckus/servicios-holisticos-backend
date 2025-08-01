@@ -203,4 +203,5 @@ module.exports = {
   crearReservaTemporal,
   verificarExpiracionReserva,
   obtenerEstadoReserva,
+  obtenerReservasConfirmadas,
 };
