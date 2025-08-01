@@ -18,7 +18,7 @@ router.get("/estado", obtenerEstadoReserva);
 router.post("/aprobar/:id", aprobarReserva);
 router.post("/cancelar/:id",
 cancelarReserva);
-
+router.get("/admin/reservas-confirmadas", obtenerReservasConfirmadas);
 // Ruta para obtener reservas confirmadas y bloqueos (incluye bloqueos temporales)
 router.get("/estado-actual/:servicioId", async (req, res) => {
   const { servicioId } = req.params;
