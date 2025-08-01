@@ -185,6 +185,16 @@ const obtenerEstadoReserva = async (req, res) => {
   }
 };
 
+const obtenerReservasConfirmadas = async (req, res) => {
+  try {
+    const reservas = await Reserva.find({ estado: "confirmada" }).sort({ createdAt: -1 });
+    res.json(reservas);
+  } catch (error) {
+    console.error("Error al obtener reservas confirmadas:", error);
+    res.status(500).json({ error: "Error al obtener reservas confirmadas" });
+  }
+};
+
 module.exports = {
   crearReservaConComprobante,
   obtenerReservas,
