@@ -11,10 +11,10 @@ const reservaSchema = new mongoose.Schema({
   nombreUsuario: { type: String, required: true },
   emailUsuario: { type: String, required: true },
   estado: {
-    type: String,
-    enum: ["en_proceso", "pendiente_de_aprobacion", "confirmada", "cancelada"],
-    default: "en_proceso",
-  },
+  type: String,
+  enum: ["pendiente", "confirmada", "cancelada"],
+  default: "pendiente",
+},
   comprobantePago: { type: String, required: true },
 }, { timestamps: true });
 
