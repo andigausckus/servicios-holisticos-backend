@@ -37,10 +37,21 @@ const crearReservaConComprobante = async (req, res) => {
   comprobantePago,
   precio,
   duracion,
-  estado: "pendiente",
+  estado: "confirmada",
 });
 
-    await nuevaReserva.save();
+await nuevaReserva.save();
+
+// Cancelar reservas temporales que bloqueaban el mismo horario
+await Reserva.updateMany(
+  {
+    servicioId,
+    fecha,
+    hora,
+    estado: "en_proceso",
+  },
+  { estado: "cancelada" }
+);
 
     const servicio = await Servicio.findById(servicioId).populate("terapeuta");
     if (servicio && servicio.terapeutaId && servicio.terapeutaId.email) {
