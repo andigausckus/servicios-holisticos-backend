@@ -98,8 +98,6 @@ const cuerpoCliente = `
   El equipo de <strong>Servicios Holísticos</strong></p>
 `;
 
-const fechaFormateada = formatearFecha(fecha);
-
   const cuerpoTerapeuta = `
   <p>👋 <strong>Hola ${nombreTerapeuta}!</strong></p>
 
