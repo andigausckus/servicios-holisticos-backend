@@ -59,6 +59,10 @@ async function enviarEmailsReserva({
 // cuerpo del emailCliente (HTML) actualizado
 
 const cuerpoCliente = `
+  <p>Hola ${nombreCliente},</p>
+
+  <p>¡Gracias por confiar en Servicios Holísticos 🌿!</p>
+
   <p>Tu sesión fue confirmada exitosamente. A continuación te compartimos los detalles de la reserva:</p>
 
   <p>
@@ -83,7 +87,7 @@ const cuerpoCliente = `
 
   <p>✨ El terapeuta ya fue notificado de tu sesión. Podés escribirle antes si tenés dudas o esperar al día de la sesión.</p>
 
-  <p>Si necesitás ayuda, podés responder este correo o escribirnos a <a href="mailto:soporte@serviciosholisticos.com.ar">soporte@serviciosholisticos.com.ar</a>.</p>
+  <p>Si necesitás ayuda, podés responder este correo.</p>
 
   <p>Un abrazo,<br>
   El equipo de <strong>Servicios Holísticos</strong></p>
