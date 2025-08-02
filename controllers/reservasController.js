@@ -46,6 +46,18 @@ const crearReservaConComprobante = async (req, res) => {
     const servicio = await Servicio.findById(servicioId);
     const terapeuta = await Terapeuta.findById(terapeutaId);
 
+    // ⏱️ Calcular hora final
+    const calcularHoraFinal = (horaInicio, duracionMinutos) => {
+      const [h, m] = horaInicio.split(":").map(Number);
+      const fecha = new Date();
+      fecha.setHours(h);
+      fecha.setMinutes(m + duracionMinutos);
+      const hh = fecha.getHours().toString().padStart(2, "0");
+      const mm = fecha.getMinutes().toString().padStart(2, "0");
+      return `${hh}:${mm}`;
+    };
+    const horaFinal = calcularHoraFinal(hora, duracion);
+
     // 📧 Enviar emails tanto al cliente como al terapeuta
     await enviarEmailsReserva({
       nombreCliente: nombreUsuario,
@@ -55,8 +67,10 @@ const crearReservaConComprobante = async (req, res) => {
       nombreServicio: servicio?.titulo || "",
       fecha,
       hora,
+      horaFinal,
       duracion,
       precio,
+      telefonoTerapeuta: terapeuta?.telefono || "",
     });
 
     console.log("✅ Emails enviados correctamente");
