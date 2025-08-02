@@ -61,18 +61,18 @@ console.log("🧑‍⚕️ Terapeuta encontrado:", terapeuta);
 
     // 📧 Enviar emails tanto al cliente como al terapeuta
     await enviarEmailsReserva({
-      nombreCliente: nombreUsuario,
-      emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta?.nombre || "",
-      emailTerapeuta: terapeuta?.email || "",
-      nombreServicio: servicio?.titulo || "",
-      fecha,
-      hora,
-      horaFinal,
-      duracion,
-      precio,
-      telefonoTerapeuta: terapeuta?.telefono || "",
-    });
+  nombreCliente: nombreUsuario,
+  emailCliente: emailUsuario,
+  nombreTerapeuta: terapeuta?.nombreCompleto || "",
+  emailTerapeuta: terapeuta?.email || "",
+  nombreServicio: servicio?.titulo || "",
+  fecha,
+  hora,
+  horaFinal,
+  duracion,
+  precio,
+  telefonoTerapeuta: terapeuta?.whatsapp || "",
+});
 
     console.log("✅ Emails enviados correctamente");
 
