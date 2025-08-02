@@ -60,7 +60,22 @@ console.log("🧑‍⚕️ Terapeuta encontrado:", terapeuta);
     const horaFinal = calcularHoraFinal(hora, duracion);
 
     // 📧 Enviar emails tanto al cliente como al terapeuta
-    await enviarEmailsReserva({
+let numeroWhatsApp = terapeuta?.whatsapp || "";
+
+// 🔧 Limpiar y formatear número para WhatsApp (Argentina)
+numeroWhatsApp = numeroWhatsApp.replace(/\D/g, ""); // quitar todo lo que no sea número
+
+if (numeroWhatsApp.startsWith("15")) {
+  numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
+}
+
+if (numeroWhatsApp.length === 10) {
+  numeroWhatsApp = `549${numeroWhatsApp}`;
+} else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {
+  numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
+}
+
+await enviarEmailsReserva({
   nombreCliente: nombreUsuario,
   emailCliente: emailUsuario,
   nombreTerapeuta: terapeuta?.nombreCompleto || "",
@@ -71,7 +86,7 @@ console.log("🧑‍⚕️ Terapeuta encontrado:", terapeuta);
   horaFinal,
   duracion,
   precio,
-  telefonoTerapeuta: terapeuta?.whatsapp || "",
+  telefonoTerapeuta: numeroWhatsApp,
 });
 
     console.log("✅ Emails enviados correctamente");
