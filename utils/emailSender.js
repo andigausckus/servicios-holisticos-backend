@@ -21,6 +21,7 @@ async function enviarEmailsReserva({
   nombreServicio,
   fecha,
   hora,
+  horaFinal, // 👈🏼 Agregá esta línea
   duracion,
   precio,
 }) {
@@ -29,6 +30,10 @@ async function enviarEmailsReserva({
     emailTerapeuta,
     nombreCliente,
     nombreTerapeuta,
+    nombreServicio,
+    fecha,
+    hora,
+    horaFinal,
   });
 
   // Validación previa
