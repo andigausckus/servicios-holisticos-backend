@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const fechaFormateada = formatearFecha(fecha); // Asegurate de tener esta función arriba
 
 const transporter = nodemailer.createTransport({
   host: "smtp.zoho.com",
