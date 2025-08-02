@@ -91,6 +91,32 @@ await enviarEmailsReserva({
 
     console.log("✅ Emails enviados correctamente");
 
+  // ⏰ Programar envío de email de reseña
+const { enviarEmailResena } = require("../utils/emailSender");
+
+const [horaFinalH, horaFinalM] = horaFinal.split(":").map(Number);
+const fechaHoraFin = new Date(fecha);
+fechaHoraFin.setHours(horaFinalH);
+fechaHoraFin.setMinutes(horaFinalM);
+
+// En desarrollo: enviar a los 1 minuto
+const minutosDelay = process.env.NODE_ENV === "development" ? 1 : 30;
+fechaHoraFin.setMinutes(fechaHoraFin.getMinutes() + minutosDelay);
+
+const delayMs = fechaHoraFin.getTime() - Date.now();
+
+if (delayMs > 0) {
+  setTimeout(() => {
+    enviarEmailResena({
+      nombreCliente: nombreUsuario,
+      emailCliente: emailUsuario,
+      nombreTerapeuta: terapeuta?.nombreCompleto || "",
+      servicio: servicio?.titulo || "",
+      reservaId: nuevaReserva._id.toString(),
+    });
+  }, delayMs);
+}
+
     res.status(201).json({
       mensaje: "Reserva creada exitosamente",
       reserva: nuevaReserva,
