@@ -44,18 +44,29 @@ async function enviarEmailsReserva({
   const asunto = "💖 Nueva sesión confirmada - Servicios Holísticos";
 
   const cuerpoCliente = `
-    <p>Hola ${nombreCliente},</p>
-    <p>Gracias por tu reserva en <strong>Servicios Holísticos</strong> 🌿</p>
-    <p>Tu sesión ha sido confirmada con el/la terapeuta <strong>${nombreTerapeuta}</strong>.</p>
-    <ul>
-      <li><strong>Servicio:</strong> ${nombreServicio}</li>
-      <li><strong>Fecha:</strong> ${fecha}</li>
-      <li><strong>Hora:</strong> ${hora}</li>
-      <li><strong>Duración:</strong> ${duracion}</li>
-      <li><strong>Monto abonado:</strong> $${precio}</li>
+  <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.5;">
+    <p>Hola <strong>${nombreCliente}</strong>,</p>
+
+    <p>¡Gracias por confiar en <strong>Servicios Holísticos</strong> 🌿!</p>
+
+    <p>Tu sesión fue confirmada exitosamente con <strong>${nombreTerapeuta}</strong>. A continuación te compartimos los detalles de la reserva:</p>
+
+    <ul style="padding-left: 16px;">
+      <li><strong>🧘 Servicio:</strong> ${nombreServicio}</li>
+      <li><strong>📅 Fecha:</strong> ${fecha}</li>
+      <li><strong>🕒 Hora:</strong> ${hora}</li>
+      <li><strong>⏱️ Duración:</strong> ${duracion}</li>
+      <li><strong>💵 Monto abonado:</strong> $${precio}</li>
     </ul>
-    <p>En breve el/la terapeuta se pondrá en contacto con vos para coordinar detalles 🙌</p>
-  `;
+
+    <p>✨ En las próximas horas, ${nombreTerapeuta} se pondrá en contacto con vos para coordinar la sesión.</p>
+
+    <p>Si tenés dudas o necesitás ayuda, podés responder este correo o escribirnos a <a href="mailto:soporte@serviciosholisticos.com.ar">soporte@serviciosholisticos.com.ar</a>.</p>
+
+    <p style="margin-top: 24px;">Un abrazo,</p>
+    <p><strong>El equipo de Servicios Holísticos</strong></p>
+  </div>
+`;
 
   const cuerpoTerapeuta = `
     <p>👋 Hola ${nombreTerapeuta},</p>
