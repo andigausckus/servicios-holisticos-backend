@@ -97,17 +97,22 @@ const cuerpoCliente = `
 `;
 
   const cuerpoTerapeuta = `
-    <p>👋 Hola ${nombreTerapeuta},</p>
-    <p><strong>${nombreCliente}</strong> reservó una sesión con vos:</p>
-    <ul>
-      <li><strong>Cliente:</strong> ${nombreCliente} (${emailCliente})</li>
-      <li><strong>Servicio:</strong> ${nombreServicio}</li>
-      <li><strong>Fecha:</strong> ${fecha}</li>
-      <li><strong>Hora:</strong> ${hora}</li>
-      <li><strong>Monto recibido:</strong> $${precio}</li>
-    </ul>
-    <p>Por favor, contactalo/a a la brevedad para confirmar.</p>
-  `;
+  <p>👋 <strong>Hola ${nombreTerapeuta}!</strong></p>
+
+  <p>¡Tenés una nueva reserva confirmada! 🎉</p>
+
+  <p>🧘 <strong>Usuario:</strong> ${nombreCliente}</p>
+  <p>🛎️ <strong>Servicio:</strong> ${nombreServicio}</p>
+  <p>📅 <strong>Fecha:</strong> ${fecha}</p>
+  <p>🕒 <strong>Hora:</strong> ${hora} a ${horaFinal}</p>
+  <p>💵 <strong>Valor de la sesión:</strong> $${precio}</p>
+
+  <p>${nombreCliente} podrá escribirte antes de la sesión si tiene alguna duda, o el mismo día del encuentro.</p>
+
+  <p>✨ Te deseamos una excelente sesión ✨</p>
+
+  <p><strong>El equipo de Servicios Holísticos</strong></p>
+`;
 
   const cuerpoAdmin = `
   <p><strong>💡 Nueva reserva confirmada:</strong></p>
