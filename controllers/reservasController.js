@@ -27,54 +27,46 @@ const crearReservaConComprobante = async (req, res) => {
     console.log({ servicioId, terapeutaId, precio, duracion });
 
     const nuevaReserva = new Reserva({
-  servicioId,
-  terapeutaId,
-  fecha,
-  hora,
-  nombreUsuario,
-  emailUsuario,
-  comprobantePago,
-  precio,
-  duracion,
-  estado: "confirmada",
-});
+      servicioId,
+      terapeutaId,
+      fecha,
+      hora,
+      nombreUsuario,
+      emailUsuario,
+      comprobantePago,
+      precio,
+      duracion,
+      estado: "confirmada",
+    });
 
-await nuevaReserva.save();
-console.log("✅ Reserva confirmada:", nuevaReserva);
+    await nuevaReserva.save();
+    console.log("✅ Reserva confirmada:", nuevaReserva);
 
-// ⏳ Intentando enviar email al cliente
-await enviarEmailConfirmacionCliente(nuevaReserva);
-console.log("✅ Email al cliente enviado");
+    // 🔍 Buscar datos del terapeuta y servicio para los emails
+    const servicio = await Servicio.findById(servicioId);
+    const terapeuta = await Terapeuta.findById(terapeutaId);
 
-// Cancelar reservas temporales que bloqueaban el mismo horario
-await Reserva.updateMany(
-  {
-    servicioId,
-    fecha,
-    hora,
-    estado: "en_proceso",
-  },
-  { estado: "cancelada" }
-);
+    // 📧 Enviar emails tanto al cliente como al terapeuta
+    await enviarEmailsReserva({
+      nombreCliente: nombreUsuario,
+      emailCliente: emailUsuario,
+      nombreTerapeuta: terapeuta?.nombre || "",
+      emailTerapeuta: terapeuta?.email || "",
+      nombreServicio: servicio?.titulo || "",
+      fecha,
+      hora,
+      duracion,
+      precio,
+    });
 
-    const servicio = await Servicio.findById(servicioId).populate("terapeuta");
-    if (servicio && servicio.terapeutaId && servicio.terapeutaId.email) {
-      const terapeutaEmail = servicio.terapeutaId.email;
-      await enviarEmailsReserva(terapeutaEmail, {
-        nombreUsuario,
-        emailUsuario,
-        fecha,
-        hora,
-        servicio: servicio.nombre,
-      });
-    }
+    console.log("✅ Emails enviados correctamente");
 
     res.status(201).json({
       mensaje: "Reserva creada exitosamente",
       reserva: nuevaReserva,
     });
   } catch (error) {
-    console.error("Error al crear reserva con comprobante:", error);
+    console.error("❌ Error al crear reserva con comprobante:", error);
     res.status(500).json({ error: "Error al crear la reserva" });
   }
 };
