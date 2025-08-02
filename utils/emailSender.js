@@ -52,33 +52,35 @@ async function enviarEmailsReserva({
 // cuerpo del emailCliente (HTML) actualizado
 
 const cuerpoCliente = `
-  <p>Hola ${nombreCliente},</p>
-  <p>¡Gracias por confiar en <strong>Servicios Holísticos</strong> 🌿!</p>
-  <p>Tu sesión fue confirmada exitosamente con <strong>${nombreTerapeuta}</strong>. A continuación te compartimos los detalles de la reserva:</p>
+Tu sesión fue confirmada exitosamente con **${nombreTerapeuta}**.  
+A continuación te compartimos los detalles de la reserva:
 
-  <ul>
-    <li><strong>🧘 Servicio:</strong> ${nombreServicio}</li>
-    <li><strong>📅 Fecha:</strong> ${fecha}</li>
-    <li><strong>🕒 Hora:</strong> ${hora} a ${horaFinal}</li>
-    <li><strong>⏱️ Duración:</strong> ${duracion} minutos</li>
-    <li><strong>💵 Valor:</strong> $${precio}</li>
-  </ul>
+- 🧘 Servicio: ${nombreServicio}
 
-  <p><strong>Datos del terapeuta holístico para contacto:</strong></p>
-  <ul>
-    <li><strong>Nombre y apellido:</strong> ${nombreTerapeuta}</li>
-    <li><strong>Email:</strong> <a href="mailto:${emailTerapeuta}">${emailTerapeuta}</a></li>
-    <li><strong>WhatsApp:</strong> <a href="https://wa.me/${telefonoTerapeuta.replace(/\D/g, "")}?text=${encodeURIComponent(
-      `Hola ${nombreTerapeuta}, soy ${nombreCliente}. Reservé con vos una sesión de "${nombreServicio}" para el día ${fecha} de ${hora} a ${horaFinal}. Quedo a la espera de la sesión. ¡Gracias!`
-    )}" target="_blank">Enviar mensaje</a></li>
-  </ul>
+- 📅 Fecha: ${fechaFormateada}
 
-  <p>✨ El terapeuta ya fue notificado de tu sesión. Podés escribirle antes si tenés dudas o esperar al día de la sesión.</p>
+- 🕒 Hora: ${hora} a ${horaFinal}
 
-  <p>Si necesitás ayuda, podés responder este correo o escribirnos a <a href="mailto:soporte@serviciosholisticos.com.ar">soporte@serviciosholisticos.com.ar</a>.</p>
+- 💵 Valor: $${precio}
 
-  <p>Un abrazo,</p>
-  <p><strong>El equipo de Servicios Holísticos</strong></p>
+
+**Datos del terapeuta holístico para contacto:**  
+
+- Nombre y apellido: ${nombreTerapeuta}
+
+- Email: ${emailTerapeuta}
+
+- WhatsApp: [Enviar mensaje](https://wa.me/${telefonoTerapeuta.replace(/\D/g, "")}?text=${encodeURIComponent(
+  `Hola ${nombreTerapeuta}, soy ${nombreCliente}. Reservé con vos una sesión de ${nombreServicio} para el día ${fechaFormateada} de ${hora} a ${horaFinal}. ¡Quedo a la espera de la sesión!`
+)})
+
+
+✨ El terapeuta ya fue notificado de tu sesión. Podés escribirle antes si tenés dudas o esperar al día de la sesión.
+
+Si necesitás ayuda, podés responder este correo o escribirnos a soporte@serviciosholisticos.com.ar.
+
+Un abrazo,  
+El equipo de Servicios Holísticos
 `;
 
   const cuerpoTerapeuta = `
