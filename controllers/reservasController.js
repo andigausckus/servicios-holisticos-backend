@@ -45,6 +45,7 @@ const crearReservaConComprobante = async (req, res) => {
     // 🔍 Buscar datos del terapeuta y servicio para los emails
     const servicio = await Servicio.findById(servicioId);
     const terapeuta = await Terapeuta.findById(terapeutaId);
+console.log("🧑‍⚕️ Terapeuta encontrado:", terapeuta);
 
     // ⏱️ Calcular hora final
     const calcularHoraFinal = (horaInicio, duracionMinutos) => {
