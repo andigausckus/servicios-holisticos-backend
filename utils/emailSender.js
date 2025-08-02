@@ -129,6 +129,32 @@ async function enviarEmailsReserva({
   }
 }
 
+      async function enviarEmailConfirmacionCliente(reserva) {
+  const {
+    nombreCliente,
+    emailCliente,
+    nombreTerapeuta,
+    emailTerapeuta,
+    nombreServicio,
+    fecha,
+    hora,
+    duracion,
+    precio,
+  } = reserva;
+
+  return await enviarEmailsReserva({
+    nombreCliente,
+    emailCliente,
+    nombreTerapeuta,
+    emailTerapeuta,
+    nombreServicio,
+    fecha,
+    hora,
+    duracion,
+    precio,
+  });
+    }
+
 module.exports = {
   enviarEmailsReserva,
   enviarEmailConfirmacionCliente,
