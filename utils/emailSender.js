@@ -201,6 +201,42 @@ const cuerpoCliente = `
   });
     }
 
+async function enviarEmailResenaUsuario({ nombreCliente, emailCliente, nombreTerapeuta, idReserva }) {
+  if (!emailCliente || !nombreCliente || !idReserva) return;
+
+  const urlResena = `https://28bc7de7-6bbd-4dd9-9f49-afa273faafcc-00-2dnc5fn90yceh.riker.replit.dev/resenas/${idReserva}`;
+
+  const html = `
+    <p>Hola ${nombreCliente},</p>
+
+    <p>Gracias por tu sesión con ${nombreTerapeuta}.</p>
+
+    <p>Nos gustaría saber cómo fue tu experiencia para ayudar a otros usuarios a tomar buenas decisiones 🙌</p>
+
+    <p>
+      <a href="${urlResena}" target="_blank" style="background:#7D5BA6;padding:12px 20px;color:white;text-decoration:none;border-radius:8px;">
+        Dejar reseña ahora
+      </a>
+    </p>
+
+    <p>Tu opinión es muy valiosa para nosotros y para la comunidad de Servicios Holísticos 🌿</p>
+
+    <p>Con cariño,<br>El equipo de Servicios Holísticos</p>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
+      to: emailCliente,
+      subject: "📝 ¿Cómo fue tu sesión?",
+      html,
+    });
+    console.log("✅ Email de reseña enviado al usuario");
+  } catch (error) {
+    console.error("❌ Error al enviar el email de reseña:", error);
+  }
+}
+
 module.exports = {
   enviarEmailsReserva,
   enviarEmailConfirmacionCliente,
