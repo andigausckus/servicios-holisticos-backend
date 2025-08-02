@@ -1,8 +1,7 @@
 const Reserva = require("../models/Reserva");
 const Terapeuta = require("../models/Terapeuta");
 const Servicio = require("../models/Servicio");
-const { enviarEmailsReserva } = require("../utils/emailSender");
-const mongoose = require("mongoose");
+const { enviarEmailsReserva, enviarEmailConfirmacionCliente } = require("../utils/emailSender");
 
 const crearReservaConComprobante = async (req, res) => {
   try {
@@ -41,6 +40,11 @@ const crearReservaConComprobante = async (req, res) => {
 });
 
 await nuevaReserva.save();
+console.log("✅ Reserva confirmada:", nuevaReserva);
+
+// ⏳ Intentando enviar email al cliente
+await enviarEmailConfirmacionCliente(nuevaReserva);
+console.log("✅ Email al cliente enviado");
 
 // Cancelar reservas temporales que bloqueaban el mismo horario
 await Reserva.updateMany(
