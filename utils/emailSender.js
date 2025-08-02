@@ -1,5 +1,9 @@
 const nodemailer = require("nodemailer");
-const fechaFormateada = formatearFecha(fecha); // Asegurate de tener esta función arriba
+
+function formatearFecha(fechaISO) {
+  const partes = fechaISO.split("-");
+  return `${partes[2]}-${partes[1]}-${partes[0]}`; // dd-mm-yyyy
+}
 
 const transporter = nodemailer.createTransport({
   host: "smtp.zoho.com",
@@ -37,6 +41,8 @@ async function enviarEmailsReserva({
     hora,
     horaFinal,
   });
+
+  const fechaFormateada = formatearFecha(fecha);
 
   // Validación previa
   if (!emailCliente || !emailTerapeuta) {
