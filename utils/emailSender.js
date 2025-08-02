@@ -24,6 +24,7 @@ async function enviarEmailsReserva({
   horaFinal, // 👈🏼 Agregá esta línea
   duracion,
   precio,
+  telefonoTerapeuta, // ✅ Agregalo acá
 }) {
   console.log("🧪 Datos recibidos para enviarEmailsReserva:", {
     emailCliente,
