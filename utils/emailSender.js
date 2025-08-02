@@ -111,6 +111,8 @@ const cuerpoCliente = `
 
   <p>${nombreCliente} podrá escribirte antes de la sesión si tiene alguna duda, o el mismo día del encuentro.</p>
 
+<p>💸 El pago correspondiente a esta sesión será procesado y enviado a tu cuenta en un plazo máximo de 60 minutos.</p>
+
 <p>✨ Te deseamos una excelente sesión ✨</p>
 
 <p>Recordá que, una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
