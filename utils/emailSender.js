@@ -129,4 +129,7 @@ async function enviarEmailsReserva({
   }
 }
 
-module.exports = { enviarEmailsReserva };
+module.exports = {
+  enviarEmailsReserva,
+  enviarEmailConfirmacionCliente,
+};
