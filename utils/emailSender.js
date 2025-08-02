@@ -88,13 +88,17 @@ const cuerpoCliente = `
 
   <br>
 
-  <p>✨ El terapeuta ya fue notificado de tu sesión. Podés escribirle antes si tenés dudas o esperar al día de la sesión.</p>
+  <p>✨ El terapeuta ya fue notificado de tu sesión. Podés escribirle antes si tenés dudas o esperar al día del encuentro.</p>
 
-  <p>Si necesitás ayuda, podés responder este correo.</p>
+<p>Una vez finalizada la sesión, vas a poder dejar una reseña sobre tu experiencia para ayudar a otros usuarios en su elección.</p>
+
+<p>Si necesitás ayuda, podés responder directamente a este correo.</p>
 
   <p>Un abrazo,<br>
   El equipo de <strong>Servicios Holísticos</strong></p>
 `;
+
+const fechaFormateada = formatearFecha(fecha);
 
   const cuerpoTerapeuta = `
   <p>👋 <strong>Hola ${nombreTerapeuta}!</strong></p>
@@ -103,13 +107,17 @@ const cuerpoCliente = `
 
   <p>🧘 <strong>Usuario:</strong> ${nombreCliente}</p>
   <p>🛎️ <strong>Servicio:</strong> ${nombreServicio}</p>
-  <p>📅 <strong>Fecha:</strong> ${fecha}</p>
+  <p>📅 <strong>Fecha:</strong> ${fechaFormateada}</p>
   <p>🕒 <strong>Hora:</strong> ${hora} a ${horaFinal}</p>
   <p>💵 <strong>Valor de la sesión:</strong> $${precio}</p>
 
   <p>${nombreCliente} podrá escribirte antes de la sesión si tiene alguna duda, o el mismo día del encuentro.</p>
 
-  <p>✨ Te deseamos una excelente sesión ✨</p>
+<p>✨ Te deseamos una excelente sesión ✨</p>
+
+<p>Recordá que, una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
+
+<p>Una buena experiencia, cordialidad y profesionalismo te ayudarán a construir una gran reputación dentro de la plataforma.</p>
 
   <p><strong>El equipo de Servicios Holísticos</strong></p>
 `;
@@ -120,7 +128,7 @@ const cuerpoCliente = `
   <p>👤 <strong>Cliente:</strong> ${nombreCliente} (${emailCliente})</p>
   <p>🧘 <strong>Terapeuta:</strong> ${nombreTerapeuta} (${emailTerapeuta})</p>
   <p>🛎️ <strong>Servicio:</strong> ${nombreServicio}</p>
-  <p>📅 <strong>Fecha:</strong> ${fecha}</p>
+  <p>📅 <strong>Fecha:</strong> ${fechaFormateada}</p>
   <p>🕒 <strong>Hora:</strong> ${hora} a ${horaFinal}</p>
   <p>💵 <strong>Precio pagado:</strong> $${precio}</p>
 
@@ -151,7 +159,7 @@ const cuerpoCliente = `
     console.log("✅ Email al terapeuta enviado");
 
     // Email al admin (opcional)
-    /*
+    
     await transporter.sendMail({
       from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
       to: emailAdmin,
@@ -159,7 +167,7 @@ const cuerpoCliente = `
       html: cuerpoAdmin,
     });
     console.log("✅ Email al admin enviado");
-    */
+    
 
   } catch (error) {
     console.error("❌ Error al enviar alguno de los emails:", error);
