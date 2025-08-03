@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const reservaSchema = new mongoose.Schema({
   usuarioId: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: false },
-  terapeutaId: { type: mongoose.Schema.Types.ObjectId, ref: "Terapeuta", required: true },
+  terapeuta: { type: mongoose.Schema.Types.ObjectId, ref: "Terapeuta", required: true },
   servicioId: { type: mongoose.Schema.Types.ObjectId, ref: "Servicio", required: true },
   fecha: { type: String, required: true },
   hora: { type: String, required: true },
@@ -11,10 +11,10 @@ const reservaSchema = new mongoose.Schema({
   nombreUsuario: { type: String, required: true },
   emailUsuario: { type: String, required: true },
   estado: {
-  type: String,
-  enum: ["pendiente", "confirmada", "cancelada"],
-  default: "pendiente",
-},
+    type: String,
+    enum: ["pendiente", "confirmada", "cancelada"],
+    default: "pendiente",
+  },
   comprobantePago: { type: String, required: true },
 }, { timestamps: true });
 
