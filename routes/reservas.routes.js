@@ -102,7 +102,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-      const { verificarToken } = require("../middleware/authMiddleware"); // asegúrate de tener el middleware
+      const verificarToken = require("../middlewares/auth");
 
 router.get("/mis-reservas", verificarToken, async (req, res) => {
   try {
