@@ -1,5 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const Reserva = require("../models/Reserva");
+const verificarToken = require("../middlewares/auth");
+
 const {
   crearReservaConComprobante,
   obtenerReservas,
@@ -102,12 +105,9 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-      const verificarToken = require("../middlewares/auth");
-
 router.get("/mis-reservas", verificarToken, async (req, res) => {
   try {
-    const Reserva = require("../models/Reserva");
-    const reservas = await Reserva.find({ terapeuta: req.usuario._id })
+    const reservas = await Reserva.find({ terapeutaId: req.user._id })
       .sort({ fecha: -1 })
       .lean();
 
@@ -120,7 +120,7 @@ router.get("/mis-reservas", verificarToken, async (req, res) => {
     res.json(reservasConDatosUsuario);
   } catch (error) {
     console.error("❌ Error al obtener mis reservas:", error);
-    res.status(500).json({ mensaje: "Error al obtener tus reservas" });
+    res.status(500).json({ mensaje: "Error al obtener tus reservas", error });
   }
 });
 
