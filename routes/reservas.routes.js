@@ -102,4 +102,26 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+      const { verificarToken } = require("../middleware/authMiddleware"); // asegúrate de tener el middleware
+
+router.get("/mis-reservas", verificarToken, async (req, res) => {
+  try {
+    const Reserva = require("../models/Reserva");
+    const reservas = await Reserva.find({ terapeuta: req.usuario._id })
+      .sort({ fecha: -1 })
+      .lean();
+
+    const reservasConDatosUsuario = reservas.map((reserva) => ({
+      ...reserva,
+      usuarioNombre: reserva.nombreUsuario || "Cliente",
+      usuarioEmail: reserva.emailUsuario || "Sin email",
+    }));
+
+    res.json(reservasConDatosUsuario);
+  } catch (error) {
+    console.error("❌ Error al obtener mis reservas:", error);
+    res.status(500).json({ mensaje: "Error al obtener tus reservas" });
+  }
+});
+
 module.exports = router;
