@@ -126,4 +126,26 @@ router.post("/bloquear-horario", async (req, res) => {
   }
 });
 
+// Obtener disponibilidad del terapeuta autenticado entre dos fechas
+router.get("/mis-horarios", verificarToken, async (req, res) => {
+  try {
+    const { desde, hasta } = req.query;
+    const terapeuta = await Terapeuta.findById(req.terapeutaId);
+
+    if (!terapeuta || !terapeuta.disponibilidadPorFechas) {
+      return res.status(404).json({ error: "No se encontró disponibilidad" });
+    }
+
+    const disponibilidadFiltrada = terapeuta.disponibilidadPorFechas.filter(dia => {
+      const fecha = new Date(dia.fecha);
+      return fecha >= new Date(desde) && fecha <= new Date(hasta);
+    });
+
+    res.json(disponibilidadFiltrada);
+  } catch (err) {
+    console.error("❌ Error en GET /mis-horarios:", err);
+    res.status(500).json({ error: "Error al obtener disponibilidad" });
+  }
+});
+
 module.exports = router;
