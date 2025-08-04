@@ -277,8 +277,7 @@ const obtenerReservasConfirmadas = async (req, res) => {
   }
 };
 
-module.exports = {
-  crearReservaConComprobante,
+export { crearReservaConComprobante };
   obtenerReservas,
   aprobarReserva,
   cancelarReserva,
