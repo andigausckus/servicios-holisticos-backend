@@ -103,6 +103,9 @@ const crearReservaConComprobante = async (req, res) => {
       numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
                         }
 
+    console.log("🧪 Terapeuta:", terapeuta);
+console.log("🧪 Servicio:", servicio);
+
 await enviarEmailsReserva({
   nombreCliente: nombreUsuario,
   emailCliente: emailUsuario,
