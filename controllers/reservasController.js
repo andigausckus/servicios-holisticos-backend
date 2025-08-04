@@ -26,6 +26,31 @@ const crearReservaConComprobante = async (req, res) => {
     console.log("📥 Datos recibidos para nueva reserva con comprobante:");
     console.log({ servicioId, terapeutaId, precio, duracion });
 
+    console.log("🧪 Datos recibidos en el backend:", {
+      servicioId,
+      terapeutaId,
+      fecha,
+      hora,
+      nombreUsuario,
+      emailUsuario,
+      comprobantePago,
+      precio,
+      duracion,
+    });
+
+    console.log("📦 Objeto que se envía a mongoose:", {
+      servicioId,
+      terapeuta: terapeutaId,
+      fecha,
+      hora,
+      nombreUsuario,
+      emailUsuario,
+      comprobantePago,
+      precio,
+      duracion,
+      estado: "confirmada",
+    });
+
     const nuevaReserva = new Reserva({
       servicioId,
       terapeuta: terapeutaId,
@@ -45,7 +70,7 @@ const crearReservaConComprobante = async (req, res) => {
     // 🔍 Buscar datos del terapeuta y servicio para los emails
     const servicio = await Servicio.findById(servicioId);
     const terapeuta = await Terapeuta.findById(terapeutaId);
-console.log("🧑‍⚕️ Terapeuta encontrado:", terapeuta);
+    console.log("🧑‍⚕️ Terapeuta encontrado:", terapeuta);
 
     // ⏱️ Calcular hora final
     const calcularHoraFinal = (horaInicio, duracionMinutos) => {
