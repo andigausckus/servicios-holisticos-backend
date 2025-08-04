@@ -28,7 +28,7 @@ const crearReservaConComprobante = async (req, res) => {
 
     const nuevaReserva = new Reserva({
       servicioId,
-      terapeutaId,
+      terapeuta: terapeutaId,
       fecha,
       hora,
       nombreUsuario,
