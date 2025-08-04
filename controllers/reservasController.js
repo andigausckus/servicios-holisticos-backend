@@ -135,20 +135,20 @@ const delayMs = fechaHoraFin.getTime() - Date.now();
 
 if (delayMs > 0) {
   console.log("⏳ Email de reseña programado en", Math.round(delayMs / 1000), "segundos");
-  setTimeout(() => {
-    console.log("📬 Ejecutando envío de email de reseña...");
-    try {
-      enviarEmailResena({
-        nombreCliente: nombreUsuario,
-        emailCliente: emailUsuario,
-        nombreTerapeuta: terapeuta?.nombreCompleto || "",
-        servicio: servicio?.titulo || "",
-        reservaId: nuevaReserva._id.toString(),
-      });
-    } catch (err) {
-      console.error("❌ Error al enviar email de reseña:", err);
-    }
-  }, delayMs);
+  setTimeout(async () => {
+  console.log("📬 Ejecutando envío de email de reseña...");
+  try {
+    await enviarEmailResena({
+      nombreCliente: nombreUsuario,
+      emailCliente: emailUsuario,
+      nombreTerapeuta: terapeuta?.nombreCompleto || "",
+      servicio: servicio?.titulo || "",
+      reservaId: nuevaReserva._id.toString(),
+    });
+  } catch (err) {
+    console.error("❌ Error al enviar email de reseña:", err);
+  }
+}, delayMs);
 } else {
   console.log("⛔ Tiempo inválido para enviar reseña. delayMs:", delayMs);
 }
