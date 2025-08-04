@@ -1,12 +1,11 @@
-import mongoose from "mongoose";
-
-import Reserva from "../models/Reserva.js";
-import Terapeuta from "../models/Terapeuta.js";
-import Servicio from "../models/Servicio.js";
-import {
+const mongoose = require("mongoose");
+const Reserva = require("../models/Reserva");
+const Terapeuta = require("../models/Terapeuta");
+const Servicio = require("../models/Servicio");
+const {
   enviarEmailsReserva,
   enviarEmailConfirmacionCliente,
-} from "../utils/emailSender.js";
+} = require("../utils/emailSender");
 
 const crearReservaConComprobante = async (req, res) => {
   try {
@@ -277,7 +276,7 @@ const obtenerReservasConfirmadas = async (req, res) => {
   }
 };
 
-export {
+module.exports = {
   crearReservaConComprobante,
   obtenerReservas,
   aprobarReserva,
