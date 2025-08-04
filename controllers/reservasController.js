@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const Reserva = require("../models/Reserva");
 const Terapeuta = require("../models/Terapeuta");
 const Servicio = require("../models/Servicio");
@@ -52,17 +54,17 @@ const crearReservaConComprobante = async (req, res) => {
     });
 
     const nuevaReserva = new Reserva({
-      servicioId,
-      terapeuta: terapeutaId,
-      fecha,
-      hora,
-      nombreUsuario,
-      emailUsuario,
-      comprobantePago,
-      precio,
-      duracion,
-      estado: "confirmada",
-    });
+  servicioId,
+  terapeuta: new mongoose.Types.ObjectId(terapeutaId),
+  fecha,
+  hora,
+  nombreUsuario,
+  emailUsuario,
+  comprobantePago,
+  precio,
+  duracion,
+  estado: "confirmada",
+});
 
     await nuevaReserva.save();
     console.log("✅ Reserva confirmada:", nuevaReserva);
