@@ -5,6 +5,7 @@ const Servicio = require("../models/Servicio");
 const {
   enviarEmailsReserva,
   enviarEmailConfirmacionCliente,
+  enviarEmailResena, // ✅ agregalo acá
 } = require("../utils/emailSender");
 
 const crearReservaConComprobante = async (req, res) => {
@@ -125,9 +126,6 @@ await enviarEmailsReserva({
 });
 
     console.log("✅ Emails enviados correctamente");
-
-  // ⏰ Programar envío de email de reseña
-const { enviarEmailResena } = require("../utils/emailSender");
 
 const [horaFinalH, horaFinalM] = horaFinal.split(":").map(Number);
 const fechaHoraFin = new Date(fecha);
