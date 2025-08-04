@@ -56,27 +56,35 @@ const crearReservaConComprobante = async (req, res) => {
     });
 
     const nuevaReserva = new Reserva({
-  servicioId,
-  terapeuta: new mongoose.Types.ObjectId(terapeutaId),
-  fecha,
-  hora,
-  nombreUsuario,
-  emailUsuario,
-  comprobantePago,
-  precio,
-  duracion,
-  estado: "confirmada",
-});
+      servicioId,
+      terapeuta: terapeutaId,
+      fecha,
+      hora,
+      nombreUsuario,
+      emailUsuario,
+      comprobantePago,
+      precio,
+      duracion,
+      estado: "confirmada",
+    });
 
     await nuevaReserva.save();
     console.log("✅ Reserva confirmada:", nuevaReserva);
 
-    // 🔍 Buscar datos del terapeuta y servicio para los emails
-    const servicio = await Servicio.findById(servicioId);
     const terapeuta = await Terapeuta.findById(terapeutaId);
-    console.log("🧑‍⚕️ Terapeuta encontrado:", terapeuta);
+    console.log("🧠 Terapeuta desde DB:", terapeuta);
 
-    // ⏱️ Calcular hora final
+    await enviarEmailsReserva({
+      emailCliente: emailUsuario,
+      emailTerapeuta: terapeuta?.email,
+      nombreUsuario,
+      fecha,
+      hora,
+    });
+
+    const servicio = await Servicio.findById(servicioId);
+    console.log("🧑‍⚕️ Servicio encontrado:", servicio);
+
     const calcularHoraFinal = (horaInicio, duracionMinutos) => {
       const [h, m] = horaInicio.split(":").map(Number);
       const fecha = new Date();
@@ -86,23 +94,21 @@ const crearReservaConComprobante = async (req, res) => {
       const mm = fecha.getMinutes().toString().padStart(2, "0");
       return `${hh}:${mm}`;
     };
+
     const horaFinal = calcularHoraFinal(hora, duracion);
 
-    // 📧 Enviar emails tanto al cliente como al terapeuta
-let numeroWhatsApp = terapeuta?.whatsapp || "";
+    let numeroWhatsApp = terapeuta?.whatsapp || "";
+    numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");
 
-// 🔧 Limpiar y formatear número para WhatsApp (Argentina)
-numeroWhatsApp = numeroWhatsApp.replace(/\D/g, ""); // quitar todo lo que no sea número
+    if (numeroWhatsApp.startsWith("15")) {
+      numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
+    }
 
-if (numeroWhatsApp.startsWith("15")) {
-  numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
-}
-
-if (numeroWhatsApp.length === 10) {
-  numeroWhatsApp = `549${numeroWhatsApp}`;
-} else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {
-  numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
-}
+    if (numeroWhatsApp.length === 10) {
+      numeroWhatsApp = `549${numeroWhatsApp}`;
+    } else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {
+      numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
+                        }
 
 await enviarEmailsReserva({
   nombreCliente: nombreUsuario,
