@@ -127,33 +127,36 @@ const fechaHoraFin = new Date(fecha);
 fechaHoraFin.setHours(horaFinalH);
 fechaHoraFin.setMinutes(horaFinalM);
 
-// En desarrollo: enviar a los 1 minuto
+// En desarrollo: enviar al 1 minuto, en producción a los 30
 const minutosDelay = process.env.NODE_ENV === "development" ? 1 : 30;
 fechaHoraFin.setMinutes(fechaHoraFin.getMinutes() + minutosDelay);
 
 const delayMs = fechaHoraFin.getTime() - Date.now();
 
 if (delayMs > 0) {
+  console.log("⏳ Email de reseña programado en", Math.round(delayMs / 1000), "segundos");
   setTimeout(() => {
-    enviarEmailResena({
-      nombreCliente: nombreUsuario,
-      emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta?.nombreCompleto || "",
-      servicio: servicio?.titulo || "",
-      reservaId: nuevaReserva._id.toString(),
-    });
+    console.log("📬 Ejecutando envío de email de reseña...");
+    try {
+      enviarEmailResena({
+        nombreCliente: nombreUsuario,
+        emailCliente: emailUsuario,
+        nombreTerapeuta: terapeuta?.nombreCompleto || "",
+        servicio: servicio?.titulo || "",
+        reservaId: nuevaReserva._id.toString(),
+      });
+    } catch (err) {
+      console.error("❌ Error al enviar email de reseña:", err);
+    }
   }, delayMs);
+} else {
+  console.log("⛔ Tiempo inválido para enviar reseña. delayMs:", delayMs);
 }
 
-    res.status(201).json({
-      mensaje: "Reserva creada exitosamente",
-      reserva: nuevaReserva,
-    });
-  } catch (error) {
-    console.error("❌ Error al crear reserva con comprobante:", error);
-    res.status(500).json({ error: "Error al crear la reserva" });
-  }
-};
+res.status(201).json({
+  mensaje: "Reserva creada exitosamente",
+  reserva: nuevaReserva,
+});
 
 const obtenerReservas = async (req, res) => {
   try {
