@@ -1,9 +1,12 @@
 import mongoose from "mongoose";
 
-const Reserva = require("../models/Reserva");
-const Terapeuta = require("../models/Terapeuta");
-const Servicio = require("../models/Servicio");
-const { enviarEmailsReserva, enviarEmailConfirmacionCliente } = require("../utils/emailSender");
+import Reserva from "../models/Reserva.js";
+import Terapeuta from "../models/Terapeuta.js";
+import Servicio from "../models/Servicio.js";
+import {
+  enviarEmailsReserva,
+  enviarEmailConfirmacionCliente,
+} from "../utils/emailSender.js";
 
 const crearReservaConComprobante = async (req, res) => {
   try {
