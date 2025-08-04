@@ -75,14 +75,6 @@ const crearReservaConComprobante = async (req, res) => {
     const terapeuta = await Terapeuta.findById(terapeutaId);
     console.log("🧠 Terapeuta desde DB:", terapeuta);
 
-    await enviarEmailsReserva({
-      emailCliente: emailUsuario,
-      emailTerapeuta: terapeuta?.email,
-      nombreUsuario,
-      fecha,
-      hora,
-    });
-
     const servicio = await Servicio.findById(servicioId);
     console.log("🧑‍⚕️ Servicio encontrado:", servicio);
 
