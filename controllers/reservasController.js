@@ -76,18 +76,20 @@ const crearReservaConComprobante = async (req, res) => {
     }
 
     await enviarEmailsReserva({
-      nombreCliente: nombreUsuario,
-      emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta?.nombreCompleto || "",
-      emailTerapeuta: terapeuta?.email || "",
-      nombreServicio: servicio?.titulo || "",
-      fecha,
-      hora,
-      horaFinal,
-      duracion,
-      precio,
-      telefonoTerapeuta: numeroWhatsApp,
-    });
+  nombreCliente,
+  emailCliente,
+  nombreTerapeuta: terapeuta?.nombreCompleto || "",
+  emailTerapeuta: terapeuta?.email || "",
+  nombreServicio: servicio?.titulo || "",
+  fecha,
+  hora,
+  horaFinal,
+  duracion,
+  precio,
+  telefonoTerapeuta: numeroWhatsApp,
+  cbuTerapeuta: terapeuta?.cbu || "",          // 👈 asegurate de tenerlo en el modelo
+  bancoTerapeuta: terapeuta?.banco || "",      // 👈 asegurate de tenerlo en el modelo
+});
 
     // Programar envío de reseña
     const [horaFinalH, horaFinalM] = horaFinal.split(":").map(Number);
