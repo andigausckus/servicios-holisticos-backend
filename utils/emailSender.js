@@ -135,7 +135,12 @@ const cuerpoCliente = `
   <p><strong>Datos del terapeuta:</strong></p>
 
   <p>🧘 <strong>Terapeuta:</strong> ${nombreTerapeuta} (${emailTerapeuta})</p>
-  <p><strong>CBU/CVU:</strong> ${cbuTerapeuta} <span style="font-size: 1.2em;">📋</span></p>
+  <p><strong>CBU/CVU:</strong> ${cbuTerapeuta} 
+    <button style="background-color: transparent; border: none; cursor: pointer; font-size: 0.8em;" 
+            onclick="navigator.clipboard.writeText('${cbuTerapeuta}')">
+      Copiar
+    </button>
+  </p>
   <p><strong>Banco:</strong> ${bancoTerapeuta}</p>
 
   <p style="margin-top: 20px;">
