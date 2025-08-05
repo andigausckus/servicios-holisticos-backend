@@ -87,8 +87,8 @@ const crearReservaConComprobante = async (req, res) => {
   duracion,
   precio,
   telefonoTerapeuta: numeroWhatsApp,
-  cbuTerapeuta: terapeuta?.cbu || "",
-  bancoTerapeuta: terapeuta?.banco || "",
+  cbuTerapeuta: terapeuta?.cbuCvu || "",           
+  bancoTerapeuta: terapeuta?.bancoOBilletera || "", 
 });
 
     // Programar envío de reseña
