@@ -126,14 +126,21 @@ const cuerpoCliente = `
   <p><strong>💡 Nueva reserva confirmada:</strong></p>
 
   <p>👤 <strong>Cliente:</strong> ${nombreCliente}</p>
-  <p>🧘 <strong>Terapeuta:</strong> ${nombreTerapeuta} (${emailTerapeuta})</p>
   <p>🛎️ <strong>Servicio:</strong> ${nombreServicio}</p>
   <p>📅 <strong>Fecha:</strong> ${fechaFormateada}</p>
   <p>🕒 <strong>Hora:</strong> ${hora} a ${horaFinal}</p>
   <p>💵 <strong>Precio pagado:</strong> $${precio}</p>
 
+  <br>
+  <p><strong>Datos del terapeuta:</strong></p>
+
+  <p>🧘 <strong>Terapeuta:</strong> ${nombreTerapeuta} (${emailTerapeuta})</p>
+  <p><strong>CBU/CVU:</strong> ${cbuTerapeuta} <span style="font-size: 1.2em;">📋</span></p>
+  <p><strong>Banco:</strong> ${bancoTerapeuta}</p>
+
   <p style="margin-top: 20px;">
-    👉 <a href="https://28bc7de7-6bbd-4dd9-9f49-afa273faafcc-00-2dnc5fn90yceh.riker.replit.dev/admin/pagos">
+    👉 <a href="https://28bc7de7-6bbd-4dd9-9f49-afa273faafcc-00-2dnc5fn90yceh.riker.replit.dev/admin/pagos" 
+    target="_blank" style="text-decoration: none; color: #7D5BA6; font-weight: bold;">
       Ver comprobante de pago
     </a>
   </p>
