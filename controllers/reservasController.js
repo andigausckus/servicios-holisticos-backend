@@ -94,13 +94,13 @@ let numeroWhatsApp = terapeuta?.whatsapp || "";
 numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");
 
 if (numeroWhatsApp.startsWith("15")) {
-numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
+  numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
 }
 
 if (numeroWhatsApp.length === 10) {
-numeroWhatsApp = 549${numeroWhatsApp};
+  numeroWhatsApp = `549${numeroWhatsApp}`;
 } else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {
-numeroWhatsApp = 549${numeroWhatsApp.slice(2)};
+  numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
 }
 
 console.log("🧪 Terapeuta:", terapeuta);
