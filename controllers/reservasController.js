@@ -154,10 +154,14 @@ if (delayMs > 0) {
 }
 
 res.status(201).json({
-  mensaje: "Reserva creada exitosamente",
-  reserva: nuevaReserva,
-});
-  }   
+      mensaje: "Reserva creada exitosamente",
+      reserva: nuevaReserva,
+    });
+  } catch (error) {
+    console.error("❌ Error al crear reserva con comprobante:", error);
+    res.status(500).json({ error: "Error al crear la reserva" });
+  }
+};   
 
 const obtenerReservas = async (req, res) => {
   try {
