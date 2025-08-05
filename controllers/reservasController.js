@@ -124,46 +124,56 @@ telefonoTerapeuta: numeroWhatsApp,
 console.log("✅ Emails enviados correctamente");
 
 try {
-  const [horaFinalH, horaFinalM] = horaFinal.split(":").map(Number);
-  const fechaHoraFin = new Date(fecha);
-  fechaHoraFin.setHours(horaFinalH);
-  fechaHoraFin.setMinutes(horaFinalM);
+  const horaFinal = calcularHoraFinal(hora, duracion);
 
-  // En desarrollo: enviar al 1 minuto, en producción a los 30
-  const minutosDelay = process.env.NODE_ENV === "development" ? 1 : 30;
-  fechaHoraFin.setMinutes(fechaHoraFin.getMinutes() + minutosDelay);
+let numeroWhatsApp = terapeuta?.whatsapp || "";
+numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");
 
-  const delayMs = fechaHoraFin.getTime() - Date.now();
-
-  if (delayMs > 0) {
-    console.log("⏳ Email de reseña programado en", Math.round(delayMs / 1000), "segundos");
-    setTimeout(async () => {
-      console.log("📬 Ejecutando envío de email de reseña...");
-      try {
-        await enviarEmailResena({
-          nombreCliente: nombreUsuario,
-          emailCliente: emailUsuario,
-          nombreTerapeuta: terapeuta?.nombreCompleto || "",
-          servicio: servicio?.titulo || "",
-          reservaId: nuevaReserva._id.toString(),
-        });
-      } catch (err) {
-        console.error("❌ Error al enviar email de reseña:", err);
-      }
-    }, delayMs);
-  } else {
-    console.log("⛔ Tiempo inválido para enviar reseña. delayMs:", delayMs);
-  }
-
-  res.status(201).json({
-    mensaje: "Reserva creada exitosamente",
-    reserva: nuevaReserva,
-  });
-
-} catch (error) {
-  console.error("❌ Error al crear reserva:", error);
-  res.status(500).json({ mensaje: "Error al crear reserva", error });
+if (numeroWhatsApp.startsWith("15")) {
+  numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
 }
+
+if (numeroWhatsApp.length === 10) {
+  numeroWhatsApp = `549${numeroWhatsApp}`;
+} else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {
+  numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
+}
+
+const [horaFinalH, horaFinalM] = horaFinal.split(":").map(Number);
+const fechaHoraFin = new Date(fecha);
+fechaHoraFin.setHours(horaFinalH);
+fechaHoraFin.setMinutes(horaFinalM);
+
+// En desarrollo: enviar al 1 minuto, en producción a los 30
+const minutosDelay = process.env.NODE_ENV === "development" ? 1 : 30;
+fechaHoraFin.setMinutes(fechaHoraFin.getMinutes() + minutosDelay);
+
+const delayMs = fechaHoraFin.getTime() - Date.now();
+
+if (delayMs > 0) {
+  console.log("⏳ Email de reseña programado en", Math.round(delayMs / 1000), "segundos");
+  setTimeout(async () => {
+    console.log("📬 Ejecutando envío de email de reseña...");
+    try {
+      await enviarEmailResena({
+        nombreCliente: nombreUsuario,
+        emailCliente: emailUsuario,
+        nombreTerapeuta: terapeuta?.nombreCompleto || "",
+        servicio: servicio?.titulo || "",
+        reservaId: nuevaReserva._id.toString(),
+      });
+    } catch (err) {
+      console.error("❌ Error al enviar email de reseña:", err);
+    }
+  }, delayMs);
+} else {
+  console.log("⛔ Tiempo inválido para enviar reseña. delayMs:", delayMs);
+}
+
+res.status(201).json({
+  mensaje: "Reserva creada exitosamente",
+  reserva: nuevaReserva,
+});
 
 const obtenerReservas = async (req, res) => {
 try {
