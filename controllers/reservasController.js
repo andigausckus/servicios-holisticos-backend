@@ -122,10 +122,11 @@ await enviarEmailsReserva({
 
     console.log("✅ Emails enviados correctamente");
 
+// Combinar fecha y horaFinal en una sola fecha completa
 const [horaFinalH, horaFinalM] = horaFinal.split(":").map(Number);
-const fechaHoraFin = new Date(fecha);
-fechaHoraFin.setHours(horaFinalH);
-fechaHoraFin.setMinutes(horaFinalM);
+const [anio, mes, dia] = fecha.split("-").map(Number); // formato YYYY-MM-DD
+
+const fechaHoraFin = new Date(anio, mes - 1, dia, horaFinalH, horaFinalM);
 
 // En desarrollo: enviar al 1 minuto, en producción a los 30
 const minutosDelay = process.env.NODE_ENV === "development" ? 1 : 30;
@@ -136,32 +137,27 @@ const delayMs = fechaHoraFin.getTime() - Date.now();
 if (delayMs > 0) {
   console.log("⏳ Email de reseña programado en", Math.round(delayMs / 1000), "segundos");
   setTimeout(async () => {
-  console.log("📬 Ejecutando envío de email de reseña...");
-  try {
-    await enviarEmailResena({
-      nombreCliente: nombreUsuario,
-      emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta?.nombreCompleto || "",
-      servicio: servicio?.titulo || "",
-      reservaId: nuevaReserva._id.toString(),
-    });
-  } catch (err) {
-    console.error("❌ Error al enviar email de reseña:", err);
-  }
-}, delayMs);
+    console.log("📬 Ejecutando envío de email de reseña...");
+    try {
+      await enviarEmailResena({
+        nombreCliente: nombreUsuario,
+        emailCliente: emailUsuario,
+        nombreTerapeuta: terapeuta?.nombreCompleto || "",
+        servicio: servicio?.titulo || "",
+        reservaId: nuevaReserva._id.toString(),
+      });
+    } catch (err) {
+      console.error("❌ Error al enviar email de reseña:", err);
+    }
+  }, delayMs);
 } else {
   console.log("⛔ Tiempo inválido para enviar reseña. delayMs:", delayMs);
 }
 
 res.status(201).json({
-      mensaje: "Reserva creada exitosamente",
-      reserva: nuevaReserva,
-    });
-  } catch (error) {
-    console.error("❌ Error al crear reserva con comprobante:", error);
-    res.status(500).json({ error: "Error al crear la reserva" });
-  }
-};   
+  mensaje: "Reserva creada exitosamente",
+  reserva: nuevaReserva,
+});   
 
 const obtenerReservas = async (req, res) => {
   try {
