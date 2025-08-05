@@ -163,7 +163,8 @@ try {
 } catch (error) {
   console.error("❌ Error al crear reserva:", error);
   res.status(500).json({ mensaje: "Error al crear reserva", error });
-}   
+} 
+};    
 
 const obtenerReservas = async (req, res) => {
   try {
