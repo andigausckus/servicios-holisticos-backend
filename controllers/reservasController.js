@@ -92,35 +92,43 @@ const crearReservaConComprobante = async (req, res) => {
 });
 
     // Programar envío de reseña
-    const [horaFinalH, horaFinalM] = horaFinal.split(":").map(Number);
-    const fechaHoraFin = new Date(fecha);
-    fechaHoraFin.setHours(horaFinalH);
-    fechaHoraFin.setMinutes(horaFinalM);
+const [horaInicioH, horaInicioM] = hora.split(":").map(Number);
+const fechaHoraInicio = new Date(fecha);
+fechaHoraInicio.setHours(horaInicioH);
+fechaHoraInicio.setMinutes(horaInicioM);
+fechaHoraInicio.setSeconds(0);
+fechaHoraInicio.setMilliseconds(0);
 
-    const minutosDelay = process.env.NODE_ENV === "development" ? 1 : 30;
-    fechaHoraFin.setMinutes(fechaHoraFin.getMinutes() + minutosDelay);
+// Calcular hora real de fin sumando la duración del servicio
+const duracionMs = servicio.duracion * 60 * 1000;
+const fechaHoraFin = new Date(fechaHoraInicio.getTime() + duracionMs);
 
-    const delayMs = fechaHoraFin.getTime() - Date.now();
+// Sumar tiempo extra para enviar la reseña
+const minutosDelay = process.env.NODE_ENV === "development" ? 1 : 30;
+fechaHoraFin.setMinutes(fechaHoraFin.getMinutes() + minutosDelay);
 
-    if (delayMs > 0) {
-      console.log("⏳ Email de reseña programado en", Math.round(delayMs / 1000), "segundos");
-      setTimeout(async () => {
-        try {
-          console.log("📬 Ejecutando envío de email de reseña...");
-          await enviarEmailResena({
-            nombreCliente: nombreUsuario,
-            emailCliente: emailUsuario,
-            nombreTerapeuta: terapeuta?.nombreCompleto || "",
-            servicio: servicio?.titulo || "",
-            reservaId: nuevaReserva._id.toString(),
-          });
-        } catch (err) {
-          console.error("❌ Error al enviar email de reseña:", err);
-        }
-      }, delayMs);
-    } else {
-      console.log("⛔ Tiempo inválido para enviar reseña. delayMs:", delayMs);
+// Calcular cuánto esperar desde ahora
+const delayMs = fechaHoraFin.getTime() - Date.now();
+
+if (delayMs > 0) {
+  console.log("⏳ Email de reseña programado en", Math.round(delayMs / 1000), "segundos");
+  setTimeout(async () => {
+    try {
+      console.log("📬 Ejecutando envío de email de reseña...");
+      await enviarEmailResena({
+        nombreCliente: nombreUsuario,
+        emailCliente: emailUsuario,
+        nombreTerapeuta: terapeuta?.nombreCompleto || "",
+        servicio: servicio?.titulo || "",
+        reservaId: nuevaReserva._id.toString(),
+      });
+    } catch (err) {
+      console.error("❌ Error al enviar email de reseña:", err);
     }
+  }, delayMs);
+} else {
+  console.log("⛔ Tiempo inválido para enviar reseña. delayMs:", delayMs);
+}
 
     res.status(201).json({
       mensaje: "Reserva creada exitosamente",
