@@ -100,16 +100,13 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Obtener un servicio público por ID
-router.get("/publico/:id", async (req, res) => {
-  const { id } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ error: "ID de servicio inválido" });
-  }
+// Nuevo (por slug)
+router.get("/publico/:slug", async (req, res) => {
+  const { slug } = req.params;
 
   try {
-    const servicio = await Servicio.findById(id).populate("terapeuta", "nombreCompleto");
+    const servicio = await Servicio.findOne({ slug }).populate("terapeuta", "nombreCompleto");
+
     if (!servicio) {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
@@ -117,45 +114,45 @@ router.get("/publico/:id", async (req, res) => {
     const bloqueos = await Bloqueo.find({ servicioId: servicio._id });
     const reservas = await Reserva.find({ servicioId: servicio._id });
 
-const horariosConEstado = Array.isArray(servicio.horariosDisponibles)
-  ? servicio.horariosDisponibles
-      .filter((dia) => dia && Array.isArray(dia.horariosFijos))
-      .map((dia) => {
-        const horariosFijosConEstado = dia.horariosFijos
-          .filter((h) => h.desde && h.hasta)
-          .map((horario) => {
-            const estaReservado = reservas.some(
-              (r) => r.fecha === dia.fecha && r.hora === horario.desde
-            );
-            const estaBloqueado = bloqueos.some(
-              (b) => b.fecha === dia.fecha && b.hora === horario.desde
-            );
+    const horariosConEstado = Array.isArray(servicio.horariosDisponibles)
+      ? servicio.horariosDisponibles
+          .filter((dia) => dia && Array.isArray(dia.horariosFijos))
+          .map((dia) => {
+            const horariosFijosConEstado = dia.horariosFijos
+              .filter((h) => h.desde && h.hasta)
+              .map((horario) => {
+                const estaReservado = reservas.some(
+                  (r) => r.fecha === dia.fecha && r.hora === horario.desde
+                );
+                const estaBloqueado = bloqueos.some(
+                  (b) => b.fecha === dia.fecha && b.hora === horario.desde
+                );
 
-            let estado = "disponible";
-            if (estaReservado) estado = "reservado";
-            else if (estaBloqueado) estado = "en_proceso";
+                let estado = "disponible";
+                if (estaReservado) estado = "reservado";
+                else if (estaBloqueado) estado = "en_proceso";
+
+                return {
+                  desde: horario.desde,
+                  hasta: horario.hasta,
+                  estado,
+                };
+              });
 
             return {
-              desde: horario.desde,
-              hasta: horario.hasta,
-              estado,
+              fecha: dia.fecha,
+              horariosFijos: horariosFijosConEstado,
             };
-          });
+          })
+      : [];
 
-        return {
-          fecha: dia.fecha,
-          horariosFijos: horariosFijosConEstado,
-        };
-      })
-  : [];
-    
     res.json({
-  ...servicio.toObject(),
-  duracion: servicio.duracionMinutos, // alias útil
-  terapeutaId: servicio.terapeuta?._id,
-  horariosDisponibles: horariosConEstado,
-  plataformas: servicio.plataformas || [],
-});
+      ...servicio.toObject(),
+      duracion: servicio.duracionMinutos,
+      terapeutaId: servicio.terapeuta?._id,
+      horariosDisponibles: horariosConEstado,
+      plataformas: servicio.plataformas || [],
+    });
 
   } catch (err) {
     console.error("❌ Error al obtener servicio público:", err);
