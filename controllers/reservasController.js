@@ -49,6 +49,7 @@ const crearReservaConComprobante = async (req, res) => {
 
     const terapeuta = await Terapeuta.findById(terapeutaId);
     const servicio = await Servicio.findById(servicioId);
+    servicio.duracion = servicio.duracion || duracion;
 
     const calcularHoraFinal = (horaInicio, duracionMinutos) => {
       const [h, m] = horaInicio.split(":").map(Number);
