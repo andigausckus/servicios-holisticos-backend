@@ -144,7 +144,8 @@ res.status(201).json({
   mensaje: "Reserva creada exitosamente",
   reserva: nuevaReserva,
 });
-
+  };
+  
 const obtenerReservas = async (req, res) => {
   try {
     const reservas = await Reserva.find();
