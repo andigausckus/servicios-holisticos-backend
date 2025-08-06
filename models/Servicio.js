@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const slugify = require("slugify"); // 👈 asegurate de tenerlo instalado
+const slugify = require("slugify");
 
 // Subdocumento para los bloques horarios por día
 const horarioSchema = new mongoose.Schema({
@@ -27,7 +27,7 @@ const horarioSchema = new mongoose.Schema({
 // Modelo principal de Servicio
 const servicioSchema = new mongoose.Schema({
   titulo: { type: String, required: true },
-  slug: { type: String, unique: true, required: true }, // 👈 nuevo campo
+  slug: { type: String, unique: true }, // ⚠️ 'required' quitado para permitir generarlo en el pre-save
   descripcion: { type: String, required: true },
   modalidad: {
     type: String,
@@ -51,7 +51,7 @@ const servicioSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Middleware para generar el slug automáticamente
-servicioSchema.pre("validate", function(next) {
+servicioSchema.pre("save", function(next) {
   if (this.titulo && !this.slug) {
     this.slug = slugify(this.titulo, { lower: true, strict: true });
   }
