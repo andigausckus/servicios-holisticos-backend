@@ -66,19 +66,20 @@ const cuerpoCliente = `
   <p>Tu sesión fue confirmada exitosamente. A continuación te compartimos los detalles de la reserva:</p>
 
   <p>
-    🧘 <strong>Servicio:</strong> ${nombreServicio}<br><br>
-    📅 <strong>Fecha:</strong> ${fechaFormateada}<br><br>
-    🕒 <strong>Hora:</strong> ${hora} a ${horaFinal}<br><br>
-    💵 <strong>Valor:</strong> $${precio}
+    🧘 Servicio:</strong> ${nombreServicio}<br><br>
+    📅 Fecha:</strong> ${fechaFormateada}<br><br>
+    🕒 Hora:</strong> ${hora} a ${horaFinal}<br><br>
+    💵 Valor:</strong> $${precio}
 </p>
 
 <br><br>
 
-<p><strong>Datos del terapeuta holístico para contacto:</strong></p>
+<img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" alt="Logo de la plataforma" style="width: 100px; height: auto; margin: 10px auto; display: block;">
+<p>Datos del terapeuta holístico para contacto</p>
 <p>
-    <strong>Nombre y apellido:</strong> ${nombreTerapeuta}<br><br>
-    <strong>Email:</strong> ${emailTerapeuta}<br><br>
-    <strong>WhatsApp:</strong> 
+    Nombre y apellido:</strong> ${nombreTerapeuta}<br><br>
+    Email:</strong> ${emailTerapeuta}<br><br>
+    WhatsApp:</strong> 
     <a href="https://wa.me/${telefonoTerapeuta}?text=👋%20Hola%20${encodeURIComponent(nombreTerapeuta)},%20soy%20${encodeURIComponent(nombreCliente)}.%20Reservé%20con%20vos%20una%20sesión%20de%20*${encodeURIComponent(nombreServicio)}*%20para%20el%20día%20${encodeURIComponent(fechaFormateada)}%20de%20${encodeURIComponent(hora)}%20a%20${encodeURIComponent(horaFinal)}.%20¡Quedo%20a%20la%20espera%20de%20la%20sesión!" 
       target="_blank" style="display:inline-block;padding:8px 16px;background-color:#25D366;color:white;border-radius:4px;text-decoration:none;">
       Enviar mensaje
@@ -97,14 +98,15 @@ const cuerpoCliente = `
 
   const cuerpoTerapeuta = `
   <p>👋 <strong>Hola ${nombreTerapeuta}!</strong></p>
-
+  
+<img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" alt="Logo de la plataforma" style="width: 100px; height: auto; margin: 10px auto; display: block;">
   <p>¡Tenés una nueva reserva confirmada! 🎉</p>
 
-  <p>🧘 <strong>Usuario:</strong> ${nombreCliente}</p>
-  <p>🛎️ <strong>Servicio:</strong> ${nombreServicio}</p>
-  <p>📅 <strong>Fecha:</strong> ${fechaFormateada}</p>
-  <p>🕒 <strong>Hora:</strong> ${hora} a ${horaFinal}</p>
-  <p>💵 <strong>Valor de la sesión:</strong> $${precio}</p>
+  <p>🧘 Usuario: ${nombreCliente}</p>
+  <p>🛎️ Servicio: ${nombreServicio}</p>
+  <p>📅 Fecha: ${fechaFormateada}</p>
+  <p>🕒 Hora: ${hora} a ${horaFinal}</p>
+  <p>💵 Valor de la sesión: $${precio}</p>
 
   <p>${nombreCliente} podrá escribirte antes de la sesión si tiene alguna duda, o el mismo día del encuentro.</p>
 
