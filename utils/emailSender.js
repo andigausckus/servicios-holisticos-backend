@@ -76,10 +76,10 @@ const cuerpoCliente = `
 
 <p><strong>Datos del terapeuta holístico para contacto:</strong></p>
 <p>
-    <strong>Nombre y apellido:</strong> ${nombreTerapeuta}<br>
-    <strong>Email:</strong> ${emailTerapeuta}<br>
+    <strong>Nombre y apellido:</strong> ${nombreTerapeuta}<br><br>
+    <strong>Email:</strong> ${emailTerapeuta}<br><br>
     <strong>WhatsApp:</strong> 
-    <a href="https://wa.me/${telefonoTerapeuta}?text=Hola%20${encodeURIComponent(nombreTerapeuta)},%20soy%20${encodeURIComponent(nombreCliente)}.%20Reservé%20con%20vos%20una%20sesión%20de%20*${encodeURIComponent(nombreServicio)}*%20para%20el%20día%20${encodeURIComponent(fechaFormateada)}%20de%20${encodeURIComponent(hora)}%20a%20${encodeURIComponent(horaFinal)}.%20¡Quedo%20a%20la%20espera%20de%20la%20sesión!" 
+    <a href="https://wa.me/${telefonoTerapeuta}?text=👋%20Hola%20${encodeURIComponent(nombreTerapeuta)},%20soy%20${encodeURIComponent(nombreCliente)}.%20Reservé%20con%20vos%20una%20sesión%20de%20*${encodeURIComponent(nombreServicio)}*%20para%20el%20día%20${encodeURIComponent(fechaFormateada)}%20de%20${encodeURIComponent(hora)}%20a%20${encodeURIComponent(horaFinal)}.%20¡Quedo%20a%20la%20espera%20de%20la%20sesión!" 
       target="_blank" style="display:inline-block;padding:8px 16px;background-color:#25D366;color:white;border-radius:4px;text-decoration:none;">
       Enviar mensaje
     </a>
