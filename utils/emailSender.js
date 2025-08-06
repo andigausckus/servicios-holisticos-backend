@@ -139,7 +139,7 @@ const cuerpoCliente = `
   <p><strong>Banco:</strong> ${bancoTerapeuta}</p>
 
   <p style="margin-top: 20px;">
-    👉 <a href="https://28bc7de7-6bbd-4dd9-9f49-afa273faafcc-00-2dnc5fn90yceh.riker.replit.dev/admin/pagos" 
+    👉 <a href="https://28bc2de7-6bbd-4dd9-9f49-afa273faafcc-00-2dnc5fn90yceh.riker.replit.dev/admin/pagos" 
     target="_blank" style="text-decoration: none; color: #7D5BA6; font-weight: bold;">
       Ver comprobante de pago
     </a>
