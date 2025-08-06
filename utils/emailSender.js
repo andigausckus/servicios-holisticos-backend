@@ -59,6 +59,7 @@ async function enviarEmailsReserva({
 // cuerpo del emailCliente (HTML) actualizado
 
 const cuerpoCliente = `
+<img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" alt="Logo de la plataforma" style="width: 100px; height: auto; margin: 10px auto; display: block;">
   <p>Hola ${nombreCliente},</p>
 
   <p>¡Gracias por confiar en Servicios Holísticos 🌿!</p>
@@ -66,19 +67,18 @@ const cuerpoCliente = `
   <p>Tu sesión fue confirmada exitosamente. A continuación te compartimos los detalles de la reserva:</p>
 
   <p>
-    🧘 Servicio:</strong> ${nombreServicio}<br><br>
-    📅 Fecha:</strong> ${fechaFormateada}<br><br>
-    🕒 Hora:</strong> ${hora} a ${horaFinal}<br><br>
-    💵 Valor:</strong> $${precio}
+    🧘 Servicio: ${nombreServicio}<br><br>
+    📅 Fecha: ${fechaFormateada}<br><br>
+    🕒 Hora: ${hora} a ${horaFinal}<br><br>
+    💵 Valor: $${precio}
 </p>
 
 <br><br>
 
-<img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" alt="Logo de la plataforma" style="width: 100px; height: auto; margin: 10px auto; display: block;">
 <p>Datos del terapeuta holístico para contacto</p>
 <p>
-    Nombre y apellido:</strong> ${nombreTerapeuta}<br><br>
-    Email:</strong> ${emailTerapeuta}<br><br>
+    Nombre y apellido: ${nombreTerapeuta}<br><br>
+    Email: ${emailTerapeuta}<br><br>
     WhatsApp:</strong> 
     <a href="https://wa.me/${telefonoTerapeuta}?text=👋%20Hola%20${encodeURIComponent(nombreTerapeuta)},%20soy%20${encodeURIComponent(nombreCliente)}.%20Reservé%20con%20vos%20una%20sesión%20de%20*${encodeURIComponent(nombreServicio)}*%20para%20el%20día%20${encodeURIComponent(fechaFormateada)}%20de%20${encodeURIComponent(hora)}%20a%20${encodeURIComponent(horaFinal)}.%20¡Quedo%20a%20la%20espera%20de%20la%20sesión!" 
       target="_blank" style="display:inline-block;padding:8px 16px;background-color:#25D366;color:white;border-radius:4px;text-decoration:none;">
@@ -93,13 +93,14 @@ const cuerpoCliente = `
 <p>Si necesitás ayuda, podés responder directamente a este correo.</p>
 
   <p>Un abrazo,<br>
+  
   El equipo de <strong>Servicios Holísticos</strong></p>
 `;
 
   const cuerpoTerapeuta = `
-  <p>👋 <strong>Hola ${nombreTerapeuta}!</strong></p>
+  <img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" alt="Logo de la plataforma" style="width: 100px; height: auto; margin: 10px auto; display: block;">
+  <p>👋 Hola ${nombreTerapeuta}!</p>
   
-<img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" alt="Logo de la plataforma" style="width: 100px; height: auto; margin: 10px auto; display: block;">
   <p>¡Tenés una nueva reserva confirmada! 🎉</p>
 
   <p>🧘 Usuario: ${nombreCliente}</p>
@@ -118,7 +119,7 @@ const cuerpoCliente = `
 
 <p>Una buena experiencia, cordialidad y profesionalismo te ayudarán a construir una gran reputación dentro de la plataforma.</p>
 
-  <p><strong>El equipo de Servicios Holísticos</strong></p>
+  <p>El equipo de Servicios Holísticos</p>
 `;
 
   const cuerpoAdmin = `
