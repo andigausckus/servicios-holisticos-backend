@@ -101,7 +101,7 @@ const crearReservaConComprobante = async (req, res) => {
     (() => {
       try {
         const [horaInicioH, horaInicioM] = hora.split(":").map(Number);
-        const fechaHoraInicio = new Date(`${fecha}T${hora}:00Z`);
+        const fechaHoraInicio = new Date(`${fecha}T${hora}:00`);
         fechaHoraInicio.setSeconds(0);
         fechaHoraInicio.setMilliseconds(0);
 
