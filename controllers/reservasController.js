@@ -97,7 +97,7 @@ console.log("Duración del servicio (min):", servicio?.duracion);
 console.log("Hora inicio recibida:", hora);
 console.log("Fecha recibida:", fecha);
 
-(async () => {
+(() => {
   try {
     const [horaInicioH, horaInicioM] = hora.split(":").map(Number);
     const fechaHoraInicio = new Date(fecha);
@@ -140,7 +140,7 @@ console.log("Fecha recibida:", fecha);
   } catch (error) {
     console.error("❌ Error calculando fecha de reseña:", error.message);
   }
-})(); // <- cierre correcto del IIFE
+})();
 
 res.status(201).json({
   mensaje: "Reserva creada exitosamente",
