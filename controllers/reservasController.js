@@ -102,24 +102,24 @@ try {
   console.log("⚠️ Email de reseña se enviará ahora (modo prueba)");
 
   await enviarEmailResena({
-    nombreCliente: nombreUsuario,
-    emailCliente: emailUsuario,
-    nombreTerapeuta: terapeuta?.nombreCompleto || "",
-    servicio: servicio?.titulo || "",
-    reservaId: nuevaReserva._id.toString(),
-  });
+      nombreCliente: nombreUsuario,
+      emailCliente: emailUsuario,
+      nombreTerapeuta: terapeuta?.nombreCompleto || "",
+      servicio: servicio?.titulo || "",
+      reservaId: nuevaReserva._id.toString(),
+    });
 
-  // Si todo sale bien, respondemos al cliente
-  res.status(201).json({
-    mensaje: "Reserva creada exitosamente",
-    reserva: nuevaReserva,
-  });
+    // Si todo sale bien, respondemos al cliente
+    return res.status(201).json({
+      mensaje: "Reserva creada exitosamente",
+      reserva: nuevaReserva,
+    });
 
-} catch (error) {
+  } catch (error) {
     console.error("❌ Error al enviar email de reseña (modo prueba):", error.message);
-    res.status(500).json({ error: "Error al crear reserva" });
+    return res.status(500).json({ error: "Error al crear reserva" });
   }
-}; // 👈 ESTA LLAVE FALTABA
+}; // 👈 ESTA LLAVE CIERRA la función crearReservaConComprobante
   
 const obtenerReservas = async (req, res) => {
   try {
