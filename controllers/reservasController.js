@@ -120,16 +120,17 @@ console.log("Fecha recibida:", fecha);
 
     const delayMs = fechaHoraFin.getTime() - Date.now();
 
-    console.log("⚠️ Email de reseña se enviará ahora (modo prueba)");
+    (async () => {
+  console.log("⚠️ Email de reseña se enviará ahora (modo prueba)");
 
-await enviarEmailResena({
-  nombreCliente: nombreUsuario,
-  emailCliente: emailUsuario,
-  nombreTerapeuta: terapeuta?.nombreCompleto || "",
-  servicio: servicio?.titulo || "",
-  reservaId: nuevaReserva._id.toString(),
-});
-    
+  try {
+    await enviarEmailResena({
+      nombreCliente: nombreUsuario,
+      emailCliente: emailUsuario,
+      nombreTerapeuta: terapeuta?.nombreCompleto || "",
+      servicio: servicio?.titulo || "",
+      reservaId: nuevaReserva._id.toString(),
+    });
   } catch (error) {
     console.error("❌ Error calculando fecha de reseña:", error.message);
   }
