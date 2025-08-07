@@ -12,10 +12,11 @@ const reservaSchema = new mongoose.Schema({
   emailUsuario: { type: String, required: true },
   estado: {
     type: String,
-    enum: ["pendiente", "confirmada", "cancelada"],
+    enum: ["pendiente", "confirmada", "cancelada", "aprobada"],
     default: "pendiente",
   },
   comprobantePago: { type: String, required: true },
+  reseñaEnviada: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Reserva", reservaSchema);
