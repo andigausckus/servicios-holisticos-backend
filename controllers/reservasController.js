@@ -11,116 +11,56 @@ const {
 const crearReservaConComprobante = async (req, res) => {
   try {
     const {
-      servicioId,
-      terapeutaId,
-      fecha,
-      hora,
       nombreUsuario,
       emailUsuario,
-      comprobantePago,
-      precio,
-      duracion,
+      nombreTerapeuta,
+      emailTerapeuta,
+      servicio,
+      fechaSeleccionada,
+      horaSeleccionada,
+      duracionMinutos,
     } = req.body;
 
-    if (!nombreUsuario || !emailUsuario || !comprobantePago) {
-      return res.status(400).json({
-        error: "Todos los campos son obligatorios: nombre, email y comprobante.",
-      });
-    }
-
-    console.log("📥 Datos recibidos para nueva reserva con comprobante:");
-    console.log({ servicioId, terapeutaId, precio, duracion });
-
     const nuevaReserva = new Reserva({
-      servicioId,
-      terapeuta: terapeutaId,
-      fecha,
-      hora,
-      nombreUsuario,
-      emailUsuario,
-      comprobantePago,
-      precio,
-      duracion,
-      estado: "confirmada",
+      usuario: {
+        nombre: nombreUsuario,
+        email: emailUsuario,
+      },
+      terapeuta: {
+        nombre: nombreTerapeuta,
+        email: emailTerapeuta,
+      },
+      servicio,
+      fecha: fechaSeleccionada,
+      hora: horaSeleccionada,
+      duracion: duracionMinutos,
+      estado: "pendiente",
     });
 
     await nuevaReserva.save();
-    console.log("✅ Reserva confirmada:", nuevaReserva);
 
-    const terapeuta = await Terapeuta.findById(terapeutaId);
-    const servicio = await Servicio.findById(servicioId);
-    servicio.duracion = servicio.duracion || duracion;
+    // 👉 ENVÍO INMEDIATO DEL EMAIL DE RESEÑA (modo prueba)
+    console.log("⚠️ Email de reseña se enviará ahora (modo prueba)");
 
-    const calcularHoraFinal = (horaInicio, duracionMinutos) => {
-      const [h, m] = horaInicio.split(":").map(Number);
-      const fecha = new Date();
-      fecha.setHours(h);
-      fecha.setMinutes(m + duracionMinutos);
-      const hh = fecha.getHours().toString().padStart(2, "0");
-      const mm = fecha.getMinutes().toString().padStart(2, "0");
-      return `${hh}:${mm}`;
-    };
-
-    const horaFinal = calcularHoraFinal(hora, duracion);
-
-    let numeroWhatsApp = terapeuta?.whatsapp || "";
-    numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");
-
-    if (numeroWhatsApp.startsWith("15")) {
-      numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
-    }
-
-    if (numeroWhatsApp.length === 10) {
-      numeroWhatsApp = `549${numeroWhatsApp}`;
-    } else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {
-      numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
-    }
-
-    await enviarEmailsReserva({
+    await enviarEmailResena({
       nombreCliente: nombreUsuario,
       emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta?.nombreCompleto || "",
-      emailTerapeuta: terapeuta?.email || "",
-      nombreServicio: servicio?.titulo || "",
-      fecha,
-      hora,
-      horaFinal,
-      duracion,
-      precio,
-      telefonoTerapeuta: numeroWhatsApp,
-      cbuTerapeuta: terapeuta?.cbuCvu || "",           
-      bancoTerapeuta: terapeuta?.bancoOBilletera || "", 
-    });
-
-    // Programar envío de reseña
-console.log("📅 Preparando email de reseña (modo prueba)...");
-console.log("Duración del servicio (min):", servicio?.duracion);
-console.log("Hora inicio recibida:", hora);
-console.log("Fecha recibida:", fecha);
-
-try {
-  console.log("⚠️ Email de reseña se enviará ahora (modo prueba)");
-
-  await enviarEmailResena({
-      nombreCliente: nombreUsuario,
-      emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta?.nombreCompleto || "",
+      nombreTerapeuta: nombreTerapeuta || "",
       servicio: servicio?.titulo || "",
       reservaId: nuevaReserva._id.toString(),
     });
 
-    // Si todo sale bien, respondemos al cliente
     return res.status(201).json({
       mensaje: "Reserva creada exitosamente",
       reserva: nuevaReserva,
     });
 
   } catch (error) {
-    console.error("❌ Error al enviar email de reseña (modo prueba):", error.message);
+    console.error("❌ Error en crearReservaConComprobante:", error.message);
     return res.status(500).json({ error: "Error al crear reserva" });
   }
-}; // 👈 ESTA LLAVE CIERRA la función crearReservaConComprobante
-  
+};
+
 const obtenerReservas = async (req, res) => {
   try {
     const reservas = await Reserva.find();
