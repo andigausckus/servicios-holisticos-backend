@@ -93,58 +93,30 @@ const crearReservaConComprobante = async (req, res) => {
     });
 
     // Programar envío de reseña
-console.log("📅 Preparando email de reseña...");
+console.log("📅 Preparando email de reseña (modo prueba)...");
 console.log("Duración del servicio (min):", servicio?.duracion);
 console.log("Hora inicio recibida:", hora);
 console.log("Fecha recibida:", fecha);
 
-(() => {
-  try {
-    const [horaInicioH, horaInicioM] = hora.split(":").map(Number);
-    const fechaHoraInicio = new Date(`${fecha}T${hora}:00`);
-    fechaHoraInicio.setSeconds(0);
-    fechaHoraInicio.setMilliseconds(0);
-
-    // 👇 Cambio aquí para pruebas
-    const duracionMin = Number(servicio?.duracion) || 2; // por defecto 2 min
-    const duracionMs = duracionMin * 60 * 1000;
-
-    if (isNaN(duracionMs)) {
-      throw new Error("Duración inválida para el servicio");
-    }
-
-    const fechaHoraFin = new Date(fechaHoraInicio.getTime() + duracionMs);
-
-    const minutosDelay = 1; // enviar email 1 minuto después de terminar
-    fechaHoraFin.setMinutes(fechaHoraFin.getMinutes() + minutosDelay);
-
-    const delayMs = fechaHoraFin.getTime() - Date.now();
-
-    (async () => {
+try {
   console.log("⚠️ Email de reseña se enviará ahora (modo prueba)");
 
-  try {
-    await enviarEmailResena({
-      nombreCliente: nombreUsuario,
-      emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta?.nombreCompleto || "",
-      servicio: servicio?.titulo || "",
-      reservaId: nuevaReserva._id.toString(),
-    });
-  } catch (error) {
-    console.error("❌ Error calculando fecha de reseña:", error.message);
-  }
-})();
+  await enviarEmailResena({
+    nombreCliente: nombreUsuario,
+    emailCliente: emailUsuario,
+    nombreTerapeuta: terapeuta?.nombreCompleto || "",
+    servicio: servicio?.titulo || "",
+    reservaId: nuevaReserva._id.toString(),
+  });
 
-    res.status(201).json({
-      mensaje: "Reserva creada exitosamente",
-      reserva: nuevaReserva,
-    });
-  } catch (error) {
-    console.error("Error al crear reserva:", error);
-    res.status(500).json({ error: "Error al crear reserva" });
-  }
-};
+  res.status(201).json({
+    mensaje: "Reserva creada exitosamente",
+    reserva: nuevaReserva,
+  });
+} catch (error) {
+  console.error("❌ Error al enviar email de reseña (modo prueba):", error.message);
+  res.status(500).json({ error: "Error al crear reserva" });
+}
   
 const obtenerReservas = async (req, res) => {
   try {
