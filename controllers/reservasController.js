@@ -112,7 +112,7 @@ const crearReservaConComprobante = async (req, res) => {
         }
 
         const fechaHoraFin = new Date(fechaHoraInicio.getTime() + duracionMs);
-        const minutosDelay = 5;
+        const minutosDelay = 1;
         fechaHoraFin.setMinutes(fechaHoraFin.getMinutes() + minutosDelay);
 
         const delayMs = fechaHoraFin.getTime() - Date.now();
