@@ -297,4 +297,5 @@ crearReservaTemporal,
 verificarExpiracionReserva,
 obtenerEstadoReserva,
 obtenerReservasConfirmadas,
+enviarResenasPendientes,
 };
