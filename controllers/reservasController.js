@@ -109,10 +109,12 @@ try {
     reservaId: nuevaReserva._id.toString(),
   });
 
+  // Si todo sale bien, respondemos al cliente
   res.status(201).json({
     mensaje: "Reserva creada exitosamente",
     reserva: nuevaReserva,
   });
+
 } catch (error) {
   console.error("❌ Error al enviar email de reseña (modo prueba):", error.message);
   res.status(500).json({ error: "Error al crear reserva" });
