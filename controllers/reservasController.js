@@ -248,6 +248,46 @@ res.status(500).json({ error: "Error al obtener reservas confirmadas" });
 }
 };
 
+const enviarResenasPendientes = async (req, res) => {
+  try {
+    const reservas = await Reserva.find({
+      estado: "aprobada",
+      fecha: { $lte: new Date() },
+      reseñaEnviada: { $ne: true },
+    })
+      .populate("usuario")
+      .populate("terapeuta")
+      .populate("servicio");
+
+    if (!reservas.length) {
+      return res.status(200).json({ mensaje: "No hay reseñas pendientes por enviar." });
+    }
+
+    for (const reserva of reservas) {
+      try {
+        await enviarEmailResena({
+          nombreCliente: reserva.usuario?.nombre || "",
+          emailCliente: reserva.usuario?.email || "",
+          nombreTerapeuta: reserva.terapeuta?.nombreCompleto || "",
+          servicio: reserva.servicio?.titulo || "",
+          reservaId: reserva._id.toString(),
+        });
+
+        // Marcar como enviada
+        reserva.reseñaEnviada = true;
+        await reserva.save();
+      } catch (error) {
+        console.error("❌ Error enviando reseña para reserva:", reserva._id, error.message);
+      }
+    }
+
+    res.status(200).json({ mensaje: `Se enviaron ${reservas.length} reseñas.` });
+  } catch (error) {
+    console.error("❌ Error al procesar reseñas pendientes:", error.message);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
+
 module.exports = {
 crearReservaConComprobante,
 obtenerReservas,
