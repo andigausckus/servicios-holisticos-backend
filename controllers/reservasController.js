@@ -103,12 +103,13 @@ const crearReservaConComprobante = async (req, res) => {
       console.log("⚠️ Email de reseña se enviará ahora (modo prueba)");
 
       await enviarEmailResena({
-        nombreCliente: nombreUsuario,
-        emailCliente: emailUsuario,
-        nombreTerapeuta: terapeuta?.nombreCompleto || "",
-        servicio: servicio?.titulo || "",
-        reservaId: nuevaReserva._id.toString(),
-      });
+  nombreCliente: nombreUsuario,
+  emailCliente: emailUsuario,
+  nombreTerapeuta: terapeuta?.nombreCompleto || "",
+  servicio: servicio?.titulo || "",
+  idReserva: nuevaReserva._id.toString(),
+});
+
 
     } catch (error) {
       console.error("❌ Error al enviar email de reseña (modo prueba):", error.message);
