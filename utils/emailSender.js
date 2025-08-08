@@ -248,5 +248,5 @@ async function enviarEmailResenaUsuario({ nombreCliente, emailCliente, nombreTer
 module.exports = {
   enviarEmailsReserva,
   enviarEmailConfirmacionCliente,
-  enviarEmailResenaUsuario, // 👈🏼 esta línea nueva
+  enviarEmailResena: enviarEmailResenaUsuario, // 👈 alias
 };
