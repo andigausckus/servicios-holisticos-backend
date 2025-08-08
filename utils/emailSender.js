@@ -209,7 +209,17 @@ const cuerpoCliente = `
     }
 
 async function enviarEmailResenaUsuario({ nombreCliente, emailCliente, nombreTerapeuta, idReserva }) {
-  if (!emailCliente || !nombreCliente || !idReserva) return;
+  console.log("📩 Datos recibidos para email de reseña:", {
+    nombreCliente,
+    emailCliente,
+    nombreTerapeuta,
+    idReserva,
+  });
+
+  if (!emailCliente || !nombreCliente || !idReserva) {
+    console.warn("⚠️ Email de reseña NO enviado: faltan datos obligatorios");
+    return;
+  }
 
   const urlResena = `https://28bc7de7-6bbd-4dd9-9f49-afa273faafcc-00-2dnc5fn90yceh.riker.replit.dev/resenas/${idReserva}`;
 
