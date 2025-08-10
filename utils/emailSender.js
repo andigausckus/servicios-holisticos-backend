@@ -221,7 +221,8 @@ async function enviarEmailResenaUsuario({ nombreCliente, emailCliente, nombreTer
     return;
   }
 
-  const urlResena = `https://28bc7de7-6bbd-4dd9-9f49-afa273faafcc-00-2dnc5fn90yceh.riker.replit.dev/resenas/${idReserva}`;
+  const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
+const urlResena = `${FRONTEND_URL}/resenas/${idReserva}`;
 
   const html = `
     <p>Hola ${nombreCliente},</p>
