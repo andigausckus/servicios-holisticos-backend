@@ -11,9 +11,9 @@ app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://28bc2de7-6bbd-4dd9-9f49-afa273faafcc-00-2dnc5fn90yceh.riker.replit.dev",
-    "https://frontend-holisticos.vercel.app"
+    "https://frontend-holisticos.vercel.app",
     "https://serviciosholisticos.com.ar",
-    "https://www.serviciosholisticos.com.ar"
+    "https://www.serviciosholisticos.com.ar",
   ]
 }));
 
