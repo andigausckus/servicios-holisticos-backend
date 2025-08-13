@@ -373,32 +373,6 @@ router.put("/actualizar-horario", async (req, res) => {
   }
 });
 
-// Dentro de tu router
-router.get("/publico/:slug", async (req, res) => {
-  try {
-    const servicio = await Servicio.findOne({ slug: req.params.slug })
-      .populate({
-        path: "resenas.usuario",
-        select: "nombreCompleto email" // puedes elegir qué campos del usuario traer
-      })
-      .populate("terapeuta", "nombreCompleto");
-
-    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
-
-    // Calcular promedio y cantidad de reseñas
-    const cantidadResenas = servicio.resenas.length;
-    const promedioResenas =
-      cantidadResenas > 0
-        ? servicio.resenas.reduce((sum, r) => sum + (r.calificacion || 0), 0) / cantidadResenas
-        : 0;
-
-    res.json({ ...servicio.toObject(), cantidadResenas, promedioResenas });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Error al obtener el servicio" });
-  }
-});
-
 // ruta: POST /api/servicios/:id/resena
 router.post("/:id/resena", async (req, res) => {
   try {
