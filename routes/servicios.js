@@ -71,18 +71,35 @@ router.post("/", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Obtener todos los servicios
+// ✅ Obtener todos los servicios con promedio y cantidad de reseñas
 router.get("/", async (req, res) => {
   try {
     const servicios = await Servicio.find().populate("terapeuta");
 
-if (!Array.isArray(servicios)) {
-  console.error("❌ No se obtuvo un array de servicios:", servicios);
-  return res.status(500).json({ error: "No se pudo obtener los servicios" });
-}
-console.log("🟡 Servicios obtenidos:", servicios);
-res.json(servicios);
+    if (!Array.isArray(servicios)) {
+      console.error("❌ No se obtuvo un array de servicios:", servicios);
+      return res.status(500).json({ error: "No se pudo obtener los servicios" });
+    }
 
+    // Para cada servicio, obtener sus reseñas aprobadas y calcular promedio
+    const conRatings = await Promise.all(
+      servicios.map(async (s) => {
+        const resenas = await Resena.find({
+          terapeuta: s.terapeuta?._id,
+          aprobado: true,
+        }).select("puntaje"); // si en tu modelo se llama 'puntuacion', cámbialo aquí
+
+        const suma = resenas.reduce((acc, r) => acc + (r.puntaje || 0), 0);
+        const promedio = resenas.length ? (suma / resenas.length) : 0;
+
+        const obj = s.toObject();
+        obj.cantidadResenas = resenas.length;
+        obj.promedioResenas = Number(promedio.toFixed(1));
+        return obj;
+      })
+    );
+
+    res.json(conRatings);
   } catch (err) {
     console.error("❌ Error real al obtener los servicios:", err.message, err.stack);
     res.status(500).json({ error: "Error al obtener los servicios" });
