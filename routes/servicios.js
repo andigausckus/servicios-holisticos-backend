@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const Bloqueo = require("../models/Bloqueo");
 const Reserva = require("../models/Reserva");
 const mongoose = require("mongoose"); // asegurate de tener esta línea al comienzo del archivo
+const Resena = require("../models/Resena"); // ⬅️ agregar
 
 // Middleware JWT
 function verificarToken(req, res, next) {
@@ -105,15 +106,30 @@ router.get("/publico/:slug", async (req, res) => {
   const { slug } = req.params;
 
   try {
-    const servicio = await Servicio.findOne({ slug }).populate("terapeuta", "nombreCompleto");
+    const servicio = await Servicio.findOne({ slug })
+      .populate("terapeuta", "nombreCompleto");
 
     if (!servicio) {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
+    // Obtener bloqueos y reservas
     const bloqueos = await Bloqueo.find({ servicioId: servicio._id });
     const reservas = await Reserva.find({ servicioId: servicio._id });
 
+    // ✅ Obtener reseñas aprobadas del servicio
+    const reseñas = await Resena.find({
+      servicioId: servicio._id,
+      estado: "aprobada"
+    }).populate("usuarioId", "nombre");
+
+    // ✅ Calcular promedio de estrellas
+    const totalEstrellas = reseñas.reduce((acc, r) => acc + r.estrellas, 0);
+    const promedioEstrellas = reseñas.length > 0 
+      ? (totalEstrellas / reseñas.length) 
+      : 0;
+
+    // Procesar horarios
     const horariosConEstado = Array.isArray(servicio.horariosDisponibles)
       ? servicio.horariosDisponibles
           .filter((dia) => dia && Array.isArray(dia.horariosFijos))
@@ -146,12 +162,16 @@ router.get("/publico/:slug", async (req, res) => {
           })
       : [];
 
+    // ✅ Respuesta con reseñas y promedio
     res.json({
       ...servicio.toObject(),
       duracion: servicio.duracionMinutos,
       terapeutaId: servicio.terapeuta?._id,
       horariosDisponibles: horariosConEstado,
       plataformas: servicio.plataformas || [],
+      reseñas,
+      promedioEstrellas,
+      totalReseñas: reseñas.length
     });
 
   } catch (err) {
@@ -159,7 +179,6 @@ router.get("/publico/:slug", async (req, res) => {
     res.status(500).json({ error: "Error al obtener el servicio público" });
   }
 });
-
 
 // 🧹 Limpiar horarios inválidos (temporal)
 router.post("/admin/limpiar-horarios-invalidos", async (req, res) => {
