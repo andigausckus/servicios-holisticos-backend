@@ -56,12 +56,6 @@ app.get("/", (req, res) => {
   res.send("🌐 API de Servicios Holísticos en funcionamiento");
 });
 
-// 🔹 Redirección de reseñas para que funcione con HashRouter
-app.get("/resenas/:id", (req, res) => {
-  const { id } = req.params;
-  res.redirect(`https://www.serviciosholisticos.com.ar/#/resenas/${id}`);
-});
-
 // ✅ Arranque del servidor
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
