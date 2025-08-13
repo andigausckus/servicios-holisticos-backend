@@ -373,9 +373,6 @@ router.put("/actualizar-horario", async (req, res) => {
   }
 });
 
-        // ruta: GET /api/servicios/publico/:slug
-const Servicio = require("../models/Servicio");
-
 // Dentro de tu router
 router.get("/publico/:slug", async (req, res) => {
   try {
