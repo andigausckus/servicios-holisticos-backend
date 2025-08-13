@@ -24,10 +24,21 @@ const horarioSchema = new mongoose.Schema({
   ]
 }, { _id: false });
 
+// Subdocumento para reseñas
+const resenaSchema = new mongoose.Schema({
+  usuario: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Usuario",
+    required: true
+  },
+  comentario: { type: String, required: true },
+  calificacion: { type: Number, min: 1, max: 5, required: true }
+}, { timestamps: true });
+
 // Modelo principal de Servicio
 const servicioSchema = new mongoose.Schema({
   titulo: { type: String, required: true },
-  slug: { type: String, unique: true }, // ⚠️ 'required' quitado para permitir generarlo en el pre-save
+  slug: { type: String, unique: true },
   descripcion: { type: String, required: true },
   modalidad: {
     type: String,
@@ -44,10 +55,8 @@ const servicioSchema = new mongoose.Schema({
     ref: "Terapeuta",
     required: true
   },
-  horariosDisponibles: {
-    type: [horarioSchema],
-    default: []
-  }
+  horariosDisponibles: { type: [horarioSchema], default: [] },
+  resenas: { type: [resenaSchema], default: [] }
 }, { timestamps: true });
 
 // Middleware para generar el slug automáticamente
