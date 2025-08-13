@@ -118,76 +118,34 @@ router.get("/mis-servicios", verificarToken, async (req, res) => {
   }
 });
 
-// Nuevo (por slug)
+// GET /api/servicios/publico/:slug
 router.get("/publico/:slug", async (req, res) => {
   const { slug } = req.params;
 
   try {
-    const servicio = await Servicio.findOne({ slug })
-      .populate("terapeuta", "nombreCompleto");
+    const servicio = await Servicio.findOne({ slug }).populate(
+      "terapeuta",
+      "nombreCompleto"
+    );
 
     if (!servicio) {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
-    // Obtener bloqueos y reservas
-    const bloqueos = await Bloqueo.find({ servicioId: servicio._id });
-    const reservas = await Reserva.find({ servicioId: servicio._id });
+    // Calcular promedio de estrellas desde las reseñas internas
+    const reseñas = servicio.resenas || [];
+    const totalEstrellas = reseñas.reduce((acc, r) => acc + (r.calificacion || 0), 0);
+    const promedioEstrellas = reseñas.length > 0 ? totalEstrellas / reseñas.length : 0;
 
-    // ✅ Obtener reseñas aprobadas del servicio
-    const reseñas = await Resena.find({
-      servicioId: servicio._id,
-      estado: "aprobada"
-    }).populate("usuarioId", "nombre");
-
-    // ✅ Calcular promedio de estrellas
-    const totalEstrellas = reseñas.reduce((acc, r) => acc + r.estrellas, 0);
-    const promedioEstrellas = reseñas.length > 0 
-      ? (totalEstrellas / reseñas.length) 
-      : 0;
-
-    // Procesar horarios
-    const horariosConEstado = Array.isArray(servicio.horariosDisponibles)
-      ? servicio.horariosDisponibles
-          .filter((dia) => dia && Array.isArray(dia.horariosFijos))
-          .map((dia) => {
-            const horariosFijosConEstado = dia.horariosFijos
-              .filter((h) => h.desde && h.hasta)
-              .map((horario) => {
-                const estaReservado = reservas.some(
-                  (r) => r.fecha === dia.fecha && r.hora === horario.desde
-                );
-                const estaBloqueado = bloqueos.some(
-                  (b) => b.fecha === dia.fecha && b.hora === horario.desde
-                );
-
-                let estado = "disponible";
-                if (estaReservado) estado = "reservado";
-                else if (estaBloqueado) estado = "en_proceso";
-
-                return {
-                  desde: horario.desde,
-                  hasta: horario.hasta,
-                  estado,
-                };
-              });
-
-            return {
-              fecha: dia.fecha,
-              horariosFijos: horariosFijosConEstado,
-            };
-          })
-      : [];
-
-    // ✅ Respuesta con reseñas y promedio
+    // Respuesta con todos los datos que espera el frontend
     res.json({
       ...servicio.toObject(),
       duracion: servicio.duracionMinutos,
       terapeutaId: servicio.terapeuta?._id,
-      horariosDisponibles: horariosConEstado,
+      horariosDisponibles: servicio.horariosDisponibles || [],
       plataformas: servicio.plataformas || [],
-      reseñas,
-      promedioEstrellas,
+      reseñas, // ahora coincide con el frontend
+      promedioEstrellas: Number(promedioEstrellas.toFixed(1)),
       totalReseñas: reseñas.length
     });
 
