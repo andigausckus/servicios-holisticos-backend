@@ -222,7 +222,7 @@ async function enviarEmailResenaUsuario({ nombreCliente, emailCliente, nombreTer
   }
 
   const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:3000";
-const urlResena = `${FRONTEND_URL}/resenas/${idReserva}`;
+const urlResena = `${FRONTEND_URL}/resenas/#/${idReserva}`;
 
   const html = `
     <p>Hola ${nombreCliente},</p>
