@@ -132,19 +132,23 @@ router.get("/publico/:slug", async (req, res) => {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
-    // Calcular promedio de estrellas desde las reseñas internas
-    const reseñas = servicio.resenas || [];
-    const totalEstrellas = reseñas.reduce((acc, r) => acc + (r.calificacion || 0), 0);
+    // Obtener reseñas aprobadas de este terapeuta
+    const reseñas = await Resena.find({
+      terapeuta: servicio.terapeuta._id,
+      aprobado: true
+    }).select("nombre comentario puntaje createdAt");
+
+    // Calcular promedio de estrellas
+    const totalEstrellas = reseñas.reduce((acc, r) => acc + (r.puntaje || 0), 0);
     const promedioEstrellas = reseñas.length > 0 ? totalEstrellas / reseñas.length : 0;
 
-    // Respuesta con todos los datos que espera el frontend
     res.json({
       ...servicio.toObject(),
       duracion: servicio.duracionMinutos,
       terapeutaId: servicio.terapeuta?._id,
       horariosDisponibles: servicio.horariosDisponibles || [],
       plataformas: servicio.plataformas || [],
-      reseñas, // ahora coincide con el frontend
+      reseñas,
       promedioEstrellas: Number(promedioEstrellas.toFixed(1)),
       totalReseñas: reseñas.length
     });
