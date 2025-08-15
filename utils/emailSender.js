@@ -75,7 +75,7 @@ const cuerpoCliente = `
 
 <br><br>
 
-<p>Datos del terapeuta holístico para contacto</p>
+<p><u>Datos del terapeuta holístico para contacto:</u></p>
 <p>
     Nombre y apellido: ${nombreTerapeuta}<br><br>
     Email: ${emailTerapeuta}<br><br>
@@ -88,13 +88,13 @@ const cuerpoCliente = `
 
   <p>✨ El terapeuta ya fue notificado de tu sesión. Podés escribirle antes si tenés dudas o esperar al día del encuentro.</p>
 
-<p>Una vez finalizada la sesión, vas a poder dejar una reseña sobre tu experiencia para ayudar a otros usuarios en su elección.</p>
+<p>Una vez finalizada la sesión, podrás dejar una reseña sobre tu experiencia para ayudar a otros usuarios en su elección.</p>
 
 <p>Si necesitás ayuda, podés responder directamente a este correo.</p>
 
-  <p>Un abrazo,<br>
+  <p>Con cariño 🌸<br>
   
-  El equipo de <strong>Servicios Holísticos</strong></p>
+  <p><strong>El equipo de Servicios Holísticos</strong></p>
 `;
 
   const cuerpoTerapeuta = `
@@ -119,7 +119,9 @@ const cuerpoCliente = `
 
 <p>Una buena experiencia, cordialidad y profesionalismo te ayudarán a construir una gran reputación dentro de la plataforma.</p>
 
-  <p>El equipo de Servicios Holísticos</p>
+<p>Con cariño 🌸<br>
+
+  <p><strong>El equipo de Servicios Holísticos</strong></p>
 `;
 
   const cuerpoAdmin = `
@@ -225,22 +227,24 @@ async function enviarEmailResenaUsuario({ nombreCliente, emailCliente, nombreTer
 const urlResena = `${FRONTEND_URL}/#/resenas/${idReserva}`;
 
   const html = `
+  <style>
+    p {
+      margin-bottom: 20px;
+    }
+  </style>
+  <div>
     <p>Hola ${nombreCliente},</p>
-
     <p>Gracias por tu sesión con ${nombreTerapeuta}.</p>
-
     <p>Nos gustaría saber cómo fue tu experiencia para ayudar a otros usuarios a tomar buenas decisiones 🙌</p>
-
+    <p>Tu opinión es muy valiosa para nosotros y para la comunidad de Servicios Holísticos 🌿</p>
     <p>
       <a href="${urlResena}" target="_blank" style="background:#7D5BA6;padding:12px 20px;color:white;text-decoration:none;border-radius:8px;">
         Dejar reseña ahora
       </a>
     </p>
-
-    <p>Tu opinión es muy valiosa para nosotros y para la comunidad de Servicios Holísticos 🌿</p>
-
     <p>Con cariño,<br>El equipo de Servicios Holísticos</p>
-  `;
+  </div>
+`;
 
   try {
     await transporter.sendMail({
