@@ -134,9 +134,9 @@ router.get("/publico/:slug", async (req, res) => {
 
     // Obtener reseñas aprobadas de este terapeuta
     const reseñas = await Resena.find({
-      terapeuta: servicio.terapeuta._id,
-      aprobado: true
-    }).select("nombre comentario puntaje createdAt");
+  servicio: servicio._id, // 🔹 filtrar por servicio específico
+  aprobado: true
+}).select("nombre comentario puntaje createdAt");
 
     // Calcular promedio de estrellas
     const totalEstrellas = reseñas.reduce((acc, r) => acc + (r.puntaje || 0), 0);
