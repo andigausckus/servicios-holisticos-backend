@@ -7,6 +7,11 @@ const resenaSchema = new mongoose.Schema(
       ref: "Terapeuta",
       required: true,
     },
+    servicio: { // 🔹 Nuevo campo
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Servicio",
+      required: true,
+    },
     nombre: {
       type: String,
       required: true,
