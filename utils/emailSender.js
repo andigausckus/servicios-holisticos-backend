@@ -237,12 +237,14 @@ const urlResena = `${FRONTEND_URL}/#/resenas/${idReserva}`;
     <p>Gracias por tu sesión con ${nombreTerapeuta}.</p>
     <p>Nos gustaría saber cómo fue tu experiencia para ayudar a otros usuarios a tomar buenas decisiones 🙌</p>
     <p>Tu opinión es muy valiosa para nosotros y para la comunidad de Servicios Holísticos 🌿</p>
-    <p>
-      <a href="${urlResena}" target="_blank" style="background:#7D5BA6;padding:12px 20px;color:white;text-decoration:none;border-radius:8px;">
-        Dejar reseña ahora
-      </a>
-    </p>
-    <p>Con cariño,<br>El equipo de Servicios Holísticos</p>
+<p style="margin-top: 40px; text-align: center;">
+  <a href="${urlResena}" target="_blank" style="background:#7D5BA6;padding:12px 20px;color:white;text-decoration:none;border-radius:8px;">
+    Dejar reseña ahora
+  </a>
+</p>
+<p>Con cariño 🌸<br>
+    
+    <p><strong>El equipo de Servicios Holísticos</strong></p>
   </div>
 `;
 
