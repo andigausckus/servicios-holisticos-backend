@@ -94,7 +94,7 @@ router.post("/temporales", async (req, res) => {
 
   const horaNormalizada = hora.trim().slice(0, 5);
   const ahora = new Date();
-  const expiracion = new Date(ahora.getTime() + 2 * 60000);
+  const expiracion = new Date(ahora.getTime() + 5 * 60000);
 
   try {
     await BloqueoTemporal.deleteMany({ expiracion: { $lt: ahora } });
