@@ -1,13 +1,26 @@
 const express = require("express");
 const router = express.Router();
 const Resena = require("../models/Resena");
+const Servicio = require("../models/Servicio"); // 🔹 importar el modelo Servicio
 
 // POST: crear una nueva reseña
 router.post("/", async (req, res) => {
   try {
-    const nuevaResena = new Resena(req.body);
+    const { servicioId, nombre, comentario, puntaje } = req.body;
+
+    const servicio = await Servicio.findById(servicioId);
+    if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
+
+    const nuevaResena = new Resena({
+      terapeuta: servicio.terapeuta, // referencia al terapeuta
+      servicio: servicio._id,        // referencia al servicio concreto
+      nombre,
+      comentario,
+      puntaje
+    });
+
     await nuevaResena.save();
-    res.status(201).json(nuevaResena);
+    res.status(201).json({ mensaje: "Reseña creada", reseña: nuevaResena });
   } catch (error) {
     res.status(400).json({ mensaje: "Error al guardar la reseña", error });
   }
