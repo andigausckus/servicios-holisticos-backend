@@ -209,7 +209,7 @@ if (!reserva) {
 const ahora = new Date();  
 const creadaHace = (ahora - reserva.createdAt) / 1000 / 60; // minutos  
 
-if (reserva.estado === "en_proceso" && creadaHace > 2) {  
+if (reserva.estado === "en_proceso" && creadaHace > 5) {  
   await Reserva.findByIdAndDelete(reservaId);  
   return res.json({ mensaje: "Reserva temporal eliminada por vencimiento" });  
 }  
