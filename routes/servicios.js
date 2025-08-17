@@ -337,13 +337,15 @@ router.put("/actualizar-horario", async (req, res) => {
 // ruta: POST /api/servicios/:id/resena
 router.post("/:id/resena", async (req, res) => {
   try {
-    const { usuarioId, nombre, comentario, puntaje } = req.body;
-    const servicio = await Servicio.findById(req.params.id);
+    const { nombre, comentario, puntaje } = req.body;
+
+    const servicio = await Servicio.findById(req.params.id).populate("terapeuta");
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
 
+    // Crear la reseña en la colección Resena
     const nuevaResena = new Resena({
-      terapeuta: servicio.terapeuta,
       servicio: servicio._id,
+      terapeuta: servicio.terapeuta._id,
       nombre,
       comentario,
       puntaje
@@ -353,7 +355,7 @@ router.post("/:id/resena", async (req, res) => {
 
     res.status(201).json({ ok: true, resena: nuevaResena });
   } catch (err) {
-    console.error(err);
+    console.error("Error al agregar reseña:", err);
     res.status(500).json({ error: "Error al agregar la reseña" });
   }
 });
