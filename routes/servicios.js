@@ -85,10 +85,9 @@ router.get("/", async (req, res) => {
     const conRatings = await Promise.all(
       servicios.map(async (s) => {
         const resenas = await Resena.find({
-          terapeuta: s.terapeuta?._id,
-          aprobado: true,
-        }).select("puntaje"); // si en tu modelo se llama 'puntuacion', cámbialo aquí
-
+  servicio: s._id,  // 🔹 filtrar SOLO por este servicio
+  aprobado: true,
+}).select("puntaje");
         const suma = resenas.reduce((acc, r) => acc + (r.puntaje || 0), 0);
         const promedio = resenas.length ? (suma / resenas.length) : 0;
 
