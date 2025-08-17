@@ -132,11 +132,11 @@ router.get("/publico/:slug", async (req, res) => {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
-    // Obtener reseñas aprobadas de este terapeuta
-    const reseñas = await Resena.find({
-  servicio: servicio._id, // 🔹 filtrar por servicio específico
+    // Obtener reseñas aprobadas de este servicio
+const reseñas = await Resena.find({
+  servicio: servicio._id,   // ✅ reseñas SOLO de este servicio
   aprobado: true
-}).select("nombre comentario puntaje createdAt");
+}).select("nombre comentario puntaje createdAt"); // ✅ usamos 'nombre' porque lo tenés en el schema
 
     // Calcular promedio de estrellas
     const totalEstrellas = reseñas.reduce((acc, r) => acc + (r.puntaje || 0), 0);
