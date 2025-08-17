@@ -337,6 +337,9 @@ router.put("/actualizar-horario", async (req, res) => {
 // ruta: POST /api/servicios/:id/resena
 router.post("/:id/resena", async (req, res) => {
   try {
+    console.log("Body recibido:", req.body);
+    console.log("ID servicio:", req.params.id);
+
     const { nombre, comentario, puntaje } = req.body;
 
     const servicio = await Servicio.findById(req.params.id).populate("terapeuta");
