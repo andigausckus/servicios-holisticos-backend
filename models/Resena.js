@@ -7,10 +7,15 @@ const resenaSchema = new mongoose.Schema(
       ref: "Terapeuta",
       required: true,
     },
-    servicio: { // 🔹 Nuevo campo
+    servicio: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Servicio",
       required: true,
+    },
+    usuarioId: { // 🔹 opcional para usuarios registrados
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Usuario",
+      required: false,
     },
     nombre: {
       type: String,
