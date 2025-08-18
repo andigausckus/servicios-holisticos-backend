@@ -40,7 +40,7 @@ router.get("/", async (req, res) => {
 // GET: obtener cantidad de reseñas pendientes
 router.get("/pendientes", async (req, res) => {
   try {
-    const cantidad = await Resena.countDocuments({ aprobada: false });
+    const cantidad = await Resena.countDocuments({ aprobado: false });
     res.json({ cantidad });
   } catch (error) {
     console.error("❌ Error al contar reseñas pendientes:", error);
