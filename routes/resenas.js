@@ -12,12 +12,13 @@ router.post("/", async (req, res) => {
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
 
     const nuevaResena = new Resena({
-      terapeuta: servicio.terapeuta, // referencia al terapeuta
-      servicio: servicio._id,        // referencia al servicio concreto
-      nombre,
-      comentario,
-      puntaje
-    });
+  terapeuta: servicio.terapeuta,
+  servicio: servicio._id,
+  nombre,
+  comentario,
+  puntaje,
+  aprobada: false // 🔹 aseguramos que sea pendiente
+});
 
     await nuevaResena.save();
     res.status(201).json({ mensaje: "Reseña creada", reseña: nuevaResena });
