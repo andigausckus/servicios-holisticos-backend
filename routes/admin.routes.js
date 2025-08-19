@@ -64,11 +64,12 @@ router.put("/aprobar-servicio/:id", async (req, res) => {
 
     const servicio = terapeuta.servicios.id(req.params.id);
     servicio.aprobado = aprobado;
-    await terapeuta.save();
+    servicio.rechazado = false; // 👈 aseguramos que no quede rechazado
 
-    res.json({ mensaje: "✅ Estado actualizado", servicio });
+    await terapeuta.save();
+    res.json({ mensaje: "✅ Servicio aprobado", servicio });
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al actualizar servicio", error });
+    res.status(500).json({ mensaje: "Error al aprobar servicio", error });
   }
 });
 
