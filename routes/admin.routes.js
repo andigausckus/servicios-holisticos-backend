@@ -33,14 +33,14 @@ router.put("/aprobar-terapeuta/:id", async (req, res) => {
 router.get("/servicios-pendientes", async (req, res) => {
   try {
     const terapeutas = await Terapeuta.find({ 
-      "servicios": { $elemMatch: { $or: [ { aprobado: false }, { aprobado: { $exists: false } } ] } }
+      "servicios": { $elemMatch: { $or: [ { aprobado: false }, { aprobado: { $exists: false } } ], rechazado: false } }
     });
 
     const pendientes = [];
 
     terapeutas.forEach(t => {
       t.servicios.forEach(s => {
-        if (!s.aprobado && s.aprobado !== true) { // considera también undefined
+        if ((!s.aprobado && s.aprobado !== true) && !s.rechazado) { // pendiente y no rechazado
           pendientes.push({
             ...s.toObject(),
             terapeuta: { _id: t._id, nombreCompleto: t.nombreCompleto }
@@ -70,6 +70,22 @@ router.put("/aprobar-servicio/:id", async (req, res) => {
     res.json({ mensaje: "✅ Servicio aprobado", servicio });
   } catch (error) {
     res.status(500).json({ mensaje: "Error al aprobar servicio", error });
+  }
+});
+
+router.put("/rechazar-servicio/:id", async (req, res) => {
+  try {
+    const terapeuta = await Terapeuta.findOne({ "servicios._id": req.params.id });
+    if (!terapeuta) return res.status(404).json({ mensaje: "Servicio no encontrado" });
+
+    const servicio = terapeuta.servicios.id(req.params.id);
+    servicio.aprobado = false;
+    servicio.rechazado = true; // 👈 clave
+
+    await terapeuta.save();
+    res.json({ mensaje: "❌ Servicio rechazado", servicio });
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al rechazar servicio", error });
   }
 });
 
