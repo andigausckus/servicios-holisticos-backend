@@ -32,7 +32,14 @@ router.put("/aprobar-terapeuta/:id", async (req, res) => {
 // --- SERVICIOS ---
 router.get("/servicios-pendientes", async (req, res) => {
   try {
-    const pendientes = await Servicio.find({ aprobado: false }).populate("terapeuta");
+    const terapeutas = await Terapeuta.find({ "servicios.aprobado": false });
+    // Aplanar servicios pendientes
+    const pendientes = [];
+    terapeutas.forEach(t => {
+      t.servicios.forEach(s => {
+        if (!s.aprobado) pendientes.push({ ...s.toObject(), terapeuta: { _id: t._id, nombreCompleto: t.nombreCompleto } });
+      });
+    });
     res.json(pendientes);
   } catch (error) {
     res.status(500).json({ mensaje: "Error al obtener servicios", error });
@@ -42,11 +49,13 @@ router.get("/servicios-pendientes", async (req, res) => {
 router.put("/aprobar-servicio/:id", async (req, res) => {
   try {
     const { aprobado } = req.body;
-    const servicio = await Servicio.findByIdAndUpdate(
-      req.params.id,
-      { aprobado },
-      { new: true }
-    );
+    const terapeuta = await Terapeuta.findOne({ "servicios._id": req.params.id });
+    if (!terapeuta) return res.status(404).json({ mensaje: "Servicio no encontrado" });
+
+    const servicio = terapeuta.servicios.id(req.params.id);
+    servicio.aprobado = aprobado;
+    await terapeuta.save();
+
     res.json({ mensaje: "✅ Estado actualizado", servicio });
   } catch (error) {
     res.status(500).json({ mensaje: "Error al actualizar servicio", error });
