@@ -51,8 +51,8 @@ const servicioSchema = new mongoose.Schema({
   modalidad: String,
   precio: Number,
   reseñas: [reseñaSchema],
-  aprobado: { type: Boolean, default: false } // 🔹 AGREGAR ESTA LÍNEA
-}, { _id: true }); // Asegurate que _id esté activado para manipular individualmente
+  aprobado: { type: Boolean, default: false } // ✅ Línea agregada
+}, { _id: true });
 
 const TerapeutaSchema = new mongoose.Schema({
   nombreCompleto: {
