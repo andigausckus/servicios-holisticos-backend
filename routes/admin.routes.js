@@ -32,14 +32,15 @@ router.put("/aprobar-terapeuta/:id", async (req, res) => {
 // --- SERVICIOS PENDIENTES ---
 router.get("/servicios-pendientes", async (req, res) => {
   try {
-    // Traer solo terapeutas que tengan servicios pendientes
-    const terapeutas = await Terapeuta.find({ "servicios.aprobado": false });
+    const terapeutas = await Terapeuta.find({ 
+      "servicios": { $elemMatch: { $or: [ { aprobado: false }, { aprobado: { $exists: false } } ] } }
+    });
 
     const pendientes = [];
 
     terapeutas.forEach(t => {
       t.servicios.forEach(s => {
-        if (s.aprobado === false) {
+        if (!s.aprobado && s.aprobado !== true) { // considera también undefined
           pendientes.push({
             ...s.toObject(),
             terapeuta: { _id: t._id, nombreCompleto: t.nombreCompleto }
