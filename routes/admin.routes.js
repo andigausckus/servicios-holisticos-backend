@@ -32,12 +32,12 @@ router.put("/aprobar-terapeuta/:id", async (req, res) => {
 // --- SERVICIOS PENDIENTES ---
 router.get("/servicios-pendientes", async (req, res) => {
   try {
-    const terapeutas = await Terapeuta.find({ "servicios.aprobado": false });
+    const terapeutas = await Terapeuta.find({ "servicios.estado": "pendiente" });
     const pendientes = [];
 
     terapeutas.forEach(t => {
       t.servicios.forEach(s => {
-        if (!s.aprobado) {
+        if (s.estado === "pendiente") {
           pendientes.push({
             ...s.toObject(),
             terapeuta: { _id: t._id, nombreCompleto: t.nombreCompleto }
