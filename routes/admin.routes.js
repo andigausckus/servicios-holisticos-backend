@@ -29,20 +29,35 @@ router.put("/aprobar-terapeuta/:id", async (req, res) => {
   }
 });
 
-// --- SERVICIOS ---
+// --- SERVICIOS PENDIENTES ---
 router.get("/servicios-pendientes", async (req, res) => {
   try {
-    const terapeutas = await Terapeuta.find({ "servicios.aprobado": false });
-    // Aplanar servicios pendientes
+    // Traer todos los terapeutas
+    const terapeutas = await Terapeuta.find();
+
+    // Extraer todos los servicios pendientes de aprobación
     const pendientes = [];
-    terapeutas.forEach(t => {
-      t.servicios.forEach(s => {
-        if (!s.aprobado) pendientes.push({ ...s.toObject(), terapeuta: { _id: t._id, nombreCompleto: t.nombreCompleto } });
-      });
+    terapeutas.forEach(terapeuta => {
+      if (Array.isArray(terapeuta.servicios)) {
+        terapeuta.servicios.forEach(servicio => {
+          if (servicio.aprobado === false) {
+            pendientes.push({
+              ...servicio.toObject(),
+              terapeuta: {
+                _id: terapeuta._id,
+                nombreCompleto: terapeuta.nombreCompleto,
+                email: terapeuta.email
+              }
+            });
+          }
+        });
+      }
     });
+
     res.json(pendientes);
   } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener servicios", error });
+    console.error("❌ Error al obtener servicios pendientes:", error);
+    res.status(500).json({ mensaje: "Error al obtener servicios pendientes", error });
   }
 });
 
