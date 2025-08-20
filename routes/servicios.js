@@ -106,17 +106,32 @@ router.get("/", async (req, res) => {
 });
 
 // GET /api/servicios
+// Devuelve todos los servicios aprobados con datos completos
 router.get("/", async (req, res) => {
   try {
-    const servicios = await Servicio.find({ aprobado: true }) // 👈 solo los aprobados
+    const servicios = await Servicio.find({ aprobado: true })
       .populate("terapeuta", "nombreCompleto");
 
-    console.log("📤 Servicios aprobados encontrados:", servicios.length);
-    servicios.forEach(s => {
-      console.log(" -", s.titulo, "| Precio:", s.precio, "| Terapeuta:", s.terapeuta?.nombreCompleto);
-    });
+    const data = servicios.map(s => ({
+      id: s._id,
+      titulo: s.titulo,
+      descripcion: s.descripcion,
+      precio: s.precio,
+      imagen: s.imagen || null,
+      modalidad: s.modalidad,
+      duracionMinutos: s.duracionMinutos,
+      categoria: s.categoria,
+      plataformas: s.plataformas || [],
+      terapeuta: {
+        id: s.terapeuta?._id,
+        nombreCompleto: s.terapeuta?.nombreCompleto || "Sin nombre"
+      },
+      horariosDisponibles: s.horariosDisponibles || []
+    }));
 
-    res.json(servicios);
+    console.log("Servicios devueltos a grilla:", data.map(d => d.titulo)); // 🔹 log en Replit
+
+    res.json(data);
   } catch (err) {
     console.error("❌ Error al obtener servicios:", err);
     res.status(500).json({ error: "Error al obtener los servicios" });
