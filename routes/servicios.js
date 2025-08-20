@@ -106,34 +106,41 @@ router.get("/", async (req, res) => {
 });
 
 // GET /api/servicios
-// Devuelve todos los servicios aprobados con datos completos
 router.get("/", async (req, res) => {
   try {
-    const servicios = await Servicio.find({ aprobado: true })
-      .populate("terapeuta", "nombreCompleto");
+    // Buscar todos los terapeutas que tengan servicios aprobados
+    const terapeutas = await Terapeuta.find({
+      "servicios.aprobado": true
+    }).populate("servicios"); // opcional, según si querés poblar referencias
 
-    const data = servicios.map(s => ({
-      id: s._id,
-      titulo: s.titulo,
-      descripcion: s.descripcion,
-      precio: s.precio,
-      imagen: s.imagen || null,
-      modalidad: s.modalidad,
-      duracionMinutos: s.duracionMinutos,
-      categoria: s.categoria,
-      plataformas: s.plataformas || [],
-      terapeuta: {
-        id: s.terapeuta?._id,
-        nombreCompleto: s.terapeuta?.nombreCompleto || "Sin nombre"
-      },
-      horariosDisponibles: s.horariosDisponibles || []
-    }));
+    const serviciosAprobados = [];
 
-    console.log("Servicios devueltos a grilla:", data.map(d => d.titulo)); // 🔹 log en Replit
+    terapeutas.forEach(t => {
+      t.servicios.forEach(s => {
+        if (s.aprobado) {
+          serviciosAprobados.push({
+            _id: s._id,
+            titulo: s.titulo,
+            descripcion: s.descripcion,
+            modalidad: s.modalidad,
+            duracionMinutos: s.duracionMinutos,
+            precio: s.precio,
+            categoria: s.categoria,
+            plataformas: s.plataformas || [],
+            imagen: s.imagen || null,
+            terapeuta: {
+              _id: t._id,
+              nombreCompleto: t.nombreCompleto
+            }
+          });
+        }
+      });
+    });
 
-    res.json(data);
+    console.log("✅ Servicios aprobados enviados:", serviciosAprobados.length);
+    res.json(serviciosAprobados);
   } catch (err) {
-    console.error("❌ Error al obtener servicios:", err);
+    console.error("❌ Error al obtener servicios aprobados:", err);
     res.status(500).json({ error: "Error al obtener los servicios" });
   }
 });
