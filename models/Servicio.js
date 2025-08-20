@@ -56,7 +56,8 @@ const servicioSchema = new mongoose.Schema({
     required: true
   },
   horariosDisponibles: { type: [horarioSchema], default: [] },
-  resenas: { type: [resenaSchema], default: [] }
+  resenas: { type: [resenaSchema], default: [] },
+  aprobado: { type: Boolean, default: false } // 👈 ahora queda pendiente
 }, { timestamps: true });
 
 // Middleware para generar el slug automáticamente
