@@ -105,40 +105,37 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /api/servicios — solo servicios aprobados
+// GET /api/servicios - traer todos los servicios aprobados
 router.get("/", async (req, res) => {
   try {
-    // Traer todos los terapeutas con sus servicios aprobados
-    const terapeutas = await Terapeuta.find({ "servicios.aprobado": true });
-
-    const serviciosAprobados = [];
-
-    for (const t of terapeutas) {
-      for (const s of t.servicios) {
-        if (s.aprobado) {
-          // Obtener promedio y cantidad de reseñas para este servicio
-          const resenas = await Resena.find({ servicio: s._id, aprobado: true }).select("puntaje");
-          const suma = resenas.reduce((acc, r) => acc + (r.puntaje || 0), 0);
-          const promedio = resenas.length ? suma / resenas.length : 0;
-
-          serviciosAprobados.push({
-            _id: s._id,
-            titulo: s.titulo,
-            descripcion: s.descripcion,
-            modalidad: s.modalidad,
-            duracionMinutos: s.duracionMinutos,
-            precio: s.precio,
-            categoria: s.categoria,
-            plataformas: s.plataformas || [],
-            imagen: s.imagen || null,
-            horariosDisponibles: s.horariosDisponibles || [],
-            terapeuta: { _id: t._id, nombreCompleto: t.nombreCompleto },
-            promedioResenas: Number(promedio.toFixed(1)),
-            cantidadResenas: resenas.length,
-          });
+    const serviciosAprobados = await Terapeuta.aggregate([
+      { $unwind: "$servicios" },               // separa cada servicio en un documento
+      { $match: { "servicios.aprobado": true } }, // solo los aprobados
+      {
+        $project: {
+          _id: "$servicios._id",
+          titulo: "$servicios.titulo",
+          descripcion: "$servicios.descripcion",
+          modalidad: "$servicios.modalidad",
+          duracionMinutos: "$servicios.duracionMinutos",
+          precio: "$servicios.precio",
+          categoria: "$servicios.categoria",
+          plataformas: "$servicios.plataformas",
+          imagen: "$servicios.imagen",
+          terapeuta: {
+            _id: "$_id",
+            nombreCompleto: "$nombreCompleto"
+          }
         }
       }
-    }
+    ]);
+
+    res.json(serviciosAprobados);
+  } catch (err) {
+    console.error("❌ Error al obtener servicios aprobados:", err);
+    res.status(500).json({ error: "Error al obtener los servicios aprobados" });
+  }
+});
 
     res.json(serviciosAprobados);
   } catch (err) {
