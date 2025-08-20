@@ -105,6 +105,18 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET /api/servicios
+router.get("/", async (req, res) => {
+  try {
+    const servicios = await Servicio.find({ aprobado: true }) // 👈 solo los aprobados
+      .populate("terapeuta", "nombreCompleto");
+    res.json(servicios);
+  } catch (err) {
+    console.error("❌ Error al obtener servicios:", err);
+    res.status(500).json({ error: "Error al obtener los servicios" });
+  }
+});
+
 
 // ✅ Obtener servicios del terapeuta autenticado
 router.get("/mis-servicios", verificarToken, async (req, res) => {
