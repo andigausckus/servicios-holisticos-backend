@@ -74,7 +74,7 @@ router.post("/", verificarToken, async (req, res) => {
 // ✅ Obtener todos los servicios con promedio y cantidad de reseñas
 router.get("/", async (req, res) => {
   try {
-    const servicios = await Servicio.find().populate("terapeuta");
+    const servicios = await Servicio.find({ aprobado: true }).populate("terapeuta");
 
     if (!Array.isArray(servicios)) {
       console.error("❌ No se obtuvo un array de servicios:", servicios);
