@@ -105,26 +105,44 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /api/servicios
+// GET /api/servicios — solo servicios aprobados
 router.get("/", async (req, res) => {
   try {
+    // Traer todos los terapeutas con sus servicios aprobados
     const terapeutas = await Terapeuta.find({ "servicios.aprobado": true });
-    const servicios = [];
 
-    terapeutas.forEach(t => {
-      t.servicios.forEach(s => {
+    const serviciosAprobados = [];
+
+    for (const t of terapeutas) {
+      for (const s of t.servicios) {
         if (s.aprobado) {
-          servicios.push({
-            ...s.toObject(),
-            terapeuta: { _id: t._id, nombreCompleto: t.nombreCompleto }
+          // Obtener promedio y cantidad de reseñas para este servicio
+          const resenas = await Resena.find({ servicio: s._id, aprobado: true }).select("puntaje");
+          const suma = resenas.reduce((acc, r) => acc + (r.puntaje || 0), 0);
+          const promedio = resenas.length ? suma / resenas.length : 0;
+
+          serviciosAprobados.push({
+            _id: s._id,
+            titulo: s.titulo,
+            descripcion: s.descripcion,
+            modalidad: s.modalidad,
+            duracionMinutos: s.duracionMinutos,
+            precio: s.precio,
+            categoria: s.categoria,
+            plataformas: s.plataformas || [],
+            imagen: s.imagen || null,
+            horariosDisponibles: s.horariosDisponibles || [],
+            terapeuta: { _id: t._id, nombreCompleto: t.nombreCompleto },
+            promedioResenas: Number(promedio.toFixed(1)),
+            cantidadResenas: resenas.length,
           });
         }
-      });
-    });
+      }
+    }
 
-    res.json(servicios);
+    res.json(serviciosAprobados);
   } catch (err) {
-    console.error("❌ Error al obtener servicios:", err);
+    console.error("❌ Error al obtener servicios aprobados:", err);
     res.status(500).json({ error: "Error al obtener los servicios" });
   }
 });
