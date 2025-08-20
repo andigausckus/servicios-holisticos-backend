@@ -108,16 +108,13 @@ router.get("/", async (req, res) => {
 // GET /api/servicios
 router.get("/", async (req, res) => {
   try {
-    // Buscar todos los terapeutas que tengan servicios aprobados
-    const terapeutas = await Terapeuta.find({
-      "servicios.aprobado": true
-    }).populate("servicios"); // opcional, según si querés poblar referencias
+    const terapeutas = await Terapeuta.find().populate("servicios");
 
     const serviciosAprobados = [];
 
     terapeutas.forEach(t => {
       t.servicios.forEach(s => {
-        if (s.aprobado) {
+        if (s.aprobado && !s.rechazado) {
           serviciosAprobados.push({
             _id: s._id,
             titulo: s.titulo,
@@ -127,20 +124,24 @@ router.get("/", async (req, res) => {
             precio: s.precio,
             categoria: s.categoria,
             plataformas: s.plataformas || [],
-            imagen: s.imagen || null,
+            imagen: s.imagen || "",
+            slug: s.slug || "", // si usás slug
+            createdAt: s.createdAt,
             terapeuta: {
               _id: t._id,
               nombreCompleto: t.nombreCompleto
-            }
+            },
+            promedioResenas: s.promedioResenas || 0,
+            cantidadResenas: s.cantidadResenas || 0
           });
         }
       });
     });
 
-    console.log("✅ Servicios aprobados enviados:", serviciosAprobados.length);
     res.json(serviciosAprobados);
+
   } catch (err) {
-    console.error("❌ Error al obtener servicios aprobados:", err);
+    console.error("❌ Error al obtener servicios:", err);
     res.status(500).json({ error: "Error al obtener los servicios" });
   }
 });
