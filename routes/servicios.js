@@ -105,48 +105,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /api/servicios
-router.get("/", async (req, res) => {
-  try {
-    const terapeutas = await Terapeuta.find().populate("servicios");
-
-    const serviciosAprobados = [];
-
-    terapeutas.forEach(t => {
-      t.servicios.forEach(s => {
-        if (s.aprobado && !s.rechazado) {
-          serviciosAprobados.push({
-            _id: s._id,
-            titulo: s.titulo,
-            descripcion: s.descripcion,
-            modalidad: s.modalidad,
-            duracionMinutos: s.duracionMinutos,
-            precio: s.precio,
-            categoria: s.categoria,
-            plataformas: s.plataformas || [],
-            imagen: s.imagen || "",
-            slug: s.slug || "", // si usás slug
-            createdAt: s.createdAt,
-            terapeuta: {
-              _id: t._id,
-              nombreCompleto: t.nombreCompleto
-            },
-            promedioResenas: s.promedioResenas || 0,
-            cantidadResenas: s.cantidadResenas || 0
-          });
-        }
-      });
-    });
-
-            console.log("SERVICIOS APROBADOS PARA GRILLA:", serviciosAprobados);
-res.json(serviciosAprobados);
-
-  } catch (err) {
-    console.error("❌ Error al obtener servicios:", err);
-    res.status(500).json({ error: "Error al obtener los servicios" });
-  }
-});
-
 
 // ✅ Obtener servicios del terapeuta autenticado
 router.get("/mis-servicios", verificarToken, async (req, res) => {
@@ -402,6 +360,46 @@ router.post("/:id/resena", async (req, res) => {
   } catch (err) {
     console.error("Error al agregar reseña:", err);
     res.status(500).json({ error: "Error al agregar la reseña" });
+  }
+});
+
+// GET /api/servicios
+router.get("/", async (req, res) => {
+  try {
+    // Buscar todos los terapeutas con servicios aprobados
+    const terapeutas = await Terapeuta.find();
+
+    const serviciosAprobados = [];
+
+    terapeutas.forEach((t) => {
+      t.servicios.forEach((s) => {
+        if (s.aprobado) {
+          serviciosAprobados.push({
+            _id: s._id,
+            titulo: s.titulo,
+            descripcion: s.descripcion,
+            modalidad: s.modalidad,
+            duracionMinutos: s.duracionMinutos,
+            precio: s.precio,
+            categoria: s.categoria,
+            plataformas: s.plataformas,
+            imagen: s.imagen,
+            slug: s.slug,
+            createdAt: s.createdAt,
+            updatedAt: s.updatedAt,
+            terapeuta: {
+              _id: t._id,
+              nombreCompleto: t.nombreCompleto,
+            },
+          });
+        }
+      });
+    });
+
+    res.json(serviciosAprobados);
+  } catch (err) {
+    console.error("❌ Error al obtener servicios:", err);
+    res.status(500).json({ error: "Error al obtener los servicios" });
   }
 });
 
