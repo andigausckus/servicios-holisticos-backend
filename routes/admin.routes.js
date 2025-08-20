@@ -47,8 +47,14 @@ router.get("/servicios-pendientes", async (req, res) => {
       t.servicios.forEach(s => {
         if (!s.aprobado && s.rechazado !== true) { // 🔹 sólo pendientes reales
           pendientes.push({
-            ...s.toObject(),
-            terapeuta: { _id: t._id, nombreCompleto: t.nombreCompleto }
+            _id: s._id,
+            titulo: s.titulo,
+            precio: s.precio,
+            imagen: s.imagen || "",          // 🔹 agregamos la imagen
+            terapeuta: { 
+              _id: t._id, 
+              nombreCompleto: t.nombreCompleto 
+            }
           });
         }
       });
