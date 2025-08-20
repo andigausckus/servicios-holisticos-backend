@@ -56,13 +56,26 @@ router.post("/", verificarToken, async (req, res) => {
 
     // 👉 ACÁ es donde se agrega el nuevo fragmento
     await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
-      $push: {
-        servicios: {
-          _id: nuevoServicio._id,
-          titulo: nuevoServicio.titulo,
-        },
-      },
-    });
+  $push: {
+    servicios: {
+      _id: nuevoServicio._id,
+      titulo: nuevoServicio.titulo,
+      descripcion: nuevoServicio.descripcion,
+      modalidad: nuevoServicio.modalidad,
+      duracionMinutos: nuevoServicio.duracionMinutos,
+      precio: nuevoServicio.precio,
+      categoria: nuevoServicio.categoria,
+      plataformas: nuevoServicio.plataformas || [],
+      imagen: nuevoServicio.imagen || "",
+      slug: nuevoServicio.slug || "",
+      aprobado: nuevoServicio.aprobado || false,
+      rechazado: nuevoServicio.rechazado || false,
+      createdAt: nuevoServicio.createdAt,
+      updatedAt: nuevoServicio.updatedAt,
+      resenas: nuevoServicio.resenas || [],
+    },
+  },
+});
 
     res.status(201).json({ ...nuevoServicio.toObject() });
   } catch (err) {
