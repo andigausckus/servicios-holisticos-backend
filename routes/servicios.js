@@ -366,14 +366,13 @@ router.post("/:id/resena", async (req, res) => {
 // GET /api/servicios
 router.get("/", async (req, res) => {
   try {
-    // Buscar todos los terapeutas con servicios aprobados
     const terapeutas = await Terapeuta.find();
 
     const serviciosAprobados = [];
 
-    terapeutas.forEach((t) => {
-      t.servicios.forEach((s) => {
-        if (s.aprobado) {
+    terapeutas.forEach(t => {
+      t.servicios.forEach(s => {
+        if (s.aprobado && !s.rechazado) {
           serviciosAprobados.push({
             _id: s._id,
             titulo: s.titulo,
@@ -382,19 +381,22 @@ router.get("/", async (req, res) => {
             duracionMinutos: s.duracionMinutos,
             precio: s.precio,
             categoria: s.categoria,
-            plataformas: s.plataformas,
-            imagen: s.imagen,
-            slug: s.slug,
+            plataformas: s.plataformas || [],
+            imagen: s.imagen || "",
+            slug: s.slug || "",
             createdAt: s.createdAt,
-            updatedAt: s.updatedAt,
             terapeuta: {
               _id: t._id,
-              nombreCompleto: t.nombreCompleto,
+              nombreCompleto: t.nombreCompleto
             },
+            promedioResenas: s.promedioResenas || 0,
+            cantidadResenas: s.cantidadResenas || 0
           });
         }
       });
     });
+
+    console.log("SERVICIOS APROBADOS PARA GRILLA:", serviciosAprobados);
 
     res.json(serviciosAprobados);
   } catch (err) {
