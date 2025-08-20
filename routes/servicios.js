@@ -108,8 +108,20 @@ router.get("/", async (req, res) => {
 // GET /api/servicios
 router.get("/", async (req, res) => {
   try {
-    const servicios = await Servicio.find({ aprobado: true }) // 👈 solo los aprobados
-      .populate("terapeuta", "nombreCompleto");
+    const terapeutas = await Terapeuta.find({ "servicios.aprobado": true });
+    const servicios = [];
+
+    terapeutas.forEach(t => {
+      t.servicios.forEach(s => {
+        if (s.aprobado) {
+          servicios.push({
+            ...s.toObject(),
+            terapeuta: { _id: t._id, nombreCompleto: t.nombreCompleto }
+          });
+        }
+      });
+    });
+
     res.json(servicios);
   } catch (err) {
     console.error("❌ Error al obtener servicios:", err);
