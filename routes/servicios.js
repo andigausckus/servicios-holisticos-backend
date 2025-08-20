@@ -138,7 +138,8 @@ router.get("/", async (req, res) => {
       });
     });
 
-    res.json(serviciosAprobados);
+            console.log("SERVICIOS APROBADOS PARA GRILLA:", serviciosAprobados);
+res.json(serviciosAprobados);
 
   } catch (err) {
     console.error("❌ Error al obtener servicios:", err);
