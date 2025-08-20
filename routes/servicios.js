@@ -64,7 +64,7 @@ router.post("/", verificarToken, async (req, res) => {
       },
     });
 
-    res.status(201).json({ id: nuevoServicio._id });
+    res.status(201).json({ ...nuevoServicio.toObject() });
   } catch (err) {
     console.error("Error al crear servicio:", err);
     res.status(500).json({ error: "Error al crear el servicio." });
