@@ -109,8 +109,8 @@ router.get("/", async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const serviciosAprobados = await Terapeuta.aggregate([
-      { $unwind: "$servicios" },               // separa cada servicio en un documento
-      { $match: { "servicios.aprobado": true } }, // solo los aprobados
+      { $unwind: "$servicios" },                   // desarmar array de servicios
+      { $match: { "servicios.aprobado": true } },  // solo aprobados
       {
         $project: {
           _id: "$servicios._id",
