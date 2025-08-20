@@ -137,13 +137,6 @@ router.get("/", async (req, res) => {
   }
 });
 
-    res.json(serviciosAprobados);
-  } catch (err) {
-    console.error("❌ Error al obtener servicios aprobados:", err);
-    res.status(500).json({ error: "Error al obtener los servicios" });
-  }
-});
-
 
 // ✅ Obtener servicios del terapeuta autenticado
 router.get("/mis-servicios", verificarToken, async (req, res) => {
