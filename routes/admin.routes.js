@@ -39,18 +39,18 @@ router.get("/servicios-pendientes", async (req, res) => {
           rechazado: { $ne: true }  // 🔹 ignorar los rechazados
         } 
       }
-    });
+    }).populate("servicios"); // 🔹 traemos todos los datos del servicio real
 
     const pendientes = [];
 
     terapeutas.forEach(t => {
       t.servicios.forEach(s => {
-        if (!s.aprobado && s.rechazado !== true) { // 🔹 sólo pendientes reales
+        if (!s.aprobado && s.rechazado !== true) {
           pendientes.push({
             _id: s._id,
             titulo: s.titulo,
             precio: s.precio,
-            imagen: s.imagen || "",          // 🔹 agregamos la imagen
+            imagen: s.imagen || "",
             terapeuta: { 
               _id: t._id, 
               nombreCompleto: t.nombreCompleto 
