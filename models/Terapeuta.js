@@ -50,9 +50,10 @@ const servicioSchema = new mongoose.Schema({
   duracion: String,
   modalidad: String,
   precio: Number,
+  imagen: String,   // 👈 agregado
   reseñas: [reseñaSchema],
-  aprobado: { type: Boolean, default: false },   // aprobado = true si pasa la revisión
-  rechazado: { type: Boolean, default: false }   // rechazado = true si fue rechazado
+  aprobado: { type: Boolean, default: false },
+  rechazado: { type: Boolean, default: false }
 }, { _id: true });
 
 const TerapeutaSchema = new mongoose.Schema({
