@@ -105,35 +105,43 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /api/servicios - traer todos los servicios aprobados
+// GET /api/servicios - solo servicios aprobados
 router.get("/", async (req, res) => {
   try {
-    const serviciosAprobados = await Terapeuta.aggregate([
-      { $unwind: "$servicios" },                   // desarmar array de servicios
-      { $match: { "servicios.aprobado": true } },  // solo aprobados
-      {
-        $project: {
-          _id: "$servicios._id",
-          titulo: "$servicios.titulo",
-          descripcion: "$servicios.descripcion",
-          modalidad: "$servicios.modalidad",
-          duracionMinutos: "$servicios.duracionMinutos",
-          precio: "$servicios.precio",
-          categoria: "$servicios.categoria",
-          plataformas: "$servicios.plataformas",
-          imagen: "$servicios.imagen",
-          terapeuta: {
-            _id: "$_id",
-            nombreCompleto: "$nombreCompleto"
-          }
+    // Buscar solo los servicios aprobados dentro de cada terapeuta
+    const terapeutas = await Terapeuta.find({ "servicios.aprobado": true });
+
+    const serviciosAprobados = [];
+
+    terapeutas.forEach((t) => {
+      t.servicios.forEach((s) => {
+        if (s.aprobado) {
+          serviciosAprobados.push({
+            _id: s._id,
+            titulo: s.titulo || "Sin título",
+            descripcion: s.descripcion || "Sin descripción",
+            modalidad: s.modalidad || "Online",
+            duracionMinutos: s.duracionMinutos || 60,
+            precio: s.precio || 0,
+            categoria: s.categoria || "Sin categoría",
+            plataformas: s.plataformas || [],
+            imagen: s.imagen || "", // si no tiene, dejamos string vacío
+            terapeuta: {
+              _id: t._id,
+              nombreCompleto: t.nombreCompleto || "Sin nombre",
+            },
+            horariosDisponibles: s.horariosDisponibles || [],
+          });
         }
-      }
-    ]);
+      });
+    });
+
+    console.log("Servicios aprobados enviados al frontend:", serviciosAprobados);
 
     res.json(serviciosAprobados);
   } catch (err) {
     console.error("❌ Error al obtener servicios aprobados:", err);
-    res.status(500).json({ error: "Error al obtener los servicios aprobados" });
+    res.status(500).json({ error: "Error al obtener los servicios" });
   }
 });
 
