@@ -105,42 +105,20 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /api/servicios - solo servicios aprobados
+// GET /api/servicios
 router.get("/", async (req, res) => {
   try {
-    // Buscar solo los servicios aprobados dentro de cada terapeuta
-    const terapeutas = await Terapeuta.find({ "servicios.aprobado": true });
+    const servicios = await Servicio.find({ aprobado: true }) // 👈 solo los aprobados
+      .populate("terapeuta", "nombreCompleto");
 
-    const serviciosAprobados = [];
-
-    terapeutas.forEach((t) => {
-      t.servicios.forEach((s) => {
-        if (s.aprobado) {
-          serviciosAprobados.push({
-            _id: s._id,
-            titulo: s.titulo || "Sin título",
-            descripcion: s.descripcion || "Sin descripción",
-            modalidad: s.modalidad || "Online",
-            duracionMinutos: s.duracionMinutos || 60,
-            precio: s.precio || 0,
-            categoria: s.categoria || "Sin categoría",
-            plataformas: s.plataformas || [],
-            imagen: s.imagen || "", // si no tiene, dejamos string vacío
-            terapeuta: {
-              _id: t._id,
-              nombreCompleto: t.nombreCompleto || "Sin nombre",
-            },
-            horariosDisponibles: s.horariosDisponibles || [],
-          });
-        }
-      });
+    console.log("📤 Servicios aprobados encontrados:", servicios.length);
+    servicios.forEach(s => {
+      console.log(" -", s.titulo, "| Precio:", s.precio, "| Terapeuta:", s.terapeuta?.nombreCompleto);
     });
 
-    console.log("Servicios aprobados enviados al frontend:", serviciosAprobados);
-
-    res.json(serviciosAprobados);
+    res.json(servicios);
   } catch (err) {
-    console.error("❌ Error al obtener servicios aprobados:", err);
+    console.error("❌ Error al obtener servicios:", err);
     res.status(500).json({ error: "Error al obtener los servicios" });
   }
 });
