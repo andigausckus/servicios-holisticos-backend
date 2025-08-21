@@ -70,15 +70,40 @@ router.get("/servicios-pendientes", async (req, res) => {
 router.put("/aprobar-servicio/:id", async (req, res) => {
   try {
     const { aprobado } = req.body;
+
+    // 1️⃣ Actualizamos el servicio dentro del array del terapeuta
     const terapeuta = await Terapeuta.findOne({ "servicios._id": req.params.id });
     if (!terapeuta) return res.status(404).json({ mensaje: "Servicio no encontrado" });
 
     const servicio = terapeuta.servicios.id(req.params.id);
     servicio.aprobado = aprobado;
-    servicio.rechazado = false; // 👈 aseguramos que no quede rechazado
+    servicio.rechazado = false;
 
     await terapeuta.save();
-    res.json({ mensaje: "✅ Servicio aprobado", servicio });
+
+    // 2️⃣ Sincronizamos con la colección Servicios
+    const ServicioModel = require("../models/Servicio"); // ajusta la ruta
+    await ServicioModel.findByIdAndUpdate(
+      req.params.id,
+      {
+        aprobado: aprobado,
+        rechazado: false,
+        titulo: servicio.titulo,
+        descripcion: servicio.descripcion,
+        modalidad: servicio.modalidad,
+        duracionMinutos: servicio.duracionMinutos,
+        precio: servicio.precio,
+        categoria: servicio.categoria,
+        plataformas: servicio.plataformas,
+        imagen: servicio.imagen,
+        slug: servicio.slug,
+        terapeuta: servicio.terapeuta,
+        horariosDisponibles: servicio.horariosDisponibles,
+      },
+      { new: true, upsert: true }
+    );
+
+    res.json({ mensaje: "✅ Servicio aprobado y sincronizado", servicio });
   } catch (error) {
     res.status(500).json({ mensaje: "Error al aprobar servicio", error });
   }
