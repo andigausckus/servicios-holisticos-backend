@@ -370,39 +370,10 @@ router.post("/:id/resena", async (req, res) => {
 // GET /api/servicios
 router.get("/", async (req, res) => {
   try {
-    const terapeutas = await Terapeuta.find();
+    const servicios = await Servicio.find({ aprobado: true, rechazado: false })
+      .populate("terapeuta", "nombreCompleto");
 
-    const serviciosAprobados = [];
-
-    terapeutas.forEach(t => {
-      t.servicios.forEach(s => {
-        if (s.aprobado && !s.rechazado) {
-          serviciosAprobados.push({
-            _id: s._id,
-            titulo: s.titulo,
-            descripcion: s.descripcion,
-            modalidad: s.modalidad,
-            duracionMinutos: s.duracionMinutos,
-            precio: s.precio,
-            categoria: s.categoria,
-            plataformas: s.plataformas || [],
-            imagen: s.imagen || "",
-            slug: s.slug || "",
-            createdAt: s.createdAt,
-            terapeuta: {
-              _id: t._id,
-              nombreCompleto: t.nombreCompleto
-            },
-            promedioResenas: s.promedioResenas || 0,
-            cantidadResenas: s.cantidadResenas || 0
-          });
-        }
-      });
-    });
-
-    console.log("SERVICIOS APROBADOS PARA GRILLA:", serviciosAprobados);
-
-    res.json(serviciosAprobados);
+    res.json(servicios);
   } catch (err) {
     console.error("❌ Error al obtener servicios:", err);
     res.status(500).json({ error: "Error al obtener los servicios" });
