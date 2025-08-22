@@ -256,7 +256,7 @@ router.put("/:id", verificarToken, async (req, res) => {
     }
 
     await servicioExistente.save();
-    res.json({ mensaje: "Servicio actualizado correctamente." });
+res.json(servicioExistente);
   } catch (err) {
     console.error("Error al actualizar servicio:", err);
     res.status(500).json({ error: "Error al actualizar el servicio." });
