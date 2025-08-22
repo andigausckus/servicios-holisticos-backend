@@ -243,6 +243,7 @@ router.put("/:id", verificarToken, async (req, res) => {
       return res.status(400).json({ error: "Faltan campos obligatorios." });
     }
 
+    // ✅ Actualizar campos editables
     servicioExistente.titulo = titulo;
     servicioExistente.descripcion = descripcion;
     servicioExistente.modalidad = modalidad;
@@ -255,8 +256,16 @@ router.put("/:id", verificarToken, async (req, res) => {
       servicioExistente.imagen = imagen;
     }
 
+    // 🚀 Importante: NO tocar el estado. Mantener el que ya tiene
+    // Ejemplo: si ya está "aprobado", queda igual
+    // servicioExistente.estado = servicioExistente.estado;
+
     await servicioExistente.save();
-res.json(servicioExistente);
+
+    res.json({
+      mensaje: "Servicio actualizado correctamente",
+      servicio: servicioExistente,
+    });
   } catch (err) {
     console.error("Error al actualizar servicio:", err);
     res.status(500).json({ error: "Error al actualizar el servicio." });
