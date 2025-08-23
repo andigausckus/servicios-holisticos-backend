@@ -7,7 +7,7 @@ const Bloqueo = require("../models/Bloqueo");
 const Reserva = require("../models/Reserva");
 const mongoose = require("mongoose"); // asegurate de tener esta línea al comienzo del archivo
 const Resena = require("../models/Resena"); // ⬅️ agregar
-const authMiddleware = require("../middleware/authMiddleware");
+const verificarToken = require("../middlewares/auth");
 
 // Middleware JWT
 function verificarToken(req, res, next) {
@@ -274,33 +274,23 @@ router.put("/:id", verificarToken, async (req, res) => {
 });
 
 // DELETE /servicios/:id
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/:id", verificarToken, async (req, res) => {
   try {
-    const servicioId = req.params.id;
+    const servicio = await Servicio.findByIdAndDelete(req.params.id);
 
-    // Buscar el servicio
-    const servicio = await Servicio.findById(servicioId);
     if (!servicio) {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
-    // Validar que el servicio pertenezca al terapeuta logueado
-    if (servicio.terapeuta.toString() !== req.terapeutaId) {
-      return res.status(403).json({ error: "No autorizado para eliminar este servicio" });
-    }
-
-    // Eliminar el servicio de la colección Servicios
-    await Servicio.findByIdAndDelete(servicioId);
-
-    // Eliminar también el subdocumento dentro del terapeuta
-    await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
-      $pull: { servicios: { _id: servicio._id } },
+    // 🔹 eliminar también de la colección Terapeuta
+    await Terapeuta.findByIdAndUpdate(servicio.terapeuta, {
+      $pull: { servicios: { _id: servicio._id } }
     });
 
     res.json({ message: "Servicio eliminado correctamente" });
   } catch (error) {
     console.error("Error al eliminar servicio:", error);
-    res.status(500).json({ error: "Error al eliminar el servicio" });
+    res.status(500).json({ error: "Error al eliminar servicio" });
   }
 });
 
