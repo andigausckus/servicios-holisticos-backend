@@ -268,6 +268,7 @@ router.delete("/:id", verificarToken, async (req, res) => {
     });
 
     res.json({ mensaje: "Servicio eliminado correctamente.", eliminadoId: servicio._id });
+
   } catch (err) {
     console.error("Error al eliminar servicio:", err);
     res.status(500).json({ error: "Error al eliminar el servicio." });
