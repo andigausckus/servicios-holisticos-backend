@@ -259,24 +259,27 @@ router.put("/:id", verificarToken, async (req, res) => {
   }
 });
 
-// DELETE /servicios/:id
+// ✅ Eliminar un servicio
 router.delete("/:id", verificarToken, async (req, res) => {
   try {
-    const servicio = await Servicio.findByIdAndDelete(req.params.id);
-
-    if (!servicio) {
-      return res.status(404).json({ error: "Servicio no encontrado" });
-    }
-
-    // 🔹 eliminar también de la colección Terapeuta
-    await Terapeuta.findByIdAndUpdate(servicio.terapeuta, {
-      $pull: { servicios: { _id: servicio._id } }
+    const servicio = await Servicio.findOneAndDelete({
+      _id: req.params.id,
+      terapeuta: req.terapeutaId,
     });
 
-    res.json({ message: "Servicio eliminado correctamente" });
-  } catch (error) {
-    console.error("Error al eliminar servicio:", error);
-    res.status(500).json({ error: "Error al eliminar servicio" });
+    if (!servicio) {
+      return res.status(404).json({ error: "Servicio no encontrado o ya eliminado" });
+    }
+
+    // ⚡ Actualizar array de servicios del terapeuta
+    await Terapeuta.findByIdAndUpdate(servicio.terapeuta, {
+      $pull: { servicios: { _id: servicio._id } },
+    });
+
+    res.json({ mensaje: "Servicio eliminado correctamente.", eliminadoId: servicio._id });
+  } catch (err) {
+    console.error("Error al eliminar servicio:", err);
+    res.status(500).json({ error: "Error al eliminar el servicio." });
   }
 });
 
