@@ -7,21 +7,7 @@ const Bloqueo = require("../models/Bloqueo");
 const Reserva = require("../models/Reserva");
 const mongoose = require("mongoose"); // asegurate de tener esta línea al comienzo del archivo
 const Resena = require("../models/Resena"); // ⬅️ agregar
-const verificarToken = require("../middlewares/auth");
-
-// Middleware JWT
-function verificarToken(req, res, next) {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Token requerido" });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.terapeutaId = decoded.id;
-    next();
-  } catch (err) {
-    return res.status(403).json({ error: "Token inválido" });
-  }
-}
+const verificarToken = require("../middlewares/auth")
 
 // ✅ Crear servicio
 router.post("/", verificarToken, async (req, res) => {
