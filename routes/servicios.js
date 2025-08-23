@@ -275,27 +275,27 @@ router.put("/:id", verificarToken, async (req, res) => {
 // ✅ Eliminar un servicio
 router.delete("/:id", verificarToken, async (req, res) => {
   try {
-    // Buscar y eliminar el servicio de la colección Servicios
     const servicio = await Servicio.findOneAndDelete({
       _id: req.params.id,
-      terapeuta: req.terapeutaId, // aseguramos que sea del terapeuta logueado
+      terapeuta: req.terapeutaId,
     });
 
     if (!servicio) {
       return res.status(404).json({ error: "Servicio no encontrado o ya eliminado" });
     }
 
-    // Eliminar el ID del servicio del array de servicios del terapeuta
-    const terapeutaActualizado = await Terapeuta.findByIdAndUpdate(
-      req.terapeutaId,
-      { $pull: { servicios: servicio._id } },
-      { new: true } // para devolver el documento actualizado si lo necesitas
-    );
+    // Eliminamos la referencia del terapeuta
+    await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
+      $pull: { servicios: servicio._id },
+    });
 
+    // Traemos los servicios existentes del terapeuta
+    const terapeuta = await Terapeuta.findById(req.terapeutaId).populate("servicios");
+    
     res.json({
       mensaje: "Servicio eliminado correctamente.",
-      eliminadoId: servicio._id,
-      serviciosActualizados: terapeutaActualizado.servicios,
+      serviciosActualizados: terapeuta.servicios,
+      eliminadoId: servicio._id
     });
   } catch (err) {
     console.error("Error al eliminar servicio:", err);
