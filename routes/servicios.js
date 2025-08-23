@@ -7,7 +7,6 @@ const Bloqueo = require("../models/Bloqueo");
 const Reserva = require("../models/Reserva");
 const mongoose = require("mongoose"); // asegurate de tener esta línea al comienzo del archivo
 const Resena = require("../models/Resena"); // ⬅️ agregar
-const verificarToken = require("../middlewares/auth")
 
 // ✅ Crear servicio
 router.post("/", verificarToken, async (req, res) => {
@@ -41,18 +40,11 @@ router.post("/", verificarToken, async (req, res) => {
 
     await nuevoServicio.save();
 
-    // 👉 ACÁ es donde se agrega el nuevo fragmento
-    await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
-  $push: {
-    servicios: {
-      _id: nuevoServicio._id,
-      titulo: nuevoServicio.titulo,
-      precio: nuevoServicio.precio,
-      imagen: nuevoServicio.imagen,
-      aprobado: nuevoServicio.aprobado || false,
-      rechazado: nuevoServicio.rechazado || false,
-    },
-  },
+    res.status(201).json({ ...nuevoServicio.toObject() });
+  } catch (err) {
+    console.error("Error al crear servicio:", err);
+    res.status(500).json({ error: "Error al crear el servicio." });
+  }
 });
 
     res.status(201).json({ ...nuevoServicio.toObject() });
@@ -271,8 +263,7 @@ router.delete("/:id", verificarToken, async (req, res) => {
       return res.status(404).json({ error: "Servicio no encontrado o ya eliminado" });
     }
 
-    // ⚡ Actualizar array de servicios del terapeuta
-    await Terapeuta.findByIdAndUpdate(servicio.terapeuta, {
+    await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
       $pull: { servicios: { _id: servicio._id } },
     });
 
