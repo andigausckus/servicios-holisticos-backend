@@ -272,34 +272,34 @@ router.put("/:id", verificarToken, async (req, res) => {
   }
 });
 
-// ✅ Eliminar un servicio
-router.delete("/:id", verificarToken, async (req, res) => {
+// DELETE /servicios/:id
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
-    const servicio = await Servicio.findOneAndDelete({
-      _id: req.params.id,
-      terapeuta: req.terapeutaId,
-    });
+    const servicioId = req.params.id;
 
+    // Buscar el servicio
+    const servicio = await Servicio.findById(servicioId);
     if (!servicio) {
-      return res.status(404).json({ error: "Servicio no encontrado o ya eliminado" });
+      return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
-    // Eliminamos la referencia del terapeuta
+    // Validar que el servicio pertenezca al terapeuta logueado
+    if (servicio.terapeuta.toString() !== req.terapeutaId) {
+      return res.status(403).json({ error: "No autorizado para eliminar este servicio" });
+    }
+
+    // Eliminar el servicio de la colección Servicios
+    await Servicio.findByIdAndDelete(servicioId);
+
+    // Eliminar también el subdocumento dentro del terapeuta
     await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
-      $pull: { servicios: servicio._id },
+      $pull: { servicios: { _id: servicio._id } },
     });
 
-    // Traemos los servicios existentes del terapeuta
-    const terapeuta = await Terapeuta.findById(req.terapeutaId).populate("servicios");
-    
-    res.json({
-      mensaje: "Servicio eliminado correctamente.",
-      serviciosActualizados: terapeuta.servicios,
-      eliminadoId: servicio._id
-    });
-  } catch (err) {
-    console.error("Error al eliminar servicio:", err);
-    res.status(500).json({ error: "Error al eliminar el servicio." });
+    res.json({ message: "Servicio eliminado correctamente" });
+  } catch (error) {
+    console.error("Error al eliminar servicio:", error);
+    res.status(500).json({ error: "Error al eliminar el servicio" });
   }
 });
 
