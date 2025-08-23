@@ -281,14 +281,14 @@ router.delete("/:id", verificarToken, async (req, res) => {
     });
 
     if (!servicio) {
-      return res.status(404).json({ error: "Servicio no encontrado o no autorizado" });
+      return res.status(404).json({ error: "Servicio no encontrado o ya eliminado" });
     }
 
     await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
       $pull: { servicios: servicio._id },
     });
 
-    res.json({ mensaje: "Servicio eliminado correctamente." });
+    res.json({ mensaje: "Servicio eliminado correctamente.", eliminadoId: servicio._id });
   } catch (err) {
     console.error("Error al eliminar servicio:", err);
     res.status(500).json({ error: "Error al eliminar el servicio." });
