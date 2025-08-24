@@ -42,14 +42,33 @@ router.post("/", verificarToken, async (req, res) => {
       terapeuta: {
         _id: terapeuta._id,
         nombreCompleto: terapeuta.nombreCompleto,
-        email: terapeuta.email || null, // opcional
+        email: terapeuta.email || null,
         imagenPerfil: terapeuta.imagen || null,
       },  
       imagen: imagen || null,  
-      aprobado: false, // queda pendiente de aprobación
+      aprobado: false,
     });  
 
-    await nuevoServicio.save();  
+    await nuevoServicio.save();
+
+    // 🔹 Agregar servicio al array del terapeuta
+    await Terapeuta.findByIdAndUpdate(req.user.id, {
+      $push: {
+        servicios: {
+          _id: nuevoServicio._id,
+          titulo: nuevoServicio.titulo,
+          descripcion: nuevoServicio.descripcion,
+          aprobado: nuevoServicio.aprobado,
+          rechazado: false,
+          plataformas: nuevoServicio.plataformas,
+          duracionMinutos: nuevoServicio.duracionMinutos,
+          precio: nuevoServicio.precio,
+          categoria: nuevoServicio.categoria,
+          imagen: nuevoServicio.imagen || "",
+          slug: nuevoServicio.slug || ""
+        }
+      }
+    });
 
     res.status(201).json({ ...nuevoServicio.toObject() });
 
