@@ -104,16 +104,21 @@ router.post("/login", async (req, res) => {
 // 🔐 Ruta protegida para obtener el perfil del terapeuta logueado
 router.get("/perfil", verificarToken, async (req, res) => {
   try {
-    const terapeuta = await Terapeuta.findById(req.user.id).populate("servicios");
+    const terapeuta = await Terapeuta.findById(req.user.id).populate({
+      path: "servicios",
+      select: "titulo descripcion modalidad duracionMinutos precio categoria plataformas imagen aprobado horariosDisponibles slug reseñas"
+    });
+
     if (!terapeuta) {
       return res.status(404).json({ message: "Terapeuta no encontrado" });
     }
+
     res.json(terapeuta);
   } catch (error) {
     console.error("Error al obtener perfil:", error);
     res.status(500).json({ message: "Error en el servidor" });
   }
-}); // ✅ cierre correcto del router.get
+});
 
 // 🧹 Ruta para borrar todos los terapeutas (temporal)
 router.delete('/borrar-todos', async (req, res) => {
