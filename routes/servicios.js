@@ -27,6 +27,10 @@ router.post("/", verificarToken, async (req, res) => {
       return res.status(400).json({ error: "Faltan campos obligatorios." });  
     }  
 
+    // Traer datos del terapeuta actual
+    const terapeuta = await Terapeuta.findById(req.user.id);
+    if (!terapeuta) return res.status(404).json({ error: "Terapeuta no encontrado" });
+
     const nuevoServicio = new Servicio({  
       titulo,  
       descripcion,  
@@ -35,17 +39,17 @@ router.post("/", verificarToken, async (req, res) => {
       precio,  
       categoria,  
       plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,  
-      terapeuta: req.user.id,  
+      terapeuta: {
+        _id: terapeuta._id,
+        nombreCompleto: terapeuta.nombreCompleto,
+        email: terapeuta.email || null, // opcional
+        imagenPerfil: terapeuta.imagen || null,
+      },  
       imagen: imagen || null,  
-      aprobado: false, // pendiente de aprobación
-    });
+      aprobado: false, // queda pendiente de aprobación
+    });  
 
-    await nuevoServicio.save();
-
-    // Agregar servicio al array de servicios del terapeuta
-    await Terapeuta.findByIdAndUpdate(req.user.id, {
-      $push: { servicios: nuevoServicio._id },
-    });
+    await nuevoServicio.save();  
 
     res.status(201).json({ ...nuevoServicio.toObject() });
 
