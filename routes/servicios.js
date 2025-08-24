@@ -5,8 +5,8 @@ const Terapeuta = require("../models/Terapeuta");
 const jwt = require("jsonwebtoken");
 const Bloqueo = require("../models/Bloqueo");
 const Reserva = require("../models/Reserva");
-const mongoose = require("mongoose");
-const Resena = require("../models/Resena");
+const mongoose = require("mongoose"); // asegurate de tener esta línea al comienzo del archivo
+const Resena = require("../models/Resena"); // ⬅️ agregar
 
 // Middleware JWT
 function verificarToken(req, res, next) {
@@ -54,18 +54,19 @@ router.post("/", verificarToken, async (req, res) => {
 
     await nuevoServicio.save();
 
+    // 👉 ACÁ es donde se agrega el nuevo fragmento
     await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
-      $push: {
-        servicios: {
-          _id: nuevoServicio._id,
-          titulo: nuevoServicio.titulo,
-          precio: nuevoServicio.precio,
-          imagen: nuevoServicio.imagen,
-          aprobado: nuevoServicio.aprobado || false,
-          rechazado: nuevoServicio.rechazado || false,
-        },
-      },
-    });
+  $push: {
+    servicios: {
+      _id: nuevoServicio._id,
+      titulo: nuevoServicio.titulo,
+      precio: nuevoServicio.precio,
+      imagen: nuevoServicio.imagen,
+      aprobado: nuevoServicio.aprobado || false,
+      rechazado: nuevoServicio.rechazado || false,
+    },
+  },
+});
 
     res.status(201).json({ ...nuevoServicio.toObject() });
   } catch (err) {
@@ -73,6 +74,41 @@ router.post("/", verificarToken, async (req, res) => {
     res.status(500).json({ error: "Error al crear el servicio." });
   }
 });
+
+// ✅ Obtener todos los servicios con promedio y cantidad de reseñas
+router.get("/", async (req, res) => {
+  try {
+    const servicios = await Servicio.find({ aprobado: true }).populate("terapeuta");
+
+    if (!Array.isArray(servicios)) {
+      console.error("❌ No se obtuvo un array de servicios:", servicios);
+      return res.status(500).json({ error: "No se pudo obtener los servicios" });
+    }
+
+    // Para cada servicio, obtener sus reseñas aprobadas y calcular promedio
+    const conRatings = await Promise.all(
+      servicios.map(async (s) => {
+        const resenas = await Resena.find({
+  servicio: s._id,  // 🔹 filtrar SOLO por este servicio
+  aprobado: true,
+}).select("puntaje");
+        const suma = resenas.reduce((acc, r) => acc + (r.puntaje || 0), 0);
+        const promedio = resenas.length ? (suma / resenas.length) : 0;
+
+        const obj = s.toObject();
+        obj.cantidadResenas = resenas.length;
+        obj.promedioResenas = Number(promedio.toFixed(1));
+        return obj;
+      })
+    );
+
+    res.json(conRatings);
+  } catch (err) {
+    console.error("❌ Error real al obtener los servicios:", err.message, err.stack);
+    res.status(500).json({ error: "Error al obtener los servicios" });
+  }
+});
+
 
 // ✅ Obtener servicios del terapeuta autenticado
 router.get("/mis-servicios", verificarToken, async (req, res) => {
@@ -99,11 +135,13 @@ router.get("/publico/:slug", async (req, res) => {
       return res.status(404).json({ error: "Servicio no encontrado" });
     }
 
-    const reseñas = await Resena.find({
-      servicio: servicio._id,
-      aprobado: true
-    }).select("nombre comentario puntaje createdAt");
+    // Obtener reseñas aprobadas de este servicio
+const reseñas = await Resena.find({
+  servicio: servicio._id,   // ✅ reseñas SOLO de este servicio
+  aprobado: true
+}).select("nombre comentario puntaje createdAt"); // ✅ usamos 'nombre' porque lo tenés en el schema
 
+    // Calcular promedio de estrellas
     const totalEstrellas = reseñas.reduce((acc, r) => acc + (r.puntaje || 0), 0);
     const promedioEstrellas = reseñas.length > 0 ? totalEstrellas / reseñas.length : 0;
 
@@ -205,6 +243,7 @@ router.put("/:id", verificarToken, async (req, res) => {
       return res.status(400).json({ error: "Faltan campos obligatorios." });
     }
 
+    // ✅ Actualizar campos editables
     servicioExistente.titulo = titulo;
     servicioExistente.descripcion = descripcion;
     servicioExistente.modalidad = modalidad;
@@ -216,6 +255,10 @@ router.put("/:id", verificarToken, async (req, res) => {
     if (imagen) {
       servicioExistente.imagen = imagen;
     }
+
+    // 🚀 Importante: NO tocar el estado. Mantener el que ya tiene
+    // Ejemplo: si ya está "aprobado", queda igual
+    // servicioExistente.estado = servicioExistente.estado;
 
     await servicioExistente.save();
 
@@ -307,11 +350,15 @@ router.put("/actualizar-horario", async (req, res) => {
 // ruta: POST /api/servicios/:id/resena
 router.post("/:id/resena", async (req, res) => {
   try {
+    console.log("Body recibido:", req.body);
+    console.log("ID servicio:", req.params.id);
+
     const { nombre, comentario, puntaje } = req.body;
 
     const servicio = await Servicio.findById(req.params.id).populate("terapeuta");
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
 
+    // Crear la reseña en la colección Resena
     const nuevaResena = new Resena({
       servicio: servicio._id,
       terapeuta: servicio.terapeuta._id,
@@ -329,7 +376,7 @@ router.post("/:id/resena", async (req, res) => {
   }
 });
 
-// ✅ Obtener todos los servicios con promedio y cantidad de reseñas (grilla pública)
+// GET /api/servicios
 router.get("/", async (req, res) => {
   try {
     const terapeutas = await Terapeuta.find();
@@ -363,6 +410,8 @@ router.get("/", async (req, res) => {
         });
       }
     });
+
+    console.log("SERVICIOS APROBADOS PARA GRILLA:", serviciosAprobados);
 
     res.json(serviciosAprobados);
   } catch (err) {
