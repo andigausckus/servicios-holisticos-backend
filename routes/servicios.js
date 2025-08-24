@@ -48,14 +48,6 @@ res.status(500).json({ error: "Error al crear el servicio." });
 }
 });
 
-res.status(201).json({ ...nuevoServicio.toObject() });
-
-} catch (err) {
-console.error("Error al crear servicio:", err);
-res.status(500).json({ error: "Error al crear el servicio." });
-}
-});
-
 // ✅ Obtener todos los servicios con promedio y cantidad de reseñas
 router.get("/", async (req, res) => {
 try {
