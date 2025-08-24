@@ -7,6 +7,7 @@ const Bloqueo = require("../models/Bloqueo");
 const Reserva = require("../models/Reserva");
 const mongoose = require("mongoose"); // asegurate de tener esta línea al comienzo del archivo
 const Resena = require("../models/Resena"); // ⬅️ agregar
+const verificarToken = require("../middlewares/auth");
 
 // ✅ Crear servicio
 router.post("/", verificarToken, async (req, res) => {
