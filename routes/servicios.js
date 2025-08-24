@@ -9,7 +9,7 @@ const mongoose = require("mongoose"); // asegurate de tener esta línea al comie
 const Resena = require("../models/Resena"); // ⬅️ agregar
 const verificarToken = require("../middlewares/auth");
 
-// ✅ Crear servicio
+// ✅ Crear servicio (como estaba antes)
 router.post("/", verificarToken, async (req, res) => {
   try {
     const {
@@ -39,21 +39,14 @@ router.post("/", verificarToken, async (req, res) => {
       precio,  
       categoria,  
       plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,  
-
-      // <-- Qui modificare questa parte:
-      terapeuta: {
-        _id: terapeuta._id,
-        nombreCompleto: terapeuta.nombreCompleto,
-        email: terapeuta.email || null, // opzionale
-        imagenPerfil: terapeuta.imagen || null,
-      },  
-
+      terapeuta: terapeuta._id,  // ⬅️ Antes solo el ID
       imagen: imagen || null,  
       aprobado: false, // queda pendiente de aprobación
     });  
 
     await nuevoServicio.save();  
-    res.status(201).json({ ...nuevoServicio.toObject() });
+
+    res.status(201).json({ _id: nuevoServicio._id });
 
   } catch (err) {
     console.error("Error al crear servicio:", err);
