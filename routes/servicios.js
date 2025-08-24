@@ -11,42 +11,48 @@ const verificarToken = require("../middlewares/auth");
 
 // ✅ Crear servicio
 router.post("/", verificarToken, async (req, res) => {
-try {
-const {
-titulo,
-descripcion,
-modalidad,
-duracionMinutos,
-precio,
-categoria,
-plataformas,
-imagen,
-} = req.body;
+  try {
+    const {
+      titulo,
+      descripcion,
+      modalidad,
+      duracionMinutos,
+      precio,
+      categoria,
+      plataformas,
+      imagen,
+    } = req.body;
 
-if (!titulo || !descripcion || !modalidad || !duracionMinutos || !precio || !categoria) {  
-  return res.status(400).json({ error: "Faltan campos obligatorios." });  
-}  
+    if (!titulo || !descripcion || !modalidad || !duracionMinutos || !precio || !categoria) {  
+      return res.status(400).json({ error: "Faltan campos obligatorios." });  
+    }  
 
-const nuevoServicio = new Servicio({  
-  titulo,  
-  descripcion,  
-  modalidad,  
-  duracionMinutos,  
-  precio,  
-  categoria,  
-  plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,  
-  terapeuta: req.user.id,  
-  imagen: imagen || null,  
-});  
+    const nuevoServicio = new Servicio({  
+      titulo,  
+      descripcion,  
+      modalidad,  
+      duracionMinutos,  
+      precio,  
+      categoria,  
+      plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,  
+      terapeuta: req.user.id,  
+      imagen: imagen || null,  
+      aprobado: false, // pendiente de aprobación
+    });
 
-await nuevoServicio.save();  
+    await nuevoServicio.save();
 
-res.status(201).json({ ...nuevoServicio.toObject() });
+    // Agregar servicio al array de servicios del terapeuta
+    await Terapeuta.findByIdAndUpdate(req.user.id, {
+      $push: { servicios: nuevoServicio._id },
+    });
 
-} catch (err) {
-console.error("Error al crear servicio:", err);
-res.status(500).json({ error: "Error al crear el servicio." });
-}
+    res.status(201).json({ ...nuevoServicio.toObject() });
+
+  } catch (err) {
+    console.error("Error al crear servicio:", err);
+    res.status(500).json({ error: "Error al crear el servicio." });
+  }
 });
 
 // ✅ Obtener todos los servicios con promedio y cantidad de reseñas
