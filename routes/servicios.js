@@ -369,49 +369,40 @@ res.status(500).json({ error: "Error al agregar la reseña" });
 }
 });
 
-// GET /api/servicios
+// GET /api/servicios → para el panel del admin o grilla pública
 router.get("/", async (req, res) => {
-try {
-const terapeutas = await Terapeuta.find();
+  try {
+    const servicios = await Servicio.find({ aprobado: true })
+      .populate("terapeuta", "_id nombreCompleto");
 
-const serviciosAprobados = [];  
+    const serviciosFormateados = servicios.map(s => ({
+      _id: s._id,
+      titulo: s.titulo || "Sin título",
+      descripcion: s.descripcion || "",
+      modalidad: s.modalidad || "",
+      duracionMinutos: s.duracionMinutos || 0,
+      precio: s.precio || 0,
+      categoria: s.categoria || "Sin categoría",
+      plataformas: s.plataformas || [],
+      imagen: s.imagen || "",
+      slug: s.slug || "",
+      createdAt: s.createdAt,
+      actualizado: s.updatedAt,
+      terapeuta: {
+        _id: s.terapeuta?._id,
+        nombreCompleto: s.terapeuta?.nombreCompleto || "Sin nombre"
+      },
+      promedioResenas: s.promedioResenas || 0,
+      cantidadResenas: s.cantidadResenas || 0
+    }));
 
-terapeutas.forEach(t => {  
-  if (Array.isArray(t.servicios)) {  
-    t.servicios.forEach(s => {  
-      if (s.aprobado && !s.rechazado) {  
-        serviciosAprobados.push({  
-          _id: s._id,  
-          titulo: s.titulo,  
-          descripcion: s.descripcion,  
-          modalidad: s.modalidad,  
-          duracionMinutos: s.duracionMinutos,  
-          precio: s.precio,  
-          categoria: s.categoria || "Sin categoría",  
-          plataformas: s.plataformas || [],  
-          imagen: s.imagen || "",  
-          slug: s.slug || "",  
-          createdAt: s.createdAt,  
-          terapeuta: {  
-            _id: t._id,  
-            nombreCompleto: t.nombreCompleto  
-          },  
-          promedioResenas: s.promedioResenas || 0,  
-          cantidadResenas: s.cantidadResenas || 0  
-        });  
-      }  
-    });  
-  }  
-});  
+    console.log("SERVICIOS PARA PANEL:", serviciosFormateados.length);
 
-console.log("SERVICIOS APROBADOS PARA GRILLA:", serviciosAprobados);  
-
-res.json(serviciosAprobados);
-
-} catch (err) {
-console.error("❌ Error al obtener servicios:", err);
-res.status(500).json({ error: "Error al obtener los servicios" });
-}
+    res.json(serviciosFormateados);
+  } catch (err) {
+    console.error("❌ Error al obtener servicios:", err);
+    res.status(500).json({ error: "Error al obtener los servicios" });
+  }
 });
 
 module.exports = router;
