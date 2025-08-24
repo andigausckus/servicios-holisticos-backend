@@ -1,5 +1,3 @@
-catch (err) {
-^
 const express = require("express");
 const router = express.Router();
 const Servicio = require("../models/Servicio");
