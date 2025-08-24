@@ -28,16 +28,16 @@ router.post("/", verificarToken, async (req, res) => {
     }
 
     const nuevoServicio = new Servicio({
-      titulo,
-      descripcion,
-      modalidad,
-      duracionMinutos,
-      precio,
-      categoria,
-      plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,
-      terapeuta: req.terapeutaId,
-      imagen: imagen || null,
-    });
+  titulo,
+  descripcion,
+  modalidad,
+  duracionMinutos,
+  precio,
+  categoria,
+  plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,
+  terapeuta: req.terapeutaId, // <--- acá va como estaba antes
+  imagen: imagen || null,
+});
 
     await nuevoServicio.save();
 
