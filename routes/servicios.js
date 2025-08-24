@@ -39,37 +39,20 @@ router.post("/", verificarToken, async (req, res) => {
       precio,  
       categoria,  
       plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,  
+
+      // <-- Qui modificare questa parte:
       terapeuta: {
         _id: terapeuta._id,
         nombreCompleto: terapeuta.nombreCompleto,
-        email: terapeuta.email || null,
+        email: terapeuta.email || null, // opzionale
         imagenPerfil: terapeuta.imagen || null,
       },  
+
       imagen: imagen || null,  
-      aprobado: false,
+      aprobado: false, // queda pendiente de aprobación
     });  
 
-    await nuevoServicio.save();
-
-    // 🔹 Agregar servicio al array del terapeuta
-    await Terapeuta.findByIdAndUpdate(req.user.id, {
-      $push: {
-        servicios: {
-          _id: nuevoServicio._id,
-          titulo: nuevoServicio.titulo,
-          descripcion: nuevoServicio.descripcion,
-          aprobado: nuevoServicio.aprobado,
-          rechazado: false,
-          plataformas: nuevoServicio.plataformas,
-          duracionMinutos: nuevoServicio.duracionMinutos,
-          precio: nuevoServicio.precio,
-          categoria: nuevoServicio.categoria,
-          imagen: nuevoServicio.imagen || "",
-          slug: nuevoServicio.slug || ""
-        }
-      }
-    });
-
+    await nuevoServicio.save();  
     res.status(201).json({ ...nuevoServicio.toObject() });
 
   } catch (err) {
