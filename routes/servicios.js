@@ -189,8 +189,8 @@ res.status(500).json({ error: "Error al obtener el servicio" });
 router.put("/:id", verificarToken, async (req, res) => {
 try {
 const servicioExistente = await Servicio.findOne({
-_id: req.params.id,
-terapeuta: req.terapeutaId,
+  _id: req.params.id,
+  terapeuta: req.user.id,
 });
 
 if (!servicioExistente) {  
