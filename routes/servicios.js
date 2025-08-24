@@ -24,18 +24,19 @@ router.post("/", verificarToken, async (req, res) => {
       return res.status(400).json({ error: "Faltan campos obligatorios." });
     }
 
-    const nuevoServicio = new Servicio({
-      titulo,
-      descripcion,
-      modalidad,
-      duracionMinutos,
-      precio,
-      categoria,
-      plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,
-      terapeuta: req.terapeutaId, // solo ID
-      imagen: imagen || null,
-      aprobado: false,
-    });
+    const terapeuta = await Terapeuta.findById(req.user.id);
+const nuevoServicio = new Servicio({
+  titulo,
+  descripcion,
+  modalidad,
+  duracionMinutos,
+  precio,
+  categoria,
+  plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,
+  terapeuta: terapeuta._id,
+  imagen: imagen || null,
+  aprobado: false,
+});
 
     await nuevoServicio.save();
     res.status(201).json({ _id: nuevoServicio._id });
