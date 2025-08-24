@@ -56,6 +56,12 @@ app.get("/", (req, res) => {
   res.send("🌐 API de Servicios Holísticos en funcionamiento");
 });
 
+// ✅ Endpoint de redirección para compartir servicios
+app.get("/s/:slug", (req, res) => {
+  const { slug } = req.params;
+  res.redirect(`/#/servicios/${slug}`);
+});
+
 // ✅ Arranque del servidor
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
