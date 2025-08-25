@@ -31,18 +31,18 @@ const crearReservaConComprobante = async (req, res) => {
     console.log("📥 Datos recibidos para nueva reserva con comprobante:");  
     console.log({ servicioId, terapeutaId, precio, duracion });  
 
-    const nuevaReserva = new Reserva({  
-  servicioId,  
-  terapeuta: terapeutaId, // ⚠️ cambiar 'terapeuta' por 'terapeutaId'
-  fecha,  
-  hora,  
-  nombreUsuario,  
-  emailUsuario,  
-  comprobantePago,  
-  precio,  
-  duracion,  
-  estado: "confirmada",  
-});  
+    const nuevaReserva = new Reserva({
+  servicioId,
+  terapeuta: mongoose.Types.ObjectId(terapeutaId), // 👈 así
+  fecha,
+  hora,
+  nombreUsuario,
+  emailUsuario,
+  comprobantePago,
+  precio,
+  duracion,
+  estado: "confirmada",
+});
 
     await nuevaReserva.save();  
     console.log("✅ Reserva confirmada:", nuevaReserva);  
