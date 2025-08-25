@@ -61,7 +61,7 @@ res.send("🌐 API de Servicios Holísticos en funcionamiento");
 // ✅ Endpoint de redirección para compartir servicios
 app.get("/s/:slug", (req, res) => {
 const { slug } = req.params;
-res.redirect(/#/servicios/${slug});
+res.redirect(`/#/servicios/${slug}`);
 });
 
 // ✅ Endpoint dinámico para compartir servicios (Open Graph)
@@ -108,6 +108,6 @@ res.status(500).send("Error al generar la página de compartir");
 // ✅ Arranque del servidor
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
-console.log(🚀 Servidor corriendo en el puerto ${PORT});
+console.log(`🚀 Servidor corriendo en el puerto ${PORT}`);
 });
 
