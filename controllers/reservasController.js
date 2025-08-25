@@ -32,17 +32,17 @@ const crearReservaConComprobante = async (req, res) => {
     console.log({ servicioId, terapeutaId, precio, duracion });  
 
     const nuevaReserva = new Reserva({  
-      servicioId,  
-      terapeuta: terapeutaId,  
-      fecha,  
-      hora,  
-      nombreUsuario,  
-      emailUsuario,  
-      comprobantePago,  
-      precio,  
-      duracion,  
-      estado: "confirmada",  
-    });  
+  servicioId,  
+  terapeutaId: terapeutaId, // ⚠️ cambiar 'terapeuta' por 'terapeutaId'
+  fecha,  
+  hora,  
+  nombreUsuario,  
+  emailUsuario,  
+  comprobantePago,  
+  precio,  
+  duracion,  
+  estado: "confirmada",  
+});  
 
     await nuevaReserva.save();  
     console.log("✅ Reserva confirmada:", nuevaReserva);  
