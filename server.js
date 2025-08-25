@@ -12,6 +12,7 @@ app.use(cors({
     "http://localhost:3000",
     "https://frontend-holisticos.vercel.app",
     "https://www.serviciosholisticos.com.ar",
+    "https://6188e661-7694-485e-b18d-0f9a4b139a16-00-3vr3dlg7g41yj.janeway.replit.dev/",
   ]
 }));
 
