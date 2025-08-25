@@ -110,13 +110,15 @@ router.get("/:id", async (req, res) => {
 router.get("/mis-reservas", verificarToken, async (req, res) => {
   try {
     const reservas = await Reserva.find({ terapeuta: req.user._id })
-  .sort({ fecha: -1 })
-  .lean();
+      .populate("servicioId", "titulo")
+      .sort({ fecha: -1 })
+      .lean();
 
     const reservasConDatosUsuario = reservas.map((reserva) => ({
       ...reserva,
-      usuarioNombre: reserva.nombreUsuario || "Cliente",
-      usuarioEmail: reserva.emailUsuario || "Sin email",
+      nombreServicio: reserva.servicioId?.titulo || "Servicio",
+      nombreUsuario: reserva.nombreUsuario || "Cliente",
+      emailUsuario: reserva.emailUsuario || "Sin email",
     }));
 
     res.json(reservasConDatosUsuario);
