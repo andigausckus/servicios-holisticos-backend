@@ -7,15 +7,17 @@ const app = express();
 
 // ✅ Middlewares
 app.use(express.json());
-app.use(cors({
-  origin: [
-    "http://localhost:3000",
-    "https://6188e661-7694-485e-b18d-0f9a4b139a16-00-3vr3dlg7g41yj.janeway.replit.dev",
-    "https://frontend-holisticos.vercel.app",
-    "https://serviciosholisticos.com.ar",
-    "https://www.serviciosholisticos.com.ar",
-  ]
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://6188e661-7694-485e-b18d-0f9a4b139a16-00-3vr3dlg7g41yj.janeway.replit.dev",
+      "https://frontend-holisticos.vercel.app",
+      "https://serviciosholisticos.com.ar",
+      "https://www.serviciosholisticos.com.ar",
+    ],
+  })
+);
 
 // ✅ Conexión a MongoDB
 mongoose
@@ -59,7 +61,7 @@ app.get("/", (req, res) => {
 // ✅ Endpoint de redirección para compartir servicios
 app.get("/s/:slug", (req, res) => {
   const { slug } = req.params;
-  res.redirect(`/#/servicios/${slug}`);
+  res.redirect(`https://www.serviciosholisticos.com.ar/servicios/${slug}`);
 });
 
 // ✅ Arranque del servidor
