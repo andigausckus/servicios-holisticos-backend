@@ -32,8 +32,8 @@ const crearReservaConComprobante = async (req, res) => {
     console.log({ servicioId, terapeutaId, precio, duracion });  
 
     const nuevaReserva = new Reserva({
-  servicioId,
-  terapeuta: mongoose.Types.ObjectId(terapeutaId), // 👈 así
+  servicioId: mongoose.Types.ObjectId(servicioId),
+  terapeuta: mongoose.Types.ObjectId(terapeutaId),
   fecha,
   hora,
   nombreUsuario,
