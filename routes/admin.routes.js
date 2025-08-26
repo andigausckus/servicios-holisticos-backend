@@ -7,44 +7,29 @@ const Reserva = require("../models/Reserva");
 const { enviarEmailAprobacionTerapeuta } = require("../utils/emailSender");
 
 
+
 // --- TERAPEUTAS ---
-
-// Obtener terapeutas pendientes
 router.get("/terapeutas-pendientes", async (req, res) => {
-  try {
-    const pendientes = await Terapeuta.find({ estado: "pendiente" });
-    res.json(pendientes);
-  } catch (error) {
-    res.status(500).json({ mensaje: "Error al obtener terapeutas", error });
-  }
+try {
+const pendientes = await Terapeuta.find({ aprobado: false });
+res.json(pendientes);
+} catch (error) {
+res.status(500).json({ mensaje: "Error al obtener terapeutas", error });
+}
 });
 
-// Aprobar terapeuta
 router.put("/aprobar-terapeuta/:id", async (req, res) => {
-  try {
-    const terapeuta = await Terapeuta.findByIdAndUpdate(
-      req.params.id,
-      { estado: "aprobado" },
-      { new: true }
-    );
-    res.json({ mensaje: "✅ Terapeuta aprobado", terapeuta });
-  } catch (error) {
-    res.status(500).json({ mensaje: "Error al aprobar terapeuta", error });
-  }
-});
-
-// Rechazar terapeuta
-router.put("/rechazar-terapeuta/:id", async (req, res) => {
-  try {
-    const terapeuta = await Terapeuta.findByIdAndUpdate(
-      req.params.id,
-      { estado: "rechazado" },
-      { new: true }
-    );
-    res.json({ mensaje: "❌ Terapeuta rechazado", terapeuta });
-  } catch (error) {
-    res.status(500).json({ mensaje: "Error al rechazar terapeuta", error });
-  }
+try {
+const { aprobado } = req.body;
+const terapeuta = await Terapeuta.findByIdAndUpdate(
+req.params.id,
+{ aprobado },
+{ new: true }
+);
+res.json({ mensaje: "✅ Estado actualizado", terapeuta });
+} catch (error) {
+res.status(500).json({ mensaje: "Error al actualizar terapeuta", error });
+}
 });
 
 // --- SERVICIOS PENDIENTES ---
