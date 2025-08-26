@@ -54,12 +54,23 @@ router.post("/", verificarToken, async (req, res) => {
 
     await nuevoServicio.save();
 
-    // 👉 ACÁ es donde se agrega el nuevo fragmento
+    // Agregar servicio al array de servicios del terapeuta
     await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
-  $push: { servicios: nuevoServicio._id }
-});
+      $push: {
+        servicios: {
+          _id: nuevoServicio._id,
+          titulo: nuevoServicio.titulo,
+          precio: nuevoServicio.precio,
+          imagen: nuevoServicio.imagen,
+          aprobado: nuevoServicio.aprobado || false,
+          rechazado: nuevoServicio.rechazado || false,
+        },
+      },
+    });
 
-    res.status(201).json({ ...nuevoServicio.toObject() });
+    // ✅ Enviar servicio recién creado al frontend
+    res.status(201).json({ servicio: nuevoServicio });
+
   } catch (err) {
     console.error("Error al crear servicio:", err);
     res.status(500).json({ error: "Error al crear el servicio." });
