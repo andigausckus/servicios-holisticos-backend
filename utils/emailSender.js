@@ -261,9 +261,51 @@ const urlResena = `${FRONTEND_URL}/#/resenas/${idReserva}`;
   }
 }
 
+async function enviarEmailAprobacionTerapeuta({ nombreCompleto, emailTerapeuta }) {
+  const FRONTEND_URL = process.env.FRONTEND_URL || "https://www.serviciosholisticos.com.ar";
+  const loginUrl = `${FRONTEND_URL}/#/login`;
+
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #333;">
+      <img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" 
+           alt="Logo de Servicios Holísticos" 
+           style="width: 60px; height: auto; margin: 10px auto; display: block;">
+      <h2 style="color:#7D5BA6; text-align:center;">🎉 ¡Bienvenido/a a Servicios Holísticos! 🌿</h2>
+      
+      <p>Hola <strong>${nombreCompleto}</strong>,</p>
+      <p>Tu solicitud para unirte como terapeuta en nuestra plataforma ha sido <strong>aprobada</strong> ✅</p>
+      <p>Ya podés iniciar sesión, crear tus servicios y comenzar a recibir reservas ✨</p>
+
+      <p style="text-align:center; margin: 30px 0;">
+        <a href="${loginUrl}" target="_blank" 
+           style="background:#7D5BA6; color:white; padding:12px 24px; text-decoration:none; border-radius:8px; font-weight:bold;">
+          🔑 Iniciar sesión
+        </a>
+      </p>
+
+      <p>Nos alegra mucho tenerte con nosotros 💖</p>
+      <p>Con cariño 🌸<br>
+      <strong>El equipo de Servicios Holísticos</strong></p>
+    </div>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
+      to: emailTerapeuta,
+      subject: "🌿 Tu cuenta fue aprobada en Servicios Holísticos",
+      html,
+    });
+    console.log("✅ Email de aprobación enviado al terapeuta");
+  } catch (error) {
+    console.error("❌ Error al enviar email de aprobación:", error);
+  }
+}
+
 
 module.exports = {
   enviarEmailsReserva,
   enviarEmailConfirmacionCliente,
-  enviarEmailResena: enviarEmailResenaUsuario, // 👈 alias
+  enviarEmailResena: enviarEmailResenaUsuario,
+  enviarEmailAprobacionTerapeuta, // 👈 nuevo
 };
