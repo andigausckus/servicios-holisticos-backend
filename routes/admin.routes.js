@@ -213,7 +213,10 @@ router.put("/aprobar-terapeuta/:id", async (req, res) => {
     // Si fue aprobado, mandamos el email
     if (aprobado) {
   console.log("📧 Enviando email de aprobación a:", terapeuta.email);
-  await enviarEmailAprobacionTerapeuta(terapeuta.email, terapeuta.nombreCompleto);
+  await enviarEmailAprobacionTerapeuta({
+    nombreCompleto: terapeuta.nombreCompleto,
+    emailTerapeuta: terapeuta.email,
+  });
 }
 
     res.json(terapeuta);
