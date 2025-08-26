@@ -96,19 +96,29 @@ WhatsApp:
 `;
 
   // ===== HTML para el terapeuta =====
-  const cuerpoTerapeuta = `
-    <img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" 
-         alt="Logo de la plataforma" style="width: 50px; height: auto; margin: 10px auto; display: block;">
-    <p>👋 Hola ${nombreTerapeuta}!</p>
-    <p>¡Tenés una nueva reserva confirmada! 🎉</p>
-    <p>🧘 Usuario: ${nombreCliente}</p>
-    <p>🛎️ Servicio: ${nombreServicio}</p>
-    <p>📅 Fecha: ${fechaFormateada}</p>
-    <p>🕒 Hora: ${hora} a ${horaFinal}</p>
-    <p>💵 Valor de la sesión: $${precio}</p>
-    <p>💸 El pago será procesado y enviado a tu cuenta en un plazo máximo de 60 minutos.</p>
-    <p>Con cariño 🌸<br><strong>El equipo de Servicios Holísticos</strong></p>
-  `;
+const cuerpoTerapeuta = `
+<img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" 
+     alt="Logo de la plataforma" style="width: 50px; height: auto; margin: 10px auto; display: block;">
+
+<p>👋 Hola <strong>${nombreTerapeuta}</strong>!</p>
+
+<p>¡Tenés una nueva reserva confirmada! 🎉</p>
+
+<p>🧘 <strong>Usuario:</strong> ${nombreCliente}</p>
+<p>🛎️ <strong>Servicio:</strong> ${nombreServicio}</p>
+<p>📅 <strong>Fecha:</strong> ${fechaFormateada}</p>
+<p>🕒 <strong>Hora:</strong> ${hora} a ${horaFinal}</p>
+<p>💵 <strong>Valor de la sesión:</strong> $${precio}</p>
+
+<p>${nombreCliente} podrá escribirte antes de la sesión por email o WhatsApp si tiene alguna duda, o el mismo día del encuentro.</p>
+
+<p>💸 El pago correspondiente a esta sesión será procesado y enviado a tu cuenta en un plazo máximo de 60 minutos.</p>
+
+<p>✨ Te deseamos una excelente sesión ✨</p>
+<p>Recordá que, una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
+<p>Con cariño 🌸<br>
+<strong>El equipo de Servicios Holísticos</strong></p>
+`;
 
   // ===== HTML para el admin =====
   const cuerpoAdmin = `
