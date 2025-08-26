@@ -41,16 +41,16 @@ router.post("/", verificarToken, async (req, res) => {
     }
 
     const nuevoServicio = new Servicio({
-      titulo,
-      descripcion,
-      modalidad,
-      duracionMinutos,
-      precio,
-      categoria,
-      plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,
-      terapeuta: req.terapeutaId,
-      imagen: imagen || null,
-    });
+  titulo,
+  descripcion,
+  modalidad: modalidad || "Online",  // 🔹 siempre string válido
+  duracionMinutos: Number(duracionMinutos), // 🔹 asegurarse que sea número
+  precio: Number(precio), // 🔹 asegurarse que sea número
+  categoria,
+  plataformas: Array.isArray(plataformas) ? plataformas : [], // 🔹 siempre array
+  terapeuta: req.terapeutaId,
+  imagen: imagen || null,
+});
 
     await nuevoServicio.save();
 
