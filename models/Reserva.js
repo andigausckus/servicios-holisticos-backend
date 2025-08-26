@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const reservaSchema = new mongoose.Schema({
   usuarioId: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: false },
-  terapeuta: { type: mongoose.Schema.Types.ObjectId, ref: "Terapeuta", required: true },
+  terapeutaId: { type: mongoose.Schema.Types.ObjectId, ref: "Terapeuta", required: true },
   servicioId: { type: mongoose.Schema.Types.ObjectId, ref: "Servicio", required: true },
-  fecha: { type: String, required: true },
-  hora: { type: String, required: true },
+  fecha: { type: String, required: true, match: [/^\d{4}-\d{2}-\d{2}$/, "Formato inválido (YYYY-MM-DD)"] },
+  hora: { type: String, required: true, match: [/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato inválido (HH:mm)"] },
   duracion: { type: Number, required: true },
   precio: { type: Number, required: true },
   nombreUsuario: { type: String, required: true },
