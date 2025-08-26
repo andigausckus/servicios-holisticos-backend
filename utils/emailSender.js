@@ -290,6 +290,7 @@ async function enviarEmailAprobacionTerapeuta({ nombreCompleto, emailTerapeuta }
   `;
 
   try {
+    console.log("📤 Preparando envío a:", emailTerapeuta, "Nombre:", nombreCompleto);
     await transporter.sendMail({
       from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
       to: emailTerapeuta,
