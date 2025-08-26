@@ -198,6 +198,7 @@ router.put("/reserva/:id", async (req, res) => {
 
 
 router.put("/aprobar-terapeuta/:id", async (req, res) => {
+  console.log("🚦 PUT /aprobar-terapeuta llamado");
   try {
     const { aprobado } = req.body;
     const terapeuta = await Terapeuta.findByIdAndUpdate(
