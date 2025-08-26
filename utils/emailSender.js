@@ -93,6 +93,7 @@ WhatsApp:
 <br>
 <p>Con cariño 🌸<br>
 <strong>El equipo de Servicios Holísticos</strong></p>
+`;
 
 
   // ===== HTML para el terapeuta =====
@@ -127,6 +128,7 @@ const cuerpoTerapeuta = `
 <br>
 <p>Con cariño 🌸<br>
 <strong>El equipo de Servicios Holísticos</strong></p>
+`;
        
 
   // ===== HTML para el admin =====
