@@ -63,21 +63,21 @@ const cuerpoCliente = `
 <img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" 
      alt="Logo de la plataforma" style="width: 50px; height: auto; margin: 10px auto; display: block;">
 
-<p>Hola <strong>${nombreCliente}</strong>,</p>
+<p>Hola ${nombreCliente},</p>
 
 <p>¡Gracias por confiar en Servicios Holísticos 🌿!</p>
 
-<p>Tu sesión fue confirmada exitosamente. A continuación te compartimos los detalles de la reserva:</p>
+<p>A continuación te compartimos los detalles de la reserva:</p>
 
-<p>🧘 <strong>Servicio:</strong> ${nombreServicio}<br>
-📅 <strong>Fecha:</strong> ${fechaFormateada}<br>
-🕒 <strong>Hora:</strong> ${hora} a ${horaFinal}<br>
-💵 <strong>Valor:</strong> $${precio}</p>
+<p>🧘 Servicio: ${nombreServicio}<br><br>
+📅 Fecha: ${fechaFormateada}<br><br>
+🕒 Hora: ${hora} a ${horaFinal}<br><br>
+💵 Valor: $${precio}</p>
 
 <p><u>Datos del terapeuta holístico para contacto:</u></p>
 
-<p>Nombre y apellido: <strong>${nombreTerapeuta}</strong><br>
-Email: <strong>${emailTerapeuta}</strong><br>
+<p>Nombre y apellido: ${nombreTerapeuta}<br>
+Email: ${emailTerapeuta}<br>
 WhatsApp: 
 <a href="https://wa.me/${telefonoTerapeuta}?text=👋%20Hola%20${encodeURIComponent(nombreCliente)},%20soy%20${encodeURIComponent(nombreTerapeuta)}.%0A%0AReservé%20con%20vos%20una%20sesión%20de%20*${encodeURIComponent(nombreServicio)}*%20para%20el%20día%20${encodeURIComponent(fechaFormateada)}%20de%20${encodeURIComponent(hora)}%20a%20${encodeURIComponent(horaFinal)}" 
    target="_blank" style="display:inline-block;padding:8px 16px;background-color:#25D366;color:white;border-radius:4px;text-decoration:none;">
@@ -86,56 +86,66 @@ WhatsApp:
 </p>
 
 <p>✨ El terapeuta ya fue notificado de tu sesión. Podés escribirle antes si tenés dudas o esperar al día del encuentro.</p>
-
+<br>
 <p>Una vez finalizada la sesión, podrás dejar una reseña sobre tu experiencia para ayudar a otros usuarios en su elección.</p>
-
+<br>
 <p>Si necesitás ayuda, podés responder directamente a este correo.</p>
-
+<br>
 <p>Con cariño 🌸<br>
 <strong>El equipo de Servicios Holísticos</strong></p>
-`;
+
 
   // ===== HTML para el terapeuta =====
 const cuerpoTerapeuta = `
 <img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" 
      alt="Logo de la plataforma" style="width: 50px; height: auto; margin: 10px auto; display: block;">
 
-<p>👋 Hola <strong>${nombreTerapeuta}</strong>!</p>
+<p>👋 Hola ${nombreTerapeuta}!</p>
 
 <p>¡Tenés una nueva reserva confirmada! 🎉</p>
 
-<p>🧘 <strong>Usuario:</strong> ${nombreCliente}</p>
-<p>🛎️ <strong>Servicio:</strong> ${nombreServicio}</p>
-<p>📅 <strong>Fecha:</strong> ${fechaFormateada}</p>
-<p>🕒 <strong>Hora:</strong> ${hora} a ${horaFinal}</p>
-<p>💵 <strong>Valor de la sesión:</strong> $${precio}</p>
+<p>🧘 Usuario: ${nombreCliente}</p>
+<br>
+<p>🛎️ Servicio: ${nombreServicio}</p>
+<br>
+<p>📅 Fecha: ${fechaFormateada}</p>
+<br>
+<p>🕒 Hora: ${hora} a ${horaFinal}</p>
+<br>
+<p>💵 Valor de la sesión: $${precio}</p>
+<br>
 
 <p>${nombreCliente} podrá escribirte antes de la sesión por email o WhatsApp si tiene alguna duda, o el mismo día del encuentro.</p>
 
 <p>💸 El pago correspondiente a esta sesión será procesado y enviado a tu cuenta en un plazo máximo de 60 minutos.</p>
 
 <p>✨ Te deseamos una excelente sesión ✨</p>
-<p>Recordá que, una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
+<br>
+<p>Una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
+<br>
+<p>Una experiencia positiva y profesional te ayudará a construir una sólida reputación en nuestra plataforma, lo que atraerá a más clientes y oportunidades de crecimiento.</p>
+<br>
 <p>Con cariño 🌸<br>
 <strong>El equipo de Servicios Holísticos</strong></p>
-`;
+       
 
   // ===== HTML para el admin =====
-  const cuerpoAdmin = `
-    <p><strong>💡 Nueva reserva confirmada:</strong></p>
-    <p>👤 <strong>Cliente:</strong> ${nombreCliente}</p>
-    <p>🛎️ <strong>Servicio:</strong> ${nombreServicio}</p>
-    <p>📅 <strong>Fecha:</strong> ${fechaFormateada}</p>
-    <p>🕒 <strong>Hora:</strong> ${hora} a ${horaFinal}</p>
-    <p>💵 <strong>Precio pagado:</strong> $${precio}</p>
-    <p><strong>Datos del terapeuta:</strong></p>
-    <p>🧘 <strong>Terapeuta:</strong> ${nombreTerapeuta} (${emailTerapeuta})</p>
-    <p><strong>CBU/CVU:</strong> ${cbuTerapeuta}</p>
-    <p><strong>Banco:</strong> ${bancoTerapeuta}</p>
-    <p style="margin-top:20px;">
-      👉 <a href="https://www.serviciosholisticos.com.ar/#/admin/pagos" target="_blank" style="text-decoration:none;color:#7D5BA6;font-weight:bold;">Ver comprobante de pago</a>
-    </p>
-  `;
+const cuerpoAdmin = `
+  <p>💡 Nueva reserva confirmada:</p>
+  <p>👤 Cliente: ${nombreCliente}</p>
+  <p>🛎️ Servicio: ${nombreServicio}</p>
+  <p>📅 Fecha: ${fechaFormateada}</p>
+  <p>🕒 Hora: ${hora} a ${horaFinal}</p>
+  <p>💵 Precio pagado: $${precio}</p>
+  <br><hr style="border: 1px solid #ccc; margin: 10px 0;">
+  <p>Datos del terapeuta:</p>
+  <p>🧘 Terapeuta: ${nombreTerapeuta} (${emailTerapeuta})</p>
+  <p>CBU/CVU: ${cbuTerapeuta}</p>
+  <p>Banco: ${bancoTerapeuta}</p>
+  <p style="margin-top:20px;">
+    👉 <a href="https://www.serviciosholisticos.com.ar/#/admin/pagos" target="_blank" style="text-decoration:none;color:#7D5BA6;">Ver comprobante de pago</a>
+  </p>
+`;
 
   try {
     // Email al cliente
