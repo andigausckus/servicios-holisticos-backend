@@ -265,6 +265,11 @@ async function enviarEmailAprobacionTerapeuta({ nombreCompleto, emailTerapeuta }
   const FRONTEND_URL = process.env.FRONTEND_URL || "https://www.serviciosholisticos.com.ar";
   const loginUrl = `${FRONTEND_URL}/#/login`;
 
+  console.log("🟢 Entramos a enviarEmailAprobacionTerapeuta");
+  console.log("📧 Destinatario:", emailTerapeuta);
+  console.log("📝 Nombre del terapeuta:", nombreCompleto);
+  console.log("🔧 Configuración del transporter:", transporter.options);
+
   const html = `
     <div style="font-family: Arial, sans-serif; color: #333;">
       <img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" 
@@ -290,14 +295,14 @@ async function enviarEmailAprobacionTerapeuta({ nombreCompleto, emailTerapeuta }
   `;
 
   try {
-    console.log("📤 Preparando envío a:", emailTerapeuta, "Nombre:", nombreCompleto);
-    await transporter.sendMail({
+    console.log("📤 Intentando enviar correo...");
+    const info = await transporter.sendMail({
       from: `"Servicios Holísticos" <notificaciones@serviciosholisticos.com.ar>`,
       to: emailTerapeuta,
       subject: "🌿 Tu cuenta fue aprobada en Servicios Holísticos",
       html,
     });
-    console.log("✅ Email de aprobación enviado al terapeuta");
+    console.log("✅ Email de aprobación enviado, info:", info);
   } catch (error) {
     console.error("❌ Error al enviar email de aprobación:", error);
   }
