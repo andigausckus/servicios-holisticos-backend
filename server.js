@@ -4,6 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
+console.log("🚀 Backend iniciado - versión Render/Dev");
 
 // ✅ Middlewares
 app.use(express.json());
@@ -40,6 +41,7 @@ const reservasRoutes = require("./routes/reservas.routes");
 const rutaDisponibilidad = require("./routes/disponibilidad");
 const mensajeGlobalRoutes = require("./routes/mensajeGlobal.routes");
 const adminRoutes = require("./routes/admin.routes");
+console.log("🗂️ Rutas de admin montadas en /api/admin");
 const bloqueosRouter = require("./routes/bloqueos");
 
 // ✅ Uso de rutas con prefijo /api
