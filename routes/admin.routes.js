@@ -4,6 +4,8 @@ const Terapeuta = require("../models/Terapeuta");
 const Servicio = require("../models/Servicio");
 const Resena = require("../models/Resena");
 const Reserva = require("../models/Reserva");
+const { enviarEmailAprobacionTerapeuta } = require("../utils/emailSender");
+
 
 // --- TERAPEUTAS ---
 
@@ -191,6 +193,35 @@ router.put("/reserva/:id", async (req, res) => {
     res.json({ mensaje: "✅ Estado actualizado", reserva });
   } catch (error) {
     res.status(500).json({ mensaje: "Error al actualizar reserva", error });
+  }
+});
+
+
+router.put("/aprobar-terapeuta/:id", async (req, res) => {
+  try {
+    const { aprobado } = req.body;
+    const terapeuta = await Terapeuta.findByIdAndUpdate(
+      req.params.id,
+      { aprobado },
+      { new: true }
+    );
+
+    if (!terapeuta) {
+      return res.status(404).json({ message: "Terapeuta no encontrado" });
+    }
+
+    // Si fue aprobado, mandamos el email
+    if (aprobado) {
+      await enviarEmailAprobacionTerapeuta({
+        nombreCompleto: terapeuta.nombreCompleto,
+        emailTerapeuta: terapeuta.email,
+      });
+    }
+
+    res.json(terapeuta);
+  } catch (error) {
+    console.error("❌ Error al aprobar terapeuta:", error);
+    res.status(500).json({ message: "Error en el servidor" });
   }
 });
 
