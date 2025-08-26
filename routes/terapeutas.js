@@ -70,38 +70,41 @@ router.post("/", async (req, res) => {
   }
 });
 
-// ✅ Login de terapeuta
+// login terapeuta
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   try {
     const terapeuta = await Terapeuta.findOne({ email });
     if (!terapeuta) {
-      return res.status(401).json({ message: "Credenciales inválidas" });
+      return res.status(400).json({ mensaje: "Credenciales incorrectas" });
     }
 
-    if (terapeuta.estado !== "aprobado") {
-      return res.status(403).json({ message: "Tu cuenta está en revisión o fue rechazada." });
+    const esValido = await bcrypt.compare(password, terapeuta.password);
+    if (!esValido) {
+      return res.status(400).json({ mensaje: "Credenciales incorrectas" });
     }
 
-    const passwordOk = await bcrypt.compare(password, terapeuta.password);
-    if (!passwordOk) {
-      return res.status(401).json({ message: "Credenciales inválidas" });
+    // 🔍 chequear estado antes de permitir acceso
+    if (terapeuta.estado === "pendiente") {
+      return res.status(403).json({ mensaje: "Tu cuenta está en revisión. Te avisaremos por email cuando sea aprobada." });
     }
 
+    if (terapeuta.estado === "rechazado") {
+      return res.status(403).json({ mensaje: "Tu solicitud fue rechazada. Contactanos para más información." });
+    }
+
+    // ✅ solo si está aprobado generamos token
     const token = jwt.sign(
       { id: terapeuta._id, email: terapeuta.email },
-      secret,
-      { expiresIn: "2h" }
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
     );
 
-    res.json({
-      token,
-      terapeuta: { id: terapeuta._id, nombre: terapeuta.nombreCompleto },
-    });
-  } catch (err) {
-    console.error("❌ Error en /login:", err);
-    res.status(500).json({ message: "Error en el servidor" });
+    res.json({ token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error en el servidor" });
   }
 });
 
