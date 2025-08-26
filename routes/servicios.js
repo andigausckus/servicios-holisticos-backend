@@ -56,16 +56,7 @@ router.post("/", verificarToken, async (req, res) => {
 
     // 👉 ACÁ es donde se agrega el nuevo fragmento
     await Terapeuta.findByIdAndUpdate(req.terapeutaId, {
-  $push: {
-    servicios: {
-      _id: nuevoServicio._id,
-      titulo: nuevoServicio.titulo,
-      precio: nuevoServicio.precio,
-      imagen: nuevoServicio.imagen,
-      aprobado: nuevoServicio.aprobado || false,
-      rechazado: nuevoServicio.rechazado || false,
-    },
-  },
+  $push: { servicios: nuevoServicio._id }
 });
 
     res.status(201).json({ ...nuevoServicio.toObject() });
@@ -113,8 +104,8 @@ router.get("/", async (req, res) => {
 // ✅ Obtener servicios del terapeuta autenticado
 router.get("/mis-servicios", verificarToken, async (req, res) => {
   try {
-    const servicios = await Servicio.find({ terapeuta: req.terapeutaId });
-    res.json(servicios);
+    const terapeuta = await Terapeuta.findById(req.terapeutaId).populate("servicios");
+res.json(terapeuta.servicios);
   } catch (err) {
     console.error("Error al obtener tus servicios:", err);
     res.status(500).json({ error: "Error al obtener tus servicios" });
