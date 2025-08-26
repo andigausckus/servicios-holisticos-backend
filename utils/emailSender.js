@@ -117,9 +117,9 @@ const cuerpoTerapeuta = `
 
 <p>✨ Te deseamos una excelente sesión ✨</p>
 
-<p>Una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
+<p>✍️ Una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
 
-<p>Una experiencia positiva y profesional te ayudará a construir una sólida reputación en nuestra plataforma, lo que atraerá a más clientes y oportunidades de crecimiento.</p>
+<p>😃 Una experiencia positiva y profesional te ayudará a construir una sólida reputación en nuestra plataforma, lo que atraerá a más clientes y oportunidades de crecimiento.</p>
 
 <p>Con cariño 🌸<br>
 <strong>El equipo de Servicios Holísticos</strong></p>
