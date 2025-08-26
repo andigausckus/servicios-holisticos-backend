@@ -50,7 +50,7 @@ const servicioSchema = new mongoose.Schema({
   duracion: String,
   modalidad: String,
   precio: Number,
-  imagen: String,   // 👈 agregado
+  imagen: String,
   reseñas: [reseñaSchema],
   aprobado: { type: Boolean, default: false },
   rechazado: { type: Boolean, default: false }
@@ -129,9 +129,11 @@ const TerapeutaSchema = new mongoose.Schema({
     ]
   },
 
-  aprobado: {
-    type: Boolean,
-    default: true
+  // 🔵 Estado del terapeuta: pendiente/aprobado/rechazado
+  estado: {
+    type: String,
+    enum: ["pendiente", "aprobado", "rechazado"],
+    default: "pendiente"
   },
 
   disponibilidad: {
