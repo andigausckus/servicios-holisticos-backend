@@ -105,11 +105,11 @@ const cuerpoTerapeuta = `
 
 <p>¡Tenés una nueva reserva confirmada! 🎉</p>
 
-<p>🧘 Usuario: ${nombreCliente}</p><br>
-<p>🛎️ Servicio: ${nombreServicio}</p><br>
-<p>📅 Fecha: ${fechaFormateada}</p><br>
-<p>🕒 Hora: ${hora} a ${horaFinal}</p><br>
-<p>💵 Valor de la sesión: $${precio}</p><br>
+<p>🧘 Usuario: ${nombreCliente}<br><br>
+🛎️ Servicio: ${nombreServicio}<br><br>
+📅 Fecha: ${fechaFormateada}<br><br>
+🕒 Hora: ${hora} a ${horaFinal}<br><br>
+💵 Valor de la sesión: $${precio}</p>
 
 <p>${nombreCliente} podrá escribirte antes de la sesión por email o WhatsApp si tiene alguna duda, o el mismo día del encuentro.</p>
 
