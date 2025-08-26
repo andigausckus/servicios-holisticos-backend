@@ -80,6 +80,10 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ message: "Credenciales inválidas" });
     }
 
+    if (terapeuta.estado !== "aprobado") {
+      return res.status(403).json({ message: "Tu cuenta está en revisión o fue rechazada." });
+    }
+
     const passwordOk = await bcrypt.compare(password, terapeuta.password);
     if (!passwordOk) {
       return res.status(401).json({ message: "Credenciales inválidas" });
