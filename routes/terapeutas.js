@@ -111,10 +111,10 @@ router.post("/login", async (req, res) => {
 // 🔐 Ruta protegida para obtener el perfil del terapeuta logueado
 router.get("/perfil", verificarToken, async (req, res) => {
   try {
-    const terapeuta = await Terapeuta.findById(req.user.id).populate({
-      path: "servicios",
-      select: "titulo descripcion modalidad duracionMinutos precio categoria plataformas imagen aprobado horariosDisponibles slug reseñas"
-    });
+    // Traemos solo los campos necesarios del terapeuta
+    const terapeuta = await Terapeuta.findById(req.user.id).select(
+      "nombreCompleto email whatsapp ubicacion cbuCvu bancoOBilletera"
+    );
 
     if (!terapeuta) {
       return res.status(404).json({ message: "Terapeuta no encontrado" });
