@@ -74,10 +74,10 @@ const cuerpoCliente = `
 🕒 Hora: ${hora} a ${horaFinal}<br><br>
 💵 Valor: $${precio}</p>
 
-<p><u>Datos del terapeuta holístico para contacto:</u></p>
+<p><u>Datos del terapeuta holístico para contacto</u></p>
 
-<p>Nombre y apellido: ${nombreTerapeuta}<br>
-Email: ${emailTerapeuta}<br>
+<p>Nombre y apellido: ${nombreTerapeuta}<br><br>
+Email: ${emailTerapeuta}<br><br>
 WhatsApp: 
 <a href="https://wa.me/${telefonoTerapeuta}?text=👋%20Hola%20${encodeURIComponent(nombreCliente)},%20soy%20${encodeURIComponent(nombreTerapeuta)}.%0A%0AReservé%20con%20vos%20una%20sesión%20de%20*${encodeURIComponent(nombreServicio)}*%20para%20el%20día%20${encodeURIComponent(fechaFormateada)}%20de%20${encodeURIComponent(hora)}%20a%20${encodeURIComponent(horaFinal)}" 
    target="_blank" style="display:inline-block;padding:8px 16px;background-color:#25D366;color:white;border-radius:4px;text-decoration:none;">
@@ -86,11 +86,11 @@ WhatsApp:
 </p>
 
 <p>✨ El terapeuta ya fue notificado de tu sesión. Podés escribirle antes si tenés dudas o esperar al día del encuentro.</p>
-<br>
+
 <p>Una vez finalizada la sesión, podrás dejar una reseña sobre tu experiencia para ayudar a otros usuarios en su elección.</p>
-<br>
+
 <p>Si necesitás ayuda, podés responder directamente a este correo.</p>
-<br>
+
 <p>Con cariño 🌸<br>
 <strong>El equipo de Servicios Holísticos</strong></p>
 `;
@@ -105,27 +105,22 @@ const cuerpoTerapeuta = `
 
 <p>¡Tenés una nueva reserva confirmada! 🎉</p>
 
-<p>🧘 Usuario: ${nombreCliente}</p>
-<br>
-<p>🛎️ Servicio: ${nombreServicio}</p>
-<br>
-<p>📅 Fecha: ${fechaFormateada}</p>
-<br>
-<p>🕒 Hora: ${hora} a ${horaFinal}</p>
-<br>
-<p>💵 Valor de la sesión: $${precio}</p>
-<br>
+<p>🧘 Usuario: ${nombreCliente}</p><br>
+<p>🛎️ Servicio: ${nombreServicio}</p><br>
+<p>📅 Fecha: ${fechaFormateada}</p><br>
+<p>🕒 Hora: ${hora} a ${horaFinal}</p><br>
+<p>💵 Valor de la sesión: $${precio}</p><br>
 
 <p>${nombreCliente} podrá escribirte antes de la sesión por email o WhatsApp si tiene alguna duda, o el mismo día del encuentro.</p>
 
 <p>💸 El pago correspondiente a esta sesión será procesado y enviado a tu cuenta en un plazo máximo de 60 minutos.</p>
 
 <p>✨ Te deseamos una excelente sesión ✨</p>
-<br>
+
 <p>Una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
-<br>
+
 <p>Una experiencia positiva y profesional te ayudará a construir una sólida reputación en nuestra plataforma, lo que atraerá a más clientes y oportunidades de crecimiento.</p>
-<br>
+
 <p>Con cariño 🌸<br>
 <strong>El equipo de Servicios Holísticos</strong></p>
 `;
