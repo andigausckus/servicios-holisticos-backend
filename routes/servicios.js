@@ -48,9 +48,9 @@ const nuevoServicio = new Servicio({
   precio,  
   categoria,  
   plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,  
-  terapeuta: req.user.id, // <-- corregido
+  terapeuta: req.terapeutaId,  // ✅ Volvemos a la versión que funcionaba
   imagen: imagen || null,  
-});  
+});
 
 await nuevoServicio.save();  
 
