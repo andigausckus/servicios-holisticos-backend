@@ -88,10 +88,10 @@ if (!passwordOk) {
   return res.status(401).json({ message: "Credenciales inválidas" });  
 }  
 
-const token = jwt.sign(
-  { _id: terapeuta._id, email: terapeuta.email }, // usar _id
-  secret,
-  { expiresIn: "2h" }
+const token = jwt.sign(  
+  { id: terapeuta._id, email: terapeuta.email },  
+  secret,  
+  { expiresIn: "2h" }  
 );  
 
 res.json({  
@@ -108,9 +108,9 @@ res.status(500).json({ message: "Error en el servidor" });
 // 🔐 Ruta protegida para obtener el perfil del terapeuta logueado
 router.get("/perfil", verificarToken, async (req, res) => {
 try {
-const terapeuta = await Terapeuta.findById(req.user._id).populate({
-  path: "servicios",
-  select: "titulo descripcion modalidad duracionMinutos precio categoria plataformas imagen aprobado horariosDisponibles slug reseñas"
+const terapeuta = await Terapeuta.findById(req.user.id).populate({
+path: "servicios",
+select: "titulo descripcion modalidad duracionMinutos precio categoria plataformas imagen aprobado horariosDisponibles slug reseñas"
 });
 
 if (!terapeuta) {  
