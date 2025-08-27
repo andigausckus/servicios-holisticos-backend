@@ -266,7 +266,23 @@ if (imagen) {
 // Ejemplo: si ya está "aprobado", queda igual  
 // servicioExistente.estado = servicioExistente.estado;  
 
-await servicioExistente.save();  
+await servicioExistente.save();
+
+  await Terapeuta.updateOne(
+  { _id: req.terapeutaId, "servicios._id": servicioExistente._id },
+  {
+    $set: {
+      "servicios.$.titulo": servicioExistente.titulo,
+      "servicios.$.descripcion": servicioExistente.descripcion,
+      "servicios.$.precio": servicioExistente.precio,
+      "servicios.$.imagen": servicioExistente.imagen || "",
+      "servicios.$.modalidad": servicioExistente.modalidad,
+      "servicios.$.duracionMinutos": servicioExistente.duracionMinutos,
+      "servicios.$.categoria": servicioExistente.categoria,
+      "servicios.$.plataformas": servicioExistente.plataformas || [],
+    }
+  }
+);
 
 res.json({  
   mensaje: "Servicio actualizado correctamente",  
@@ -291,9 +307,10 @@ if (!servicio) {
   return res.status(404).json({ error: "Servicio no encontrado o no autorizado" });  
 }  
 
-await Terapeuta.findByIdAndUpdate(req.terapeutaId, {  
-  $pull: { servicios: servicio._id },  
-});  
+await Terapeuta.updateOne(
+  { _id: req.terapeutaId },
+  { $pull: { servicios: { _id: servicio._id } } }
+);  
 
 res.json({ mensaje: "Servicio eliminado correctamente." });
 
@@ -430,6 +447,16 @@ res.json(serviciosAprobados);
 console.error("❌ Error al obtener servicios:", err);
 res.status(500).json({ error: "Error al obtener los servicios" });
 }
+});
+
+router.get("/reservas/terapeuta/:id", async (req, res) => {
+  try {
+    const reservas = await Reserva.find({ terapeuta: req.params.id });
+    res.json(reservas);
+  } catch (err) {
+    console.error("Error al obtener reservas:", err);
+    res.status(500).json({ error: "Error al obtener reservas" });
+  }
 });
 
 module.exports = router;
