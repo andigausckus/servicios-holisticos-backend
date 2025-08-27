@@ -110,7 +110,7 @@ router.get("/:id", async (req, res) => {
 router.get("/mis-reservas", verificarToken, async (req, res) => {
   console.log("req.user:", req.user);
   try {
-    const reservas = await Reserva.find({ terapeutaId: req.user._id }) // <- CORREGIDO
+    const reservas = await Reserva.find({ terapeutaId: req.user.id })
       .populate("servicioId", "titulo")
       .sort({ fecha: -1 })
       .lean();
