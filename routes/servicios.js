@@ -459,7 +459,7 @@ res.status(500).json({ error: "Error al obtener los servicios" });
 
 router.get("/reservas/terapeuta/:id", async (req, res) => {
   try {
-    const reservas = await Reserva.find({ terapeuta: req.params.id });
+    const reservas = await Reserva.find({ terapeutaId: req.params.id });
     res.json(reservas);
   } catch (err) {
     console.error("Error al obtener reservas:", err);
