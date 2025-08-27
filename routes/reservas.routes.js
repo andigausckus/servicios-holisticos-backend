@@ -107,23 +107,13 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// 🔐 Obtener reservas del terapeuta logueado
 router.get("/mis-reservas", verificarToken, async (req, res) => {
   try {
-    // Convertimos el id del token a ObjectId
-    const terapeutaObjectId = mongoose.Types.ObjectId(req.user.id);
-
-    // Buscamos todas las reservas del terapeuta
-    const reservas = await Reserva.find({ terapeutaId: terapeutaObjectId })
+    const reservas = await Reserva.find({ terapeutaId: req.user._id }) // <- CORREGIDO
       .populate("servicioId", "titulo")
       .sort({ fecha: -1 })
       .lean();
 
-    if (!reservas || reservas.length === 0) {
-      return res.status(404).json({ mensaje: "Reserva no encontrada" });
-    }
-
-    // Mapear datos para el frontend
     const reservasConDatosUsuario = reservas.map((reserva) => ({
       ...reserva,
       nombreServicio: reserva.servicioId?.titulo || "Servicio",
