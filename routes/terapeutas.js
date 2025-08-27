@@ -88,10 +88,10 @@ if (!passwordOk) {
   return res.status(401).json({ message: "Credenciales inválidas" });  
 }  
 
-const token = jwt.sign(  
-  { id: terapeuta._id, email: terapeuta.email },  
-  secret,  
-  { expiresIn: "2h" }  
+const token = jwt.sign(
+  { _id: terapeuta._id, email: terapeuta.email }, // ✅ usar "_id" aquí
+  secret,
+  { expiresIn: "2h" }
 );  
 
 res.json({  
