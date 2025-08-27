@@ -215,84 +215,92 @@ res.status(500).json({ error: "Error al obtener el servicio" });
 
 // ✅ Actualizar un servicio
 router.put("/:id", verificarToken, async (req, res) => {
-try {
-const servicioExistente = await Servicio.findOne({
-_id: req.params.id,
-terapeuta: req.terapeutaId,
-});
+  try {
+    const servicioExistente = await Servicio.findOne({
+      _id: req.params.id,
+      terapeuta: req.terapeutaId,
+    });
 
-if (!servicioExistente) {  
-  return res.status(404).json({ error: "Servicio no encontrado" });  
-}  
-
-const {  
-  titulo,  
-  descripcion,  
-  modalidad,  
-  duracionMinutos,  
-  precio,  
-  categoria,  
-  plataformas,  
-  imagen,  
-} = req.body;  
-
-if (  
-  !titulo?.trim() ||  
-  !descripcion?.trim() ||  
-  !modalidad ||  
-  duracionMinutos === undefined ||  
-  isNaN(duracionMinutos) ||  
-  !precio ||  
-  !categoria?.trim() ||  
-  !plataformas || plataformas.length === 0  
-) {  
-  return res.status(400).json({ error: "Faltan campos obligatorios." });  
-}  
-
-// ✅ Actualizar campos editables  
-servicioExistente.titulo = titulo;  
-servicioExistente.descripcion = descripcion;  
-servicioExistente.modalidad = modalidad;  
-servicioExistente.duracionMinutos = duracionMinutos;  
-servicioExistente.precio = precio;  
-servicioExistente.categoria = categoria;  
-servicioExistente.plataformas = plataformas;  
-
-if (imagen) {  
-  servicioExistente.imagen = imagen;  
-}  
-
-// 🚀 Importante: NO tocar el estado. Mantener el que ya tiene  
-// Ejemplo: si ya está "aprobado", queda igual  
-// servicioExistente.estado = servicioExistente.estado;  
-
-await servicioExistente.save();
-
-  await Terapeuta.updateOne(
-  { _id: req.terapeutaId, "servicios._id": servicioExistente._id },
-  {
-    $set: {
-      "servicios.$.titulo": servicioExistente.titulo,
-      "servicios.$.descripcion": servicioExistente.descripcion,
-      "servicios.$.precio": servicioExistente.precio,
-      "servicios.$.imagen": servicioExistente.imagen || "",
-      "servicios.$.modalidad": servicioExistente.modalidad,
-      "servicios.$.duracionMinutos": servicioExistente.duracionMinutos,
-      "servicios.$.categoria": servicioExistente.categoria,
-      "servicios.$.plataformas": servicioExistente.plataformas || [],
+    if (!servicioExistente) {
+      return res.status(404).json({ error: "Servicio no encontrado" });
     }
+
+    const {
+      titulo,
+      descripcion,
+      modalidad,
+      duracionMinutos,
+      precio,
+      categoria,
+      plataformas,
+      imagen,
+    } = req.body;
+
+    if (
+      !titulo?.trim() ||
+      !descripcion?.trim() ||
+      !modalidad ||
+      duracionMinutos === undefined ||
+      isNaN(duracionMinutos) ||
+      !precio ||
+      !categoria?.trim() ||
+      !plataformas ||
+      plataformas.length === 0
+    ) {
+      return res.status(400).json({ error: "Faltan campos obligatorios." });
+    }
+
+    // ✅ Actualizar campos editables
+    servicioExistente.titulo = titulo;
+    servicioExistente.descripcion = descripcion;
+    servicioExistente.modalidad = modalidad;
+    servicioExistente.duracionMinutos = duracionMinutos;
+    servicioExistente.precio = precio;
+    servicioExistente.categoria = categoria;
+    servicioExistente.plataformas = plataformas;
+
+    if (imagen) {
+      servicioExistente.imagen = imagen;
+    }
+
+    // 🚀 Generar slug a partir del título
+    const nuevoSlug = titulo
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9\-]/g, "")
+      .replace(/^-+|-+$/g, "");
+    servicioExistente.slug = nuevoSlug;
+
+    await servicioExistente.save();
+
+    // Actualizar también en el array de servicios dentro del terapeuta
+    await Terapeuta.updateOne(
+      { _id: req.terapeutaId, "servicios._id": servicioExistente._id },
+      {
+        $set: {
+          "servicios.$.titulo": servicioExistente.titulo,
+          "servicios.$.descripcion": servicioExistente.descripcion,
+          "servicios.$.precio": servicioExistente.precio,
+          "servicios.$.imagen": servicioExistente.imagen || "",
+          "servicios.$.modalidad": servicioExistente.modalidad,
+          "servicios.$.duracionMinutos": servicioExistente.duracionMinutos,
+          "servicios.$.categoria": servicioExistente.categoria,
+          "servicios.$.plataformas": servicioExistente.plataformas || [],
+          "servicios.$.slug": servicioExistente.slug, // ⬅️ agregado
+        },
+      }
+    );
+
+    res.json({
+      mensaje: "Servicio actualizado correctamente",
+      servicio: servicioExistente,
+    });
+  } catch (err) {
+    console.error("Error al actualizar servicio:", err);
+    res.status(500).json({ error: "Error al actualizar el servicio." });
   }
-);
-
-res.json({  
-  mensaje: "Servicio actualizado correctamente",  
-  servicio: servicioExistente,  
-});
-
-} catch (err) {
-console.error("Error al actualizar servicio:", err);
-res.status(500).json({ error: "Error al actualizar el servicio." });
-}
 });
 
 // ✅ Eliminar un servicio
