@@ -48,7 +48,7 @@ const nuevoServicio = new Servicio({
   precio,  
   categoria,  
   plataformas: typeof plataformas === "string" ? JSON.parse(plataformas) : plataformas,  
-  terapeuta: req.terapeutaId,  
+  terapeuta: req.user.id, // <-- corregido
   imagen: imagen || null,  
 });  
 
