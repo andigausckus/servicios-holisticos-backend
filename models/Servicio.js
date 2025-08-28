@@ -57,7 +57,6 @@ required: true
 },
 horariosDisponibles: { type: [horarioSchema], default: [] },
 resenas: { type: [resenaSchema], default: [] },
-aprobado: { type: Boolean, default: false } // 👈 ahora queda pendiente
 
         estado: {
   type: String,
