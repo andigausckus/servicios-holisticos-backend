@@ -11,13 +11,16 @@ router.post("/", async (req, res) => {
     const servicio = await Servicio.findById(servicioId);
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
 
+    console.log("🟢 servicio.terapeuta:", servicio.terapeuta);
+console.log("🟢 typeof servicio.terapeuta:", typeof servicio.terapeuta);
+
     const nuevaResena = new Resena({
-  terapeuta: servicio.terapeuta,
+  terapeuta: servicio.terapeuta._id, // 🔹 importante: solo el ObjectId
   servicio: servicio._id,
   nombre,
   comentario,
   puntaje,
-  aprobado: false // 🔹 CORREGIDO: antes era 'aprobada'
+  aprobado: false
 });
 
     await nuevaResena.save();
