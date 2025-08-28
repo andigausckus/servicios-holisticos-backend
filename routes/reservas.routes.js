@@ -97,12 +97,17 @@ reservas.forEach((r) => {
     // GET: obtener los datos de una reserva
 router.get("/:id", async (req, res) => {
   try {
-    const reserva = await Reserva.findById(req.params.id).populate("terapeuta");
+    const reserva = await Reserva.findById(req.params.id)
+      .populate("terapeutaId", "nombreCompleto email") // nombre correcto
+      .populate("servicioId", "titulo precio"); // opcional si querés info del servicio
+
     if (!reserva) {
       return res.status(404).json({ mensaje: "Reserva no encontrada" });
     }
+
     res.status(200).json(reserva);
   } catch (error) {
+    console.error("❌ Error al obtener la reserva:", error);
     res.status(500).json({ mensaje: "Error al obtener la reserva", error });
   }
 });
