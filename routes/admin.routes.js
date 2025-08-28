@@ -37,29 +37,28 @@ router.get("/servicios-pendientes", async (req, res) => {
   try {
     const terapeutas = await Terapeuta.find({ 
       "servicios": { 
-        $elemMatch: { 
-          aprobado: false, 
-          rechazado: { $ne: true }  // 🔹 ignorar los rechazados
-        } 
-      }
+  $elemMatch: { 
+    estado: "pendiente" 
+  } 
+}
     }).populate("servicios"); // 🔹 traemos todos los datos del servicio real
 
     const pendientes = [];
 
     terapeutas.forEach(t => {
       t.servicios.forEach(s => {
-        if (!s.aprobado && s.rechazado !== true) {
-          pendientes.push({
-            _id: s._id,
-            titulo: s.titulo,
-            precio: s.precio,
-            imagen: s.imagen || "",
-            terapeuta: { 
-              _id: t._id, 
-              nombreCompleto: t.nombreCompleto 
-            }
-          });
-        }
+        if (s.estado === "pendiente") {
+  pendientes.push({
+    _id: s._id,
+    titulo: s.titulo,
+    precio: s.precio,
+    imagen: s.imagen || "",
+    terapeuta: { 
+      _id: t._id, 
+      nombreCompleto: t.nombreCompleto 
+    }
+  });
+      }
       });
     });
 
@@ -72,25 +71,20 @@ router.get("/servicios-pendientes", async (req, res) => {
 
 router.put("/aprobar-servicio/:id", async (req, res) => {
   try {
-    const { aprobado } = req.body;
-
-    // 1️⃣ Actualizamos el servicio dentro del array del terapeuta
     const terapeuta = await Terapeuta.findOne({ "servicios._id": req.params.id });
     if (!terapeuta) return res.status(404).json({ mensaje: "Servicio no encontrado" });
 
     const servicio = terapeuta.servicios.id(req.params.id);
-    servicio.aprobado = aprobado;
-    servicio.rechazado = false;
+    servicio.estado = "aprobado";
 
     await terapeuta.save();
 
-    // 2️⃣ Sincronizamos con la colección Servicios
-    const ServicioModel = require("../models/Servicio"); // ajusta la ruta
+    // Sincronizamos con la colección Servicios
+    const ServicioModel = require("../models/Servicio");
     await ServicioModel.findByIdAndUpdate(
       req.params.id,
       {
-        aprobado: aprobado,
-        rechazado: false,
+        estado: "aprobado",
         titulo: servicio.titulo,
         descripcion: servicio.descripcion,
         modalidad: servicio.modalidad,
@@ -118,8 +112,7 @@ router.put("/rechazar-servicio/:id", async (req, res) => {
     if (!terapeuta) return res.status(404).json({ mensaje: "Servicio no encontrado" });
 
     const servicio = terapeuta.servicios.id(req.params.id);
-    servicio.aprobado = false;
-    servicio.rechazado = true; // 👈 clave
+    servicio.estado = "rechazado";
 
     await terapeuta.save();
     res.json({ mensaje: "❌ Servicio rechazado", servicio });
