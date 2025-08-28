@@ -58,6 +58,13 @@ required: true
 horariosDisponibles: { type: [horarioSchema], default: [] },
 resenas: { type: [resenaSchema], default: [] },
 aprobado: { type: Boolean, default: false } // 👈 ahora queda pendiente
+
+        estado: {
+  type: String,
+  enum: ["pendiente", "aprobado", "rechazado"],
+  default: "pendiente"
+             }
+
 }, { timestamps: true });
 
 // Middleware para generar el slug automáticamente
