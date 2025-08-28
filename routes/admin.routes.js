@@ -35,8 +35,8 @@ res.status(500).json({ mensaje: "Error al actualizar terapeuta", error });
 // --- SERVICIOS PENDIENTES ---
 router.get("/servicios-pendientes", async (req, res) => {
   try {
-    const pendientes = await Servicio.find({ aprobado: false, estado: "pendiente" })
-      .populate("terapeuta", "nombreCompleto") // solo traemos nombreCompleto del terapeuta
+    const pendientes = await Servicio.find({ aprobado: false }) // solo filtro por aprobado
+      .populate("terapeuta", "nombreCompleto") 
       .select("_id titulo precio imagen terapeuta");
 
     res.json(pendientes);
