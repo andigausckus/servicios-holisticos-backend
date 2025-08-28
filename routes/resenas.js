@@ -17,7 +17,7 @@ router.post("/", async (req, res) => {
   nombre,
   comentario,
   puntaje,
-  aprobada: false // 🔹 aseguramos que sea pendiente
+  aprobado: false // 🔹 CORREGIDO: antes era 'aprobada'
 });
 
     await nuevaResena.save();
