@@ -35,28 +35,9 @@ res.status(500).json({ mensaje: "Error al actualizar terapeuta", error });
 // --- SERVICIOS PENDIENTES ---
 router.get("/servicios-pendientes", async (req, res) => {
   try {
-    const terapeutas = await Terapeuta.find({
-      "servicios": { $elemMatch: { estado: "pendiente" } }
-    });
-
-    const pendientes = [];
-
-    terapeutas.forEach(t => {
-      t.servicios.forEach(s => {
-        if (s.estado === "pendiente") {
-          pendientes.push({
-            _id: s._id,
-            titulo: s.titulo,
-            precio: s.precio,
-            imagen: s.imagen || "",
-            terapeuta: {
-              _id: t._id,
-              nombreCompleto: t.nombreCompleto
-            }
-          });
-        }
-      });
-    });
+    const pendientes = await Servicio.find({ aprobado: false, estado: "pendiente" })
+      .populate("terapeuta", "nombreCompleto") // solo traemos nombreCompleto del terapeuta
+      .select("_id titulo precio imagen terapeuta");
 
     res.json(pendientes);
   } catch (error) {
