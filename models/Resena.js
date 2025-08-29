@@ -12,12 +12,17 @@ const resenaSchema = new mongoose.Schema(
       ref: "Servicio",
       required: true,
     },
-    usuarioId: { // 🔹 opcional para usuarios registrados
+    usuarioId: { // opcional para usuarios registrados
       type: mongoose.Schema.Types.ObjectId,
       ref: "Usuario",
       required: false,
     },
     nombre: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    email: { // ⚠️ agregado para controlar reseñas duplicadas
       type: String,
       required: true,
       trim: true,
