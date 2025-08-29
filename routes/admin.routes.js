@@ -180,4 +180,17 @@ router.put("/aprobar-terapeuta/:id", async (req, res) => {
   }
 });
 
+  // Obtener reseñas pendientes
+router.get("/resenas-pendientes", async (req, res) => {
+  try {
+    const reseñas = await Resena.find({ aprobado: false })
+      .populate("servicio", "titulo")
+      .populate("terapeuta", "nombre");
+    res.json(reseñas);
+  } catch (error) {
+    console.error("❌ Error al obtener reseñas pendientes:", error);
+    res.status(500).json({ error: "Error al obtener reseñas pendientes" });
+  }
+});
+
 module.exports = router;
