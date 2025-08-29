@@ -193,4 +193,16 @@ router.get("/resenas-pendientes", async (req, res) => {
   }
 });
 
+// DELETE reseña
+router.delete("/rechazar-resena/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Resena.findByIdAndDelete(id);
+    res.json({ message: "✅ Reseña rechazada y eliminada" });
+  } catch (error) {
+    console.error("❌ Error al rechazar reseña:", error);
+    res.status(500).json({ error: "Error al rechazar reseña" });
+  }
+});
+
 module.exports = router;
