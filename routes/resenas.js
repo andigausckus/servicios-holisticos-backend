@@ -6,22 +6,27 @@ const Servicio = require("../models/Servicio"); // 🔹 importar el modelo Servi
 // POST: crear una nueva reseña
 router.post("/", async (req, res) => {
   try {
-    const { servicioId, nombre, comentario, puntaje } = req.body;
+    const { servicioId, nombre, comentario, puntaje, email } = req.body;
 
+    // Verificar que el servicio existe
     const servicio = await Servicio.findById(servicioId);
     if (!servicio) return res.status(404).json({ error: "Servicio no encontrado" });
 
-    console.log("🟢 servicio.terapeuta:", servicio.terapeuta);
-console.log("🟢 typeof servicio.terapeuta:", typeof servicio.terapeuta);
+    // Verificar si ya existe una reseña de este usuario/email para este servicio
+    const existente = await Resena.findOne({ servicio: servicio._id, nombre, email });
+    if (existente) {
+      return res.status(400).json({ error: "Ya dejaste una reseña para este servicio" });
+    }
 
     const nuevaResena = new Resena({
-  terapeuta: servicio.terapeuta._id, // 🔹 importante: solo el ObjectId
-  servicio: servicio._id,
-  nombre,
-  comentario,
-  puntaje,
-  aprobado: false
-});
+      terapeuta: servicio.terapeuta._id,
+      servicio: servicio._id,
+      nombre,
+      email, // ⚠️ agregamos email al modelo si no está
+      comentario,
+      puntaje,
+      aprobado: false
+    });
 
     await nuevaResena.save();
     res.status(201).json({ mensaje: "Reseña creada", reseña: nuevaResena });
