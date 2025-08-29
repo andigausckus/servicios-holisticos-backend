@@ -232,7 +232,6 @@ const enviarResenasPendientes = async (req, res) => {
       estado: "confirmada",
       reseñaEnviada: false,
     })
-      .populate("usuarioId")
       .populate("terapeutaId")
       .populate("servicioId");
 
@@ -245,6 +244,7 @@ const enviarResenasPendientes = async (req, res) => {
 
     for (const reserva of reservas) {
       try {
+        // Hora de inicio de la sesión
         const [horaStr, minStr] = reserva.hora.split(":");
         const fechaHora = new Date(reserva.fecha);
         fechaHora.setHours(parseInt(horaStr));
@@ -252,15 +252,18 @@ const enviarResenasPendientes = async (req, res) => {
         fechaHora.setSeconds(0);
         fechaHora.setMilliseconds(0);
 
-        // ⏱️ Configurar margen dinámico según el entorno
-        const duracionMinutos = reserva.duracion || 60; // si no tiene, default 60 min
-        const margenExtra = process.env.NODE_ENV === "production" ? 30 : 2;
+        // Duración de la sesión + margen extra
+        const duracionMinutos = reserva.duracion || 60; // 60 min por defecto
+        const margenExtra = process.env.NODE_ENV === "development" ? 2 : 30; // 2 min en dev, 30 min producción
+        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + margenExtra) * 60000);
 
-        const finSesion = new Date(
-          fechaHora.getTime() + (duracionMinutos + margenExtra) * 60000
-        );
-
+        // Solo enviamos si ya pasó la hora
         if (ahora >= finSesion) {
+          // 🔹 Primero marcamos como enviada para evitar duplicados
+          reserva.reseñaEnviada = true;
+          await reserva.save();
+
+          // 🔹 Luego enviamos el email
           await enviarEmailResena({
             nombreCliente: reserva.nombreUsuario,
             emailCliente: reserva.emailUsuario,
@@ -269,9 +272,8 @@ const enviarResenasPendientes = async (req, res) => {
             idReserva: reserva._id.toString(),
           });
 
-          reserva.reseñaEnviada = true;
-          await reserva.save();
           enviadas++;
+          console.log(`📩 Email de reseña enviado: reserva ${reserva._id}`);
         }
       } catch (error) {
         console.error("❌ Error enviando reseña para reserva:", reserva._id, error.message);
