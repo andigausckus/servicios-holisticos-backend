@@ -251,11 +251,12 @@ res.status(500).json({ error: "Error al obtener reservas confirmadas" });
 
 const enviarResenasPendientes = async (req, res) => {
   try {
-    // Traer todas las reservas confirmadas que aún no se les envió reseña
     const reservas = await Reserva.find({
       estado: "confirmada",
       reseñaEnviada: { $ne: true },
-    });
+    })
+      .populate("terapeutaId")
+      .populate("servicioId");
 
     if (!reservas.length) {
       return res.status(200).json({ mensaje: "No hay reseñas pendientes por enviar." });
@@ -264,9 +265,11 @@ const enviarResenasPendientes = async (req, res) => {
     const ahora = new Date();
     let enviadas = 0;
 
+    const modoPrueba = process.env.NODE_ENV !== "production"; // true si estamos en dev
+
     for (const reserva of reservas) {
       try {
-        // Combinar fecha + hora de la reserva
+        // Hora de finalización de la sesión
         const [horaStr, minutosStr] = reserva.hora.split(":");
         const fechaHora = new Date(reserva.fecha);
         fechaHora.setHours(parseInt(horaStr));
@@ -274,22 +277,19 @@ const enviarResenasPendientes = async (req, res) => {
         fechaHora.setSeconds(0);
         fechaHora.setMilliseconds(0);
 
-        // Para prueba: enviar 2 minutos después de la hora de inicio
-        const duracionMinutos = 1; // prueba
-        const margenExtra = 1;     // 1 minuto extra
-        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + margenExtra) * 60000);
+        const duracionMinutos = reserva.duracion || 60;
+        const tiempoExtra = modoPrueba ? 2 : 30; // 2 min en dev, 30 min en producción
+        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + tiempoExtra) * 60000);
 
-        // Revisar si ya pasó el tiempo de envío
         if (ahora >= finSesion) {
           await enviarEmailResena({
             nombreCliente: reserva.nombreUsuario,
             emailCliente: reserva.emailUsuario,
-            nombreTerapeuta: reserva.terapeuta?.nombreCompleto || "",
+            nombreTerapeuta: reserva.terapeutaId?.nombreCompleto || "",
             servicio: reserva.servicioId?.titulo || "",
-            reservaId: reserva._id.toString(),
+            idReserva: reserva._id.toString(),
           });
 
-          // Marcar como enviado
           reserva.reseñaEnviada = true;
           await reserva.save();
           enviadas++;
@@ -300,12 +300,7 @@ const enviarResenasPendientes = async (req, res) => {
       }
     }
 
-    if (enviadas === 0) {
-      return res.status(200).json({ mensaje: "No hay reseñas listas para enviar todavía." });
-    }
-
     res.status(200).json({ mensaje: `Se enviaron ${enviadas} reseñas.` });
-
   } catch (error) {
     console.error("❌ Error al procesar reseñas pendientes:", error.message);
     res.status(500).json({ error: "Error interno del servidor" });
