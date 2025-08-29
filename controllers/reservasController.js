@@ -92,29 +92,6 @@ const crearReservaConComprobante = async (req, res) => {
       bancoTerapeuta: terapeuta?.bancoOBilletera || "",   
     });  
 
-    // Programar envío de reseña
-
-    console.log("📅 Preparando email de reseña (modo prueba)...");
-    console.log("Duración del servicio (min):", servicio?.duracion);
-    console.log("Hora inicio recibida:", hora);
-    console.log("Fecha recibida:", fecha);
-
-    try {
-      console.log("⚠️ Email de reseña se enviará ahora (modo prueba)");
-
-      await enviarEmailResena({
-  nombreCliente: nombreUsuario,
-  emailCliente: emailUsuario,
-  nombreTerapeuta: terapeuta?.nombreCompleto || "",
-  servicio: servicio?.titulo || "",
-  idReserva: nuevaReserva._id.toString(),
-});
-
-
-    } catch (error) {
-      console.error("❌ Error al enviar email de reseña (modo prueba):", error.message);
-    }
-
     // Si todo sale bien, respondemos al cliente  
     return res.status(201).json({  
       mensaje: "Reserva creada exitosamente",  
@@ -253,8 +230,9 @@ const enviarResenasPendientes = async (req, res) => {
   try {
     const reservas = await Reserva.find({
       estado: "confirmada",
-      reseñaEnviada: { $ne: true },
+      reseñaEnviada: false,
     })
+      .populate("usuarioId")
       .populate("terapeutaId")
       .populate("servicioId");
 
@@ -265,21 +243,19 @@ const enviarResenasPendientes = async (req, res) => {
     const ahora = new Date();
     let enviadas = 0;
 
-    const modoPrueba = process.env.NODE_ENV !== "production"; // true si estamos en dev
-
     for (const reserva of reservas) {
       try {
-        // Hora de finalización de la sesión
-        const [horaStr, minutosStr] = reserva.hora.split(":");
+        const [horaStr, minStr] = reserva.hora.split(":");
         const fechaHora = new Date(reserva.fecha);
         fechaHora.setHours(parseInt(horaStr));
-        fechaHora.setMinutes(parseInt(minutosStr));
+        fechaHora.setMinutes(parseInt(minStr));
         fechaHora.setSeconds(0);
         fechaHora.setMilliseconds(0);
 
-        const duracionMinutos = reserva.duracion || 60;
-        const tiempoExtra = modoPrueba ? 2 : 30; // 2 min en dev, 30 min en producción
-        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + tiempoExtra) * 60000);
+        // 📌 Modo prueba: sesión de prueba = 2 min, enviar 2 min después
+        const duracionMinutos = reserva.duracion || 2; 
+        const margenExtra = 2; // minutos después de finalizar la sesión
+        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + margenExtra) * 60000);
 
         if (ahora >= finSesion) {
           await enviarEmailResena({
