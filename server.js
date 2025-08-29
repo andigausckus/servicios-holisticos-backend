@@ -4,6 +4,7 @@ const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
+console.log("🌍 Entorno actual:", process.env.NODE_ENV);
 console.log("🚀 Backend iniciado - versión Render/Dev");
 
 // ✅ Middlewares
