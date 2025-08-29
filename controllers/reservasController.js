@@ -252,10 +252,13 @@ const enviarResenasPendientes = async (req, res) => {
         fechaHora.setSeconds(0);
         fechaHora.setMilliseconds(0);
 
-        // 📌 Modo prueba: sesión de prueba = 2 min, enviar 2 min después
-        const duracionMinutos = reserva.duracion || 2; 
-        const margenExtra = 2; // minutos después de finalizar la sesión
-        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + margenExtra) * 60000);
+        // ⏱️ Configurar margen dinámico según el entorno
+        const duracionMinutos = reserva.duracion || 60; // si no tiene, default 60 min
+        const margenExtra = process.env.NODE_ENV === "production" ? 30 : 2;
+
+        const finSesion = new Date(
+          fechaHora.getTime() + (duracionMinutos + margenExtra) * 60000
+        );
 
         if (ahora >= finSesion) {
           await enviarEmailResena({
@@ -270,7 +273,6 @@ const enviarResenasPendientes = async (req, res) => {
           await reserva.save();
           enviadas++;
         }
-
       } catch (error) {
         console.error("❌ Error enviando reseña para reserva:", reserva._id, error.message);
       }
