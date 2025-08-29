@@ -228,11 +228,11 @@ res.status(500).json({ error: "Error al obtener reservas confirmadas" });
 
 const enviarResenasPendientes = async (req, res) => {
   try {
-    // Buscar reservas confirmadas que aún no recibieron el email de reseña
     const reservas = await Reserva.find({
       estado: "confirmada",
       reseñaEnviada: false,
     })
+      .populate("usuarioId")
       .populate("terapeutaId")
       .populate("servicioId");
 
@@ -243,20 +243,27 @@ const enviarResenasPendientes = async (req, res) => {
     const ahora = new Date();
     let enviadas = 0;
 
+    // Determinar tiempo de espera según entorno
+    const isProduction = process.env.NODE_ENV === "production";
+    const minutosDespuesDeFin = isProduction ? 30 : 2; // 30 min en prod, 2 min en dev
+
     for (const reserva of reservas) {
       try {
-        // Convertir fecha + hora a objeto Date en hora local
         const [horaStr, minStr] = reserva.hora.split(":");
-        const [year, month, day] = reserva.fecha.split("-");
-        const fechaHora = new Date(year, month - 1, day, parseInt(horaStr), parseInt(minStr), 0, 0);
+        const fechaHora = new Date(reserva.fecha);
+        fechaHora.setHours(parseInt(horaStr));
+        fechaHora.setMinutes(parseInt(minStr));
+        fechaHora.setSeconds(0);
+        fechaHora.setMilliseconds(0);
 
-        // Calcular fin de sesión con margen de espera
-        const duracionMinutos = reserva.duracion || 2; // 2 min si es prueba
-        const margenExtra = 2; // 2 min después de terminar la sesión
-        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + margenExtra) * 60000);
+        const duracionMinutos = reserva.duracion || 60;
+        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + minutosDespuesDeFin) * 60000);
 
-        // Solo enviar si ya pasó el fin de sesión
+        console.log(`📅 Reserva ${reserva._id}: sesión termina a ${finSesion.toLocaleTimeString()}`);
+
         if (ahora >= finSesion) {
+          console.log(`📩 Enviando email de reseña a ${reserva.emailUsuario}`);
+
           await enviarEmailResena({
             nombreCliente: reserva.nombreUsuario,
             emailCliente: reserva.emailUsuario,
@@ -265,19 +272,21 @@ const enviarResenasPendientes = async (req, res) => {
             idReserva: reserva._id.toString(),
           });
 
-          // Marcar como enviada para evitar duplicados
           reserva.reseñaEnviada = true;
           await reserva.save();
+          console.log("✅ Email de reseña enviado y marca actualizada en DB");
+
           enviadas++;
+        } else {
+          console.log(`⏳ Aún no corresponde enviar reseña para reserva ${reserva._id}`);
         }
 
       } catch (error) {
-        console.error("❌ Error enviando reseña para reserva:", reserva._id, error.message);
+        console.error("❌ Error enviando email de reseña para reserva:", reserva._id, error.message);
       }
     }
 
     res.status(200).json({ mensaje: `Se enviaron ${enviadas} reseñas.` });
-
   } catch (error) {
     console.error("❌ Error al procesar reseñas pendientes:", error.message);
     res.status(500).json({ error: "Error interno del servidor" });
