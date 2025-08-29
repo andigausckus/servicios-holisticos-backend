@@ -17,6 +17,11 @@ const reservaSchema = new mongoose.Schema({
   },
   comprobantePago: { type: String, required: true },
   reseñaEnviada: { type: Boolean, default: false },
+  
+emailResenaEnviado: {
+  type: Boolean,
+  default: false,
+},
 }, { timestamps: true });
 
 module.exports = mongoose.model("Reserva", reservaSchema);
