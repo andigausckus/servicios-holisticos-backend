@@ -231,9 +231,7 @@ const enviarResenasPendientes = async (req, res) => {
     const reservas = await Reserva.find({
       estado: "confirmada",
       reseñaEnviada: false,
-    })
-      .populate("terapeutaId")
-      .populate("servicioId");
+    });
 
     if (!reservas.length) {
       return res.status(200).json({ mensaje: "No hay reseñas pendientes por enviar." });
@@ -248,7 +246,6 @@ const enviarResenasPendientes = async (req, res) => {
 
     for (const reserva of reservas) {
       try {
-        // Hora de inicio de la sesión
         const [horaStr, minStr] = reserva.hora.split(":");
         const fechaHora = new Date(reserva.fecha);
         fechaHora.setHours(parseInt(horaStr));
@@ -256,26 +253,27 @@ const enviarResenasPendientes = async (req, res) => {
         fechaHora.setSeconds(0);
         fechaHora.setMilliseconds(0);
 
-        const duracionMinutos = reserva.duracion || 60; // fallback
+        const duracionMinutos = reserva.duracion;
+        if (!duracionMinutos) {
+          console.warn(`⚠️ Duración no definida para reserva ${reserva._id}`);
+          continue;
+        }
+
         const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + minutosDespuesDeFin) * 60000);
 
         console.log(`📅 Reserva ${reserva._id}: sesión termina a ${finSesion.toLocaleTimeString()}`);
-        
-        if (ahora >= finSesion) {
-          // Datos del cliente siempre desde la reserva
-          const nombreCliente = reserva.nombreUsuario;
-          const emailCliente = reserva.emailUsuario;
 
-          if (!nombreCliente || !emailCliente) {
-            console.warn(`⚠️ No se puede enviar reseña, faltan datos del cliente para reserva ${reserva._id}`);
+        if (ahora >= finSesion) {
+          if (!reserva.nombreUsuario || !reserva.emailUsuario) {
+            console.warn(`⚠️ Datos incompletos para enviar reseña de reserva ${reserva._id}`);
             continue;
           }
 
-          console.log(`📩 Enviando email de reseña a ${emailCliente}`);
+          console.log(`📩 Enviando email de reseña a ${reserva.emailUsuario}`);
 
           await enviarEmailResena({
-            nombreCliente,
-            emailCliente,
+            nombreCliente: reserva.nombreUsuario,
+            emailCliente: reserva.emailUsuario,
             nombreTerapeuta: reserva.terapeutaId?.nombreCompleto || "",
             servicio: reserva.servicioId?.titulo || "",
             idReserva: reserva._id.toString(),
@@ -289,10 +287,19 @@ const enviarResenasPendientes = async (req, res) => {
         } else {
           console.log(`⏳ Aún no corresponde enviar reseña para reserva ${reserva._id}`);
         }
+
       } catch (error) {
         console.error("❌ Error enviando email de reseña para reserva:", reserva._id, error.message);
       }
     }
+
+    res.status(200).json({ mensaje: `Se enviaron ${enviadas} reseñas.` });
+
+  } catch (error) {
+    console.error("❌ Error al procesar reseñas pendientes:", error.message);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+};
 
     res.status(200).json({ mensaje: `Se enviaron ${enviadas} reseñas.` });
   } catch (error) {
