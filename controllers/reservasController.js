@@ -240,10 +240,12 @@ res.status(500).json({ error: "Error al obtener reservas confirmadas" });
 
 const enviarResenasPendientes = async (req, res) => {
   try {
+    // Buscamos reservas confirmadas, que aún no tengan reseña enviada
+    // y cuyo momento de envío ya pasó
     const reservas = await Reserva.find({
       estado: "confirmada",
       reseñaEnviada: false,
-      fechaHoraEnvioResena: { $lte: new Date() } // solo las que ya deberían enviarse
+      fechaHoraEnvioResena: { $lte: new Date() }
     })
       .populate("terapeutaId")
       .populate("servicioId");
@@ -256,11 +258,13 @@ const enviarResenasPendientes = async (req, res) => {
 
     for (const reserva of reservas) {
       try {
-        if (!reserva.emailUsuario || !reserva.nombreUsuario) {
+        // Validamos que la reserva tenga nombre y email del cliente
+        if (!reserva.nombreUsuario || !reserva.emailUsuario) {
           console.log(`⚠️ Reserva ${reserva._id} sin datos de usuario, no se envía reseña`);
           continue;
         }
 
+        // Enviamos email de reseña
         await enviarEmailResena({
           nombreCliente: reserva.nombreUsuario,
           emailCliente: reserva.emailUsuario,
@@ -269,6 +273,7 @@ const enviarResenasPendientes = async (req, res) => {
           idReserva: reserva._id.toString(),
         });
 
+        // Marcamos como enviada
         reserva.reseñaEnviada = true;
         reserva.emailResenaEnviado = true;
         await reserva.save();
@@ -288,7 +293,6 @@ const enviarResenasPendientes = async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor" });
   }
 };
-
 module.exports = {
 crearReservaConComprobante,
 obtenerReservas,
