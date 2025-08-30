@@ -66,15 +66,15 @@ const cuerpoCliente = `
 <div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-bottom: 16px; background-color: #f9f9f9;">
   <p>Hola ${nombreCliente},</p>
   <p>¡Gracias por confiar en Servicios Holísticos 🌿!</p>
-  <p>A continuación te compartimos los detalles de la reserva</p>
+  <p><i>A continuación te compartimos los detalles de la reserva</i></p>
   <p>🧘 Servicio: ${nombreServicio}<br>
      📅 Fecha: ${fechaFormateada}<br>
      🕒 Hora: ${hora} a ${horaFinal}<br>
-     💵 Valor: $${precio}</p>
+     💰 Valor: $${precio}</p>
 </div>
 
 <div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-bottom: 16px; background-color: #f9f9f9;">
-  <p><u>Datos del terapeuta holístico para contacto</u></p>
+  <p><i>Datos del terapeuta holístico para contacto</i></p>
   <p>Nombre y apellido: ${nombreTerapeuta}<br>
      Email: ${emailTerapeuta}<br>
      WhatsApp: 
@@ -102,12 +102,8 @@ const cuerpoTerapeuta = `
      alt="Logo de la plataforma" style="width: 50px; height: auto; margin: 10px auto; display: block;">
 
 <div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-bottom: 16px; background-color: #f9f9f9;">
-  <img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" 
-       alt="Logo de la plataforma" 
-       style="width: 50px; height: auto; margin: 10px auto; display: block;">
-
   <p>👋 Hola ${nombreTerapeuta}!</p>
-  <p>¡Tenés una nueva reserva confirmada! 🎉</p>
+  <p><i>¡Tenés una nueva reserva confirmada! 🎉</i></p>
   <p>🧘 Usuario: ${nombreCliente}<br>
      🌸 Servicio: ${nombreServicio}<br>
      📅 Fecha: ${fechaFormateada}<br>
@@ -118,7 +114,6 @@ const cuerpoTerapeuta = `
 <div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-bottom: 16px; background-color: #f9f9f9;">
   <p>${nombreCliente} podrá escribirte antes de la sesión por email o WhatsApp si tiene alguna duda, o el mismo día del encuentro.</p>
   <p>💸 El pago correspondiente a esta sesión será procesado y enviado a tu cuenta en un plazo máximo de 60 minutos.</p>
-  <p>✨ Te deseamos una excelente sesión ✨</p>
   <p>✍️ Una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
   <p>😃 Una experiencia positiva y profesional te ayudará a construir una sólida reputación en nuestra plataforma, lo que atraerá a más clientes y oportunidades de crecimiento.</p>
   <p>Con cariño 🌸<br>
@@ -220,8 +215,8 @@ async function enviarEmailResenaUsuario({ nombreCliente, emailCliente, nombreTer
   const html = `
     <style>p { margin-bottom: 20px; }</style>
     <div>
-      <p>Hola ${nombreCliente},</p>
-      <p>Gracias por tu sesión con ${nombreTerapeuta}.</p>
+      <p>Hola 👋${nombreCliente},</p>
+      <p><i>Gracias por tu sesión con ${nombreTerapeuta}.</i></p>
       <p>Nos gustaría saber cómo fue tu experiencia para ayudar a otros usuarios a tomar buenas decisiones 🙌</p>
       <p>Tu opinión es muy valiosa para nosotros y para la comunidad de Servicios Holísticos 🌿</p>
       <p style="margin-top: 40px; text-align: center;">
