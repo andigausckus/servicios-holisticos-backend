@@ -22,97 +22,99 @@ const crearReservaConComprobante = async (req, res) => {
       duracion,
     } = req.body;
 
-    if (!nombreUsuario || !emailUsuario || !comprobantePago) {  
-      return res.status(400).json({  
-        error: "Todos los campos son obligatorios: nombre, email y comprobante.",  
-      });  
-    }  
-
-    console.log("📥 Datos recibidos para nueva reserva con comprobante:");  
-    console.log({ servicioId, terapeutaId, precio, duracion });  
-
-    const nuevaReserva = new Reserva({  
-  servicioId,  
-  terapeutaId,  
-  fecha,  
-  hora,  
-  nombreUsuario,  
-  emailUsuario,  
-  comprobantePago,  
-  precio,  
-  duracion,  
-  estado: "confirmada",  
-});
-
-// 📌 Calcular fecha y hora exacta para enviar reseña
-const fechaHoraInicio = new Date(`${fecha}T${hora}:00Z`); // UTC
-const duracionMinutos = duracion || 60;
-const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
-
-nuevaReserva.fechaHoraEnvioResena = new Date(fechaHoraInicio.getTime() + (duracionMinutos + delayMinutos) * 60000);
-
-try {
-  // Guardar reserva en DB
-  await nuevaReserva.save();
-  console.log("✅ Reserva confirmada:", nuevaReserva);
-
-  const terapeuta = await Terapeuta.findById(terapeutaId);  
-  const servicio = await Servicio.findById(servicioId);  
-  servicio.duracion = servicio.duracion || duracion;  
-
-  const calcularHoraFinal = (horaInicio, duracionMinutos) => {  
-    const [h, m] = horaInicio.split(":").map(Number);  
-    const fecha = new Date();  
-    fecha.setHours(h);  
-    fecha.setMinutes(m + duracionMinutos);  
-    const hh = fecha.getHours().toString().padStart(2, "0");  
-    const mm = fecha.getMinutes().toString().padStart(2, "0");  
-    return `${hh}:${mm}`;  
-  };  
-
-  const horaFinal = calcularHoraFinal(hora, duracion);  
-
-  // Formatear número de WhatsApp
-  let numeroWhatsApp = terapeuta?.whatsapp || "";  
-  numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");  
-
-  if (numeroWhatsApp.startsWith("15")) {  
-    numeroWhatsApp = "11" + numeroWhatsApp.slice(2);  
-  }  
-
-  if (numeroWhatsApp.length === 10) {  
-    numeroWhatsApp = `549${numeroWhatsApp}`;  
-  } else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {  
-    numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;  
-  }  
-
-  // Enviar emails de confirmación
-  await enviarEmailsReserva({  
-    nombreCliente: nombreUsuario,  
-    emailCliente: emailUsuario,  
-    nombreTerapeuta: terapeuta?.nombreCompleto || "",  
-    emailTerapeuta: terapeuta?.email || "",  
-    nombreServicio: servicio?.titulo || "",  
-    fecha,  
-    hora,  
-    horaFinal,  
-    duracion,  
-    precio,  
-    telefonoTerapeuta: numeroWhatsApp,  
-    cbuTerapeuta: terapeuta?.cbuCvu || "",             
-    bancoTerapeuta: terapeuta?.bancoOBilletera || "",   
-  });
-
-  // Responder al cliente
-  return res.status(201).json({  
-    mensaje: "Reserva creada exitosamente",  
-    reserva: nuevaReserva,  
-  });
-
-} catch (error) {
-  console.error("❌ Error al crear reserva:", error.message);
-  return res.status(500).json({ error: "Error al crear reserva" });
+    if (!nombreUsuario || !emailUsuario || !comprobantePago) {
+      return res.status(400).json({
+        error: "Todos los campos son obligatorios: nombre, email y comprobante.",
+      });
     }
+
+    console.log("📥 Datos recibidos para nueva reserva con comprobante:");
+    console.log({ servicioId, terapeutaId, precio, duracion });
+
+    const nuevaReserva = new Reserva({
+      servicioId,
+      terapeutaId,
+      fecha,
+      hora,
+      nombreUsuario,
+      emailUsuario,
+      comprobantePago,
+      precio,
+      duracion,
+      estado: "confirmada",
+    });
+
+    // 📌 Calcular fecha y hora exacta para enviar reseña
+    const fechaHoraInicio = new Date(`${fecha}T${hora}:00Z`); // UTC
+    const duracionMinutos = duracion || 60;
+    const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
+
+    nuevaReserva.fechaHoraEnvioResena = new Date(
+      fechaHoraInicio.getTime() + (duracionMinutos + delayMinutos) * 60000
+    );
+
+    // Guardar reserva en DB
+    await nuevaReserva.save();
+    console.log("✅ Reserva confirmada:", nuevaReserva);
+
+    const terapeuta = await Terapeuta.findById(terapeutaId);
+    const servicio = await Servicio.findById(servicioId);
+    servicio.duracion = servicio.duracion || duracion;
+
+    const calcularHoraFinal = (horaInicio, duracionMinutos) => {
+      const [h, m] = horaInicio.split(":").map(Number);
+      const fecha = new Date();
+      fecha.setHours(h);
+      fecha.setMinutes(m + duracionMinutos);
+      const hh = fecha.getHours().toString().padStart(2, "0");
+      const mm = fecha.getMinutes().toString().padStart(2, "0");
+      return `${hh}:${mm}`;
+    };
+
+    const horaFinal = calcularHoraFinal(hora, duracion);
+
+    // Formatear número de WhatsApp
+    let numeroWhatsApp = terapeuta?.whatsapp || "";
+    numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");
+
+    if (numeroWhatsApp.startsWith("15")) {
+      numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
+    }
+
+    if (numeroWhatsApp.length === 10) {
+      numeroWhatsApp = `549${numeroWhatsApp}`;
+    } else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {
+      numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
+    }
+
+    // Enviar emails de confirmación
+    await enviarEmailsReserva({
+      nombreCliente: nombreUsuario,
+      emailCliente: emailUsuario,
+      nombreTerapeuta: terapeuta?.nombreCompleto || "",
+      emailTerapeuta: terapeuta?.email || "",
+      nombreServicio: servicio?.titulo || "",
+      fecha,
+      hora,
+      horaFinal,
+      duracion,
+      precio,
+      telefonoTerapeuta: numeroWhatsApp,
+      cbuTerapeuta: terapeuta?.cbuCvu || "",
+      bancoTerapeuta: terapeuta?.bancoOBilletera || "",
+    });
+
+    // Responder al cliente
+    return res.status(201).json({
+      mensaje: "Reserva creada exitosamente",
+      reserva: nuevaReserva,
+    });
+
+  } catch (error) {
+    console.error("❌ Error al crear reserva:", error.message);
+    return res.status(500).json({ error: "Error al crear reserva" });
+  }
+};
 
 const obtenerReservas = async (req, res) => {
 try {
