@@ -232,7 +232,6 @@ const enviarResenasPendientes = async (req, res) => {
       estado: "confirmada",
       reseñaEnviada: false,
     })
-      .populate("usuarioId")
       .populate("terapeutaId")
       .populate("servicioId");
 
@@ -243,13 +242,13 @@ const enviarResenasPendientes = async (req, res) => {
     const ahora = new Date();
     let enviadas = 0;
 
-    // Determinar tiempo de espera según entorno
+    // Tiempo de espera según entorno
     const isProduction = process.env.NODE_ENV === "production";
     const minutosDespuesDeFin = isProduction ? 30 : 2; // 30 min en prod, 2 min en dev
 
     for (const reserva of reservas) {
       try {
-        // Calcular hora de inicio de la reserva
+        // Hora de inicio de la sesión
         const [horaStr, minStr] = reserva.hora.split(":");
         const fechaHora = new Date(reserva.fecha);
         fechaHora.setHours(parseInt(horaStr));
@@ -257,21 +256,26 @@ const enviarResenasPendientes = async (req, res) => {
         fechaHora.setSeconds(0);
         fechaHora.setMilliseconds(0);
 
-        // Calcular fin de sesión y hora de envío
-        const duracionMinutos = reserva.duracion || 60;
-        const finSesion = new Date(fechaHora.getTime() + duracionMinutos * 60000);
-        const horaEnvio = new Date(finSesion.getTime() + minutosDespuesDeFin * 60000);
+        const duracionMinutos = reserva.duracion || 60; // fallback
+        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + minutosDespuesDeFin) * 60000);
 
-        console.log(
-          `📅 Reserva ${reserva._id}: fin=${finSesion.toLocaleTimeString()} → envío reseña=${horaEnvio.toLocaleTimeString()}`
-        );
+        console.log(`📅 Reserva ${reserva._id}: sesión termina a ${finSesion.toLocaleTimeString()}`);
+        
+        if (ahora >= finSesion) {
+          // Datos del cliente siempre desde la reserva
+          const nombreCliente = reserva.nombreUsuario;
+          const emailCliente = reserva.emailUsuario;
 
-        if (ahora >= horaEnvio) {
-          console.log(`📩 Enviando email de reseña a ${reserva.usuarioId?.email}`);
+          if (!nombreCliente || !emailCliente) {
+            console.warn(`⚠️ No se puede enviar reseña, faltan datos del cliente para reserva ${reserva._id}`);
+            continue;
+          }
+
+          console.log(`📩 Enviando email de reseña a ${emailCliente}`);
 
           await enviarEmailResena({
-            nombreCliente: reserva.usuarioId?.nombre || "",
-            emailCliente: reserva.usuarioId?.email || "",
+            nombreCliente,
+            emailCliente,
             nombreTerapeuta: reserva.terapeutaId?.nombreCompleto || "",
             servicio: reserva.servicioId?.titulo || "",
             idReserva: reserva._id.toString(),
