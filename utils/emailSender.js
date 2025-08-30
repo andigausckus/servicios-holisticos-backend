@@ -93,6 +93,7 @@ const cuerpoCliente = `
   <p>Con cariño 🌸<br>
   <strong>El equipo de Servicios Holísticos</strong></p>
 </div>
+`;
 
 
   // ===== HTML para el terapeuta =====
