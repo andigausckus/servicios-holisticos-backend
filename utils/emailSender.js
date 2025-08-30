@@ -101,47 +101,57 @@ const cuerpoTerapeuta = `
 <img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" 
      alt="Logo de la plataforma" style="width: 50px; height: auto; margin: 10px auto; display: block;">
 
-<p>👋 Hola ${nombreTerapeuta}!</p>
+<div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-bottom: 16px; background-color: #f9f9f9;">
+  <img src="https://i.postimg.cc/xTCF8sfm/IMG-20250607-170740-893.webp" 
+       alt="Logo de la plataforma" 
+       style="width: 50px; height: auto; margin: 10px auto; display: block;">
 
-<p>¡Tenés una nueva reserva confirmada! 🎉</p>
+  <p>👋 Hola ${nombreTerapeuta}!</p>
+  <p>¡Tenés una nueva reserva confirmada! 🎉</p>
+  <p>🧘 Usuario: ${nombreCliente}<br>
+     🌸 Servicio: ${nombreServicio}<br>
+     📅 Fecha: ${fechaFormateada}<br>
+     🕒 Hora: ${hora} a ${horaFinal}<br>
+     💰 Valor de la sesión: $${precio}</p>
+</div>
 
-<p>🧘 Usuario: ${nombreCliente}<br><br>
-🛎️ Servicio: ${nombreServicio}<br><br>
-📅 Fecha: ${fechaFormateada}<br><br>
-🕒 Hora: ${hora} a ${horaFinal}<br><br>
-💵 Valor de la sesión: $${precio}</p>
-
-<p>${nombreCliente} podrá escribirte antes de la sesión por email o WhatsApp si tiene alguna duda, o el mismo día del encuentro.</p>
-
-<p>💸 El pago correspondiente a esta sesión será procesado y enviado a tu cuenta en un plazo máximo de 60 minutos.</p>
-
-<p>✨ Te deseamos una excelente sesión ✨</p>
-
-<p>✍️ Una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
-
-<p>😃 Una experiencia positiva y profesional te ayudará a construir una sólida reputación en nuestra plataforma, lo que atraerá a más clientes y oportunidades de crecimiento.</p>
-
-<p>Con cariño 🌸<br>
-<strong>El equipo de Servicios Holísticos</strong></p>
+<div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-bottom: 16px; background-color: #f9f9f9;">
+  <p>${nombreCliente} podrá escribirte antes de la sesión por email o WhatsApp si tiene alguna duda, o el mismo día del encuentro.</p>
+  <p>💸 El pago correspondiente a esta sesión será procesado y enviado a tu cuenta en un plazo máximo de 60 minutos.</p>
+  <p>✨ Te deseamos una excelente sesión ✨</p>
+  <p>✍️ Una vez finalizada la sesión, el usuario podrá dejar una reseña sobre tu servicio.</p>
+  <p>😃 Una experiencia positiva y profesional te ayudará a construir una sólida reputación en nuestra plataforma, lo que atraerá a más clientes y oportunidades de crecimiento.</p>
+  <p>Con cariño 🌸<br>
+  <strong>El equipo de Servicios Holísticos</strong></p>
+</div>
 `;
        
 
   // ===== HTML para el admin =====
 const cuerpoAdmin = `
+  <div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-bottom: 16px; background-color: #f9f9f9;">
   <p>💡 Nueva reserva confirmada:</p>
   <p>👤 Cliente: ${nombreCliente}</p>
   <p>🛎️ Servicio: ${nombreServicio}</p>
   <p>📅 Fecha: ${fechaFormateada}</p>
   <p>🕒 Hora: ${hora} a ${horaFinal}</p>
   <p>💵 Precio pagado: $${precio}</p>
-  <br><hr style="border: 1px solid #ccc; margin: 10px 0;">
-  <p>Datos del terapeuta:</p>
-  <p>🧘 Terapeuta: ${nombreTerapeuta} (${emailTerapeuta})</p>
-  <p>CBU/CVU: ${cbuTerapeuta}</p>
+</div>
+
+<div style="border: 1px solid #ddd; border-radius: 10px; padding: 16px; margin-bottom: 16px; background-color: #f9f9f9;">
+  <p>🧘 Datos del terapeuta:</p>
+  <p>Terapeuta: ${nombreTerapeuta} (${emailTerapeuta})</p>
+  <p>CBU/CVU: <span id="cbuTerapeuta">${cbuTerapeuta}</span>
+     <button onclick="navigator.clipboard.writeText('${cbuTerapeuta}')" 
+             style="margin-left:8px;padding:4px 8px;background-color:#7D5BA6;color:white;border:none;border-radius:4px;cursor:pointer;">
+       Copiar
+     </button>
+  </p>
   <p>Banco: ${bancoTerapeuta}</p>
   <p style="margin-top:20px;">
     👉 <a href="https://www.serviciosholisticos.com.ar/#/admin/pagos" target="_blank" style="text-decoration:none;color:#7D5BA6;">Ver comprobante de pago</a>
   </p>
+</div>
 `;
 
   try {
