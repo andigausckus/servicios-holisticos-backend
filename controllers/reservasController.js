@@ -257,13 +257,23 @@ const enviarResenasPendientes = async (req, res) => {
         fechaHora.setMilliseconds(0);
 
         const duracionMinutos = reserva.duracion || 60;
-        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + minutosDespuesDeFin) * 60000);
 
-        console.log(`📅 Reserva ${reserva._id}: sesión termina a ${finSesion.toLocaleTimeString()}`);
+// Hora de fin de la sesión
+const finSesion = new Date(fechaHora.getTime() + duracionMinutos * 60000);
 
-        if (ahora >= finSesion) {
-          console.log(`📩 Enviando email de reseña a ${reserva.emailUsuario}`);
+// Hora en la que debe enviarse la reseña (según entorno)
+const horaEnvio = new Date(finSesion.getTime() + minutosDespuesDeFin * 60000);
 
+console.log(
+  `📅 Reserva ${reserva._id}: fin=${finSesion.toLocaleTimeString()} → envío reseña=${horaEnvio.toLocaleTimeString()}`
+);
+
+if (ahora >= horaEnvio) {
+  console.log(`📩 Enviando email de reseña a ${reserva.emailUsuario}`);
+  // ... envío de email y update en DB
+} else {
+  console.log(`⏳ Aún no corresponde enviar reseña para reserva ${reserva._id}`);
+}
           await enviarEmailResena({
             nombreCliente: reserva.nombreUsuario,
             emailCliente: reserva.emailUsuario,
