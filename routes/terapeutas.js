@@ -173,4 +173,36 @@ res.status(500).json({ message: "Error al obtener reseñas", error });
 }
 });
 
+  // Actualizar foto de perfil
+router.put('/:id/foto-perfil', async (req, res) => {
+  try {
+    const { url } = req.body; // URL de Cloudinary enviada desde el frontend
+    const terapeuta = await Terapeuta.findById(req.params.id);
+    if (!terapeuta) return res.status(404).json({ message: 'Terapeuta no encontrado' });
+
+    terapeuta.fotoPerfil = url;
+    await terapeuta.save();
+    res.json({ fotoPerfil: terapeuta.fotoPerfil });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al actualizar foto de perfil' });
+  }
+});
+
+// Actualizar foto de portada
+router.put('/:id/foto-portada', async (req, res) => {
+  try {
+    const { url } = req.body; // URL de Cloudinary enviada desde el frontend
+    const terapeuta = await Terapeuta.findById(req.params.id);
+    if (!terapeuta) return res.status(404).json({ message: 'Terapeuta no encontrado' });
+
+    terapeuta.fotoPortada = url;
+    await terapeuta.save();
+    res.json({ fotoPortada: terapeuta.fotoPortada });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Error al actualizar foto de portada' });
+  }
+});
+
 module.exports = router;
