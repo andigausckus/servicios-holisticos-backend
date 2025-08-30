@@ -231,7 +231,10 @@ const enviarResenasPendientes = async (req, res) => {
     const reservas = await Reserva.find({
       estado: "confirmada",
       reseñaEnviada: false,
-    });
+    })
+      .populate("usuarioId")
+      .populate("terapeutaId")
+      .populate("servicioId");
 
     if (!reservas.length) {
       return res.status(200).json({ mensaje: "No hay reseñas pendientes por enviar." });
@@ -240,24 +243,30 @@ const enviarResenasPendientes = async (req, res) => {
     const ahora = new Date();
     let enviadas = 0;
 
-    // Tiempo de espera según entorno
+    // Determinar tiempo de espera según entorno
     const isProduction = process.env.NODE_ENV === "production";
-    const minutosDespuesDeFin = isProduction ? 30 : 2;
+    const minutosDespuesDeFin = isProduction ? 30 : 2; // 30 min en prod, 2 min en dev
 
     for (const reserva of reservas) {
       try {
-        // Convertir fecha + hora de reserva a UTC
         const [horaStr, minStr] = reserva.hora.split(":");
-        const fechaUTC = new Date(`${reserva.fecha}T${horaStr.padStart(2, "0")}:${minStr.padStart(2, "0")}:00Z`);
 
+        // Hora de inicio de la sesión en UTC
+        const fechaInicioUTC = new Date(`${reserva.fecha}T${horaStr.padStart(2,"0")}:${minStr.padStart(2,"0")}:00Z`);
+
+        // Hora de fin de la sesión en UTC
         const duracionMinutos = reserva.duracion || 60;
-        const finSesionUTC = new Date(fechaUTC.getTime() + (duracionMinutos + minutosDespuesDeFin) * 60000);
+        const fechaFinUTC = new Date(fechaInicioUTC.getTime() + duracionMinutos * 60000);
 
-        console.log(`📅 Reserva ${reserva._id}: sesión termina a ${finSesionUTC.toUTCString()}`);
+        // Hora de envío de reseña (después de finalizar + margen)
+        const envioResenaUTC = new Date(fechaFinUTC.getTime() + minutosDespuesDeFin * 60000);
 
-        if (ahora >= finSesionUTC) {
+        console.log(`📅 Reserva ${reserva._id}: sesión termina a ${fechaFinUTC.toLocaleTimeString("es-AR", { timeZone: "UTC" })} → envío reseña a ${envioResenaUTC.toLocaleTimeString("es-AR", { timeZone: "UTC" })}`);
+
+        if (ahora >= envioResenaUTC) {
+          // Validar datos del usuario
           if (!reserva.nombreUsuario || !reserva.emailUsuario) {
-            console.log(`⚠️ Email de reseña NO enviado para reserva ${reserva._id}: faltan datos obligatorios`);
+            console.warn(`⚠️ Email de reseña NO enviado: faltan datos obligatorios en reserva ${reserva._id}`);
             continue;
           }
 
@@ -266,8 +275,8 @@ const enviarResenasPendientes = async (req, res) => {
           await enviarEmailResena({
             nombreCliente: reserva.nombreUsuario,
             emailCliente: reserva.emailUsuario,
-            nombreTerapeuta: reserva.terapeuta || reserva.terapeutaId?.nombreCompleto || "",
-            servicio: reserva.servicio || reserva.servicioId?.titulo || "",
+            nombreTerapeuta: reserva.terapeutaId?.nombreCompleto || "",
+            servicio: reserva.servicioId?.titulo || "",
             idReserva: reserva._id.toString(),
           });
 
