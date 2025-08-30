@@ -33,7 +33,7 @@ const crearReservaConComprobante = async (req, res) => {
 
     const nuevaReserva = new Reserva({  
   servicioId,  
-  terapeutaId,  // ✅ usar el nombre correcto del campo
+  terapeutaId,  
   fecha,  
   hora,  
   nombreUsuario,  
@@ -44,65 +44,69 @@ const crearReservaConComprobante = async (req, res) => {
   estado: "confirmada",  
 });
 
-    await nuevaReserva.save();  
-    console.log("✅ Reserva confirmada:", nuevaReserva);  
+// 📌 Calcular fecha y hora exacta para enviar reseña
+const fechaHoraInicio = new Date(`${fecha}T${hora}:00Z`); // UTC
+const duracionMinutos = duracion || 60;
+const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
 
-    const terapeuta = await Terapeuta.findById(terapeutaId);  
-    const servicio = await Servicio.findById(servicioId);  
-    servicio.duracion = servicio.duracion || duracion;  
+nuevaReserva.fechaHoraEnvioResena = new Date(fechaHoraInicio.getTime() + (duracionMinutos + delayMinutos) * 60000);
 
-    const calcularHoraFinal = (horaInicio, duracionMinutos) => {  
-      const [h, m] = horaInicio.split(":").map(Number);  
-      const fecha = new Date();  
-      fecha.setHours(h);  
-      fecha.setMinutes(m + duracionMinutos);  
-      const hh = fecha.getHours().toString().padStart(2, "0");  
-      const mm = fecha.getMinutes().toString().padStart(2, "0");  
-      return `${hh}:${mm}`;  
-    };  
+// Guardar reserva en DB
+await nuevaReserva.save();
+console.log("✅ Reserva confirmada:", nuevaReserva);
 
-    const horaFinal = calcularHoraFinal(hora, duracion);  
+const terapeuta = await Terapeuta.findById(terapeutaId);  
+const servicio = await Servicio.findById(servicioId);  
+servicio.duracion = servicio.duracion || duracion;  
 
-    let numeroWhatsApp = terapeuta?.whatsapp || "";  
-    numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");  
+const calcularHoraFinal = (horaInicio, duracionMinutos) => {  
+  const [h, m] = horaInicio.split(":").map(Number);  
+  const fecha = new Date();  
+  fecha.setHours(h);  
+  fecha.setMinutes(m + duracionMinutos);  
+  const hh = fecha.getHours().toString().padStart(2, "0");  
+  const mm = fecha.getMinutes().toString().padStart(2, "0");  
+  return `${hh}:${mm}`;  
+};  
 
-    if (numeroWhatsApp.startsWith("15")) {  
-      numeroWhatsApp = "11" + numeroWhatsApp.slice(2);  
-    }  
+const horaFinal = calcularHoraFinal(hora, duracion);  
 
-    if (numeroWhatsApp.length === 10) {  
-      numeroWhatsApp = `549${numeroWhatsApp}`;  
-    } else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {  
-      numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;  
-    }  
+// Formatear número de WhatsApp
+let numeroWhatsApp = terapeuta?.whatsapp || "";  
+numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");  
 
-    await enviarEmailsReserva({  
-      nombreCliente: nombreUsuario,  
-      emailCliente: emailUsuario,  
-      nombreTerapeuta: terapeuta?.nombreCompleto || "",  
-      emailTerapeuta: terapeuta?.email || "",  
-      nombreServicio: servicio?.titulo || "",  
-      fecha,  
-      hora,  
-      horaFinal,  
-      duracion,  
-      precio,  
-      telefonoTerapeuta: numeroWhatsApp,  
-      cbuTerapeuta: terapeuta?.cbuCvu || "",             
-      bancoTerapeuta: terapeuta?.bancoOBilletera || "",   
-    });  
+if (numeroWhatsApp.startsWith("15")) {  
+  numeroWhatsApp = "11" + numeroWhatsApp.slice(2);  
+}  
 
-    // Si todo sale bien, respondemos al cliente  
-    return res.status(201).json({  
-      mensaje: "Reserva creada exitosamente",  
-      reserva: nuevaReserva,  
-    });
+if (numeroWhatsApp.length === 10) {  
+  numeroWhatsApp = `549${numeroWhatsApp}`;  
+} else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {  
+  numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;  
+}  
 
-  } catch (error) {
-    console.error("❌ Error al crear reserva:", error.message);
-    return res.status(500).json({ error: "Error al crear reserva" });
-  }
-};
+// Enviar emails de confirmación
+await enviarEmailsReserva({  
+  nombreCliente: nombreUsuario,  
+  emailCliente: emailUsuario,  
+  nombreTerapeuta: terapeuta?.nombreCompleto || "",  
+  emailTerapeuta: terapeuta?.email || "",  
+  nombreServicio: servicio?.titulo || "",  
+  fecha,  
+  hora,  
+  horaFinal,  
+  duracion,  
+  precio,  
+  telefonoTerapeuta: numeroWhatsApp,  
+  cbuTerapeuta: terapeuta?.cbuCvu || "",             
+  bancoTerapeuta: terapeuta?.bancoOBilletera || "",   
+});
+
+// Responder al cliente
+return res.status(201).json({  
+  mensaje: "Reserva creada exitosamente",  
+  reserva: nuevaReserva,  
+});
 
 const obtenerReservas = async (req, res) => {
 try {
@@ -231,8 +235,8 @@ const enviarResenasPendientes = async (req, res) => {
     const reservas = await Reserva.find({
       estado: "confirmada",
       reseñaEnviada: false,
+      fechaHoraEnvioResena: { $lte: new Date() } // solo las que ya deberían enviarse
     })
-      .populate("usuarioId")
       .populate("terapeutaId")
       .populate("servicioId");
 
@@ -240,61 +244,37 @@ const enviarResenasPendientes = async (req, res) => {
       return res.status(200).json({ mensaje: "No hay reseñas pendientes por enviar." });
     }
 
-    const ahora = new Date();
     let enviadas = 0;
-
-    // Determinar tiempo de espera según entorno
-    const isProduction = process.env.NODE_ENV === "production";
-    const minutosDespuesDeFin = isProduction ? 30 : 2; // 30 min en prod, 2 min en dev
 
     for (const reserva of reservas) {
       try {
-        const [horaStr, minStr] = reserva.hora.split(":");
-
-        // Hora de inicio de la sesión en UTC
-        const fechaInicioUTC = new Date(`${reserva.fecha}T${horaStr.padStart(2,"0")}:${minStr.padStart(2,"0")}:00Z`);
-
-        // Hora de fin de la sesión en UTC
-        const duracionMinutos = reserva.duracion || 60;
-        const fechaFinUTC = new Date(fechaInicioUTC.getTime() + duracionMinutos * 60000);
-
-        // Hora de envío de reseña (después de finalizar + margen)
-        const envioResenaUTC = new Date(fechaFinUTC.getTime() + minutosDespuesDeFin * 60000);
-
-        console.log(`📅 Reserva ${reserva._id}: sesión termina a ${fechaFinUTC.toLocaleTimeString("es-AR", { timeZone: "UTC" })} → envío reseña a ${envioResenaUTC.toLocaleTimeString("es-AR", { timeZone: "UTC" })}`);
-
-        if (ahora >= envioResenaUTC) {
-          // Validar datos del usuario
-          if (!reserva.nombreUsuario || !reserva.emailUsuario) {
-            console.warn(`⚠️ Email de reseña NO enviado: faltan datos obligatorios en reserva ${reserva._id}`);
-            continue;
-          }
-
-          console.log(`📩 Enviando email de reseña a ${reserva.emailUsuario}`);
-
-          await enviarEmailResena({
-            nombreCliente: reserva.nombreUsuario,
-            emailCliente: reserva.emailUsuario,
-            nombreTerapeuta: reserva.terapeutaId?.nombreCompleto || "",
-            servicio: reserva.servicioId?.titulo || "",
-            idReserva: reserva._id.toString(),
-          });
-
-          reserva.reseñaEnviada = true;
-          await reserva.save();
-          console.log("✅ Email de reseña enviado y marca actualizada en DB");
-
-          enviadas++;
-        } else {
-          console.log(`⏳ Aún no corresponde enviar reseña para reserva ${reserva._id}`);
+        if (!reserva.emailUsuario || !reserva.nombreUsuario) {
+          console.log(`⚠️ Reserva ${reserva._id} sin datos de usuario, no se envía reseña`);
+          continue;
         }
 
+        await enviarEmailResena({
+          nombreCliente: reserva.nombreUsuario,
+          emailCliente: reserva.emailUsuario,
+          nombreTerapeuta: reserva.terapeutaId?.nombreCompleto || "",
+          servicio: reserva.servicioId?.titulo || "",
+          idReserva: reserva._id.toString(),
+        });
+
+        reserva.reseñaEnviada = true;
+        reserva.emailResenaEnviado = true;
+        await reserva.save();
+
+        console.log(`✅ Email de reseña enviado y marca actualizada en DB para reserva ${reserva._id}`);
+        enviadas++;
+
       } catch (error) {
-        console.error("❌ Error enviando email de reseña para reserva:", reserva._id, error.message);
+        console.error(`❌ Error enviando reseña para reserva ${reserva._id}:`, error.message);
       }
     }
 
     res.status(200).json({ mensaje: `Se enviaron ${enviadas} reseñas.` });
+
   } catch (error) {
     console.error("❌ Error al procesar reseñas pendientes:", error.message);
     res.status(500).json({ error: "Error interno del servidor" });
