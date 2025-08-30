@@ -28,9 +28,7 @@ const crearReservaConComprobante = async (req, res) => {
       });
     }
 
-    console.log("📥 Datos recibidos para nueva reserva con comprobante:");
-    console.log({ servicioId, terapeutaId, precio, duracion });
-
+    // Crear reserva
     const nuevaReserva = new Reserva({
       servicioId,
       terapeutaId,
@@ -44,16 +42,15 @@ const crearReservaConComprobante = async (req, res) => {
       estado: "confirmada",
     });
 
-    // 📌 Calcular fecha y hora exacta para enviar reseña
+    // --- Calcular fechaHoraEnvioResena ---
     const fechaHoraInicio = new Date(`${fecha}T${hora}:00Z`); // UTC
     const duracionMinutos = duracion || 60;
-    const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
-
+    const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2; // delay
     nuevaReserva.fechaHoraEnvioResena = new Date(
       fechaHoraInicio.getTime() + (duracionMinutos + delayMinutos) * 60000
     );
 
-    // Guardar reserva en DB
+    // Guardar reserva
     await nuevaReserva.save();
     console.log("✅ Reserva confirmada:", nuevaReserva);
 
@@ -61,6 +58,7 @@ const crearReservaConComprobante = async (req, res) => {
     const servicio = await Servicio.findById(servicioId);
     servicio.duracion = servicio.duracion || duracion;
 
+    // Calcular hora final para el email de confirmación
     const calcularHoraFinal = (horaInicio, duracionMinutos) => {
       const [h, m] = horaInicio.split(":").map(Number);
       const fecha = new Date();
@@ -70,22 +68,15 @@ const crearReservaConComprobante = async (req, res) => {
       const mm = fecha.getMinutes().toString().padStart(2, "0");
       return `${hh}:${mm}`;
     };
-
     const horaFinal = calcularHoraFinal(hora, duracion);
 
     // Formatear número de WhatsApp
     let numeroWhatsApp = terapeuta?.whatsapp || "";
     numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");
-
-    if (numeroWhatsApp.startsWith("15")) {
-      numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
-    }
-
-    if (numeroWhatsApp.length === 10) {
-      numeroWhatsApp = `549${numeroWhatsApp}`;
-    } else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54")) {
+    if (numeroWhatsApp.startsWith("15")) numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
+    if (numeroWhatsApp.length === 10) numeroWhatsApp = `549${numeroWhatsApp}`;
+    else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54"))
       numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
-    }
 
     // Enviar emails de confirmación
     await enviarEmailsReserva({
@@ -104,12 +95,10 @@ const crearReservaConComprobante = async (req, res) => {
       bancoTerapeuta: terapeuta?.bancoOBilletera || "",
     });
 
-    // Responder al cliente
     return res.status(201).json({
       mensaje: "Reserva creada exitosamente",
       reserva: nuevaReserva,
     });
-
   } catch (error) {
     console.error("❌ Error al crear reserva:", error.message);
     return res.status(500).json({ error: "Error al crear reserva" });
