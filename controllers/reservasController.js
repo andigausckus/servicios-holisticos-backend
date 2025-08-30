@@ -240,30 +240,24 @@ const enviarResenasPendientes = async (req, res) => {
     const ahora = new Date();
     let enviadas = 0;
 
+    // Tiempo de espera según entorno
     const isProduction = process.env.NODE_ENV === "production";
-    const minutosDespuesDeFin = isProduction ? 30 : 2; // 30 min en prod, 2 min en dev
+    const minutosDespuesDeFin = isProduction ? 30 : 2;
 
     for (const reserva of reservas) {
       try {
+        // Convertir fecha + hora de reserva a UTC
         const [horaStr, minStr] = reserva.hora.split(":");
-        const fechaHora = new Date(reserva.fecha);
-        fechaHora.setHours(parseInt(horaStr));
-        fechaHora.setMinutes(parseInt(minStr));
-        fechaHora.setSeconds(0);
-        fechaHora.setMilliseconds(0);
+        const fechaUTC = new Date(`${reserva.fecha}T${horaStr.padStart(2, "0")}:${minStr.padStart(2, "0")}:00Z`);
 
-        const duracionMinutos = reserva.duracion;
-        if (!duracionMinutos) {
-          console.warn(`⚠️ Duración no definida para reserva ${reserva._id}`);
-          continue;
-        }
+        const duracionMinutos = reserva.duracion || 60;
+        const finSesionUTC = new Date(fechaUTC.getTime() + (duracionMinutos + minutosDespuesDeFin) * 60000);
 
-        const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + minutosDespuesDeFin) * 60000);
-        console.log(`📅 Reserva ${reserva._id}: sesión termina a ${finSesion.toLocaleTimeString()}`);
+        console.log(`📅 Reserva ${reserva._id}: sesión termina a ${finSesionUTC.toUTCString()}`);
 
-        if (ahora >= finSesion) {
+        if (ahora >= finSesionUTC) {
           if (!reserva.nombreUsuario || !reserva.emailUsuario) {
-            console.warn(`⚠️ Datos incompletos para enviar reseña de reserva ${reserva._id}`);
+            console.log(`⚠️ Email de reseña NO enviado para reserva ${reserva._id}: faltan datos obligatorios`);
             continue;
           }
 
@@ -272,8 +266,8 @@ const enviarResenasPendientes = async (req, res) => {
           await enviarEmailResena({
             nombreCliente: reserva.nombreUsuario,
             emailCliente: reserva.emailUsuario,
-            nombreTerapeuta: reserva.terapeutaId?.nombreCompleto || "",
-            servicio: reserva.servicioId?.titulo || "",
+            nombreTerapeuta: reserva.terapeuta || reserva.terapeutaId?.nombreCompleto || "",
+            servicio: reserva.servicio || reserva.servicioId?.titulo || "",
             idReserva: reserva._id.toString(),
           });
 
@@ -292,7 +286,6 @@ const enviarResenasPendientes = async (req, res) => {
     }
 
     res.status(200).json({ mensaje: `Se enviaron ${enviadas} reseñas.` });
-
   } catch (error) {
     console.error("❌ Error al procesar reseñas pendientes:", error.message);
     res.status(500).json({ error: "Error interno del servidor" });
