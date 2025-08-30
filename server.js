@@ -16,7 +16,7 @@ app.use(
       "https://frontend-holisticos.vercel.app",
       "https://serviciosholisticos.com.ar",
       "https://www.serviciosholisticos.com.ar",
-      "https://6188e661-7694-485e-b18d-0f9a4b139a16-00-3vr3dlg7g41yj.janeway.replit.dev",
+      "https://2d0d0aaa-2a91-4a42-bb1d-546fb340f646-00-a3fmw5bvv9w.kirk.replit.dev",
     ],
   })
 );
