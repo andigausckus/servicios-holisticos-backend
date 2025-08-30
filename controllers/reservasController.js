@@ -240,7 +240,6 @@ const enviarResenasPendientes = async (req, res) => {
     const ahora = new Date();
     let enviadas = 0;
 
-    // Tiempo de espera según entorno
     const isProduction = process.env.NODE_ENV === "production";
     const minutosDespuesDeFin = isProduction ? 30 : 2; // 30 min en prod, 2 min en dev
 
@@ -260,7 +259,6 @@ const enviarResenasPendientes = async (req, res) => {
         }
 
         const finSesion = new Date(fechaHora.getTime() + (duracionMinutos + minutosDespuesDeFin) * 60000);
-
         console.log(`📅 Reserva ${reserva._id}: sesión termina a ${finSesion.toLocaleTimeString()}`);
 
         if (ahora >= finSesion) {
@@ -295,13 +293,6 @@ const enviarResenasPendientes = async (req, res) => {
 
     res.status(200).json({ mensaje: `Se enviaron ${enviadas} reseñas.` });
 
-  } catch (error) {
-    console.error("❌ Error al procesar reseñas pendientes:", error.message);
-    res.status(500).json({ error: "Error interno del servidor" });
-  }
-};
-
-    res.status(200).json({ mensaje: `Se enviaron ${enviadas} reseñas.` });
   } catch (error) {
     console.error("❌ Error al procesar reseñas pendientes:", error.message);
     res.status(500).json({ error: "Error interno del servidor" });
