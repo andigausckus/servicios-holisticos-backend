@@ -142,13 +142,14 @@ router.get("/publico/:id", async (req, res) => {
       .select("nombreCompleto email whatsapp fotoPerfil fotoPortada descripcion servicios")
       .populate({
         path: "servicios",
-        select: "titulo descripcion imagen slug", // solo los campos necesarios
+        select: "titulo descripcion imagen slug modalidad precio categoria", // 👈 ahora incluye slug
       });
 
     if (!terapeuta) {
       return res.status(404).json({ error: "Terapeuta no encontrado" });
     }
 
+    console.log("👉 Servicios con slug:", terapeuta.servicios); // 👈 debug
     res.json(terapeuta);
   } catch (err) {
     console.error("Error al obtener terapeuta público:", err);
