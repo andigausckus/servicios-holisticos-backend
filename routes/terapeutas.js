@@ -139,7 +139,7 @@ res.status(500).json({ error: 'Error al borrar terapeutas' });
 router.get("/publico/:id", async (req, res) => {
   try {
     const terapeuta = await Terapeuta.findById(req.params.id)
-      .select("nombreCompleto email whatsapp fotoPerfil fotoPortada");
+      .select("nombreCompleto email whatsapp fotoPerfil fotoPortada descripcion");
     if (!terapeuta) {
       return res.status(404).json({ error: "Terapeuta no encontrado" });
     }
