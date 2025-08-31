@@ -135,14 +135,18 @@ res.status(500).json({ error: 'Error al borrar terapeutas' });
 }
 });
 
-// ✅ Obtener un terapeuta público por ID con servicios
+// ✅ Obtener un terapeuta público por ID con servicios y reseñas
 router.get("/publico/:id", async (req, res) => {
   try {
     const terapeuta = await Terapeuta.findById(req.params.id)
-      .select("nombreCompleto email whatsapp fotoPerfil fotoPortada descripcion servicios") // agregamos servicios
+      .select("nombreCompleto email whatsapp fotoPerfil fotoPortada descripcion servicios")
       .populate({
         path: "servicios",
-        select: "titulo descripcion imagen reseñas", // los campos que quieras mostrar
+        select: "titulo descripcion imagen reseñas",
+        populate: {
+          path: "reseñas",   // <-- aquí indicamos que queremos poblar cada reseña
+          select: "puntuacion comentario usuario fecha", // los campos que necesites
+        },
       });
 
     if (!terapeuta) {
