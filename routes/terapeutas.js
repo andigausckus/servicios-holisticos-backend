@@ -137,16 +137,17 @@ res.status(500).json({ error: 'Error al borrar terapeutas' });
 
 // ✅ Obtener un terapeuta público por ID
 router.get("/publico/:id", async (req, res) => {
-try {
-const terapeuta = await Terapeuta.findById(req.params.id).select("nombreCompleto email whatsapp");
-if (!terapeuta) {
-return res.status(404).json({ error: "Terapeuta no encontrado" });
-}
-res.json(terapeuta);
-} catch (err) {
-console.error("Error al obtener terapeuta público:", err);
-res.status(500).json({ error: "Error al obtener terapeuta" });
-}
+  try {
+    const terapeuta = await Terapeuta.findById(req.params.id)
+      .select("nombreCompleto email whatsapp fotoPerfil fotoPortada");
+    if (!terapeuta) {
+      return res.status(404).json({ error: "Terapeuta no encontrado" });
+    }
+    res.json(terapeuta);
+  } catch (err) {
+    console.error("Error al obtener terapeuta público:", err);
+    res.status(500).json({ error: "Error al obtener terapeuta" });
+  }
 });
 
 // ✅ Ruta pública para obtener reseñas aprobadas y puntaje promedio de un terapeuta
