@@ -142,7 +142,7 @@ router.get("/publico/:id", async (req, res) => {
       .select("nombreCompleto email whatsapp fotoPerfil fotoPortada descripcion servicios")
       .populate({
         path: "servicios",
-        select: "titulo descripcion imagen slug modalidad precio categoria aprobado rechazado reseñas", // 👈 AGREGA slug acá
+        select: "titulo descripcion imagen slug modalidad precio categoria aprobado rechazado reseñas", // 👈 incluimos slug
       });
 
     if (!terapeuta) {
