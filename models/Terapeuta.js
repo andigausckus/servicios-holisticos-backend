@@ -98,6 +98,13 @@ modalidad: {
 type: String,
 enum: ["Online", "Presencial", "Ambas"]
 },
+
+  descripcion: {
+  type: String,
+  trim: true,
+  default: ""  // opcional, para que no sea null
+},
+  
 fotoPerfil: String,
 fotoPortada: String,
 
