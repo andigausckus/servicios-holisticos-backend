@@ -141,8 +141,9 @@ router.get("/publico/:id", async (req, res) => {
     const terapeuta = await Terapeuta.findById(req.params.id)
       .select("nombreCompleto email whatsapp fotoPerfil fotoPortada descripcion servicios")
       .populate({
-        path: "servicios",
-        select: "titulo descripcion imagen reseñas",
+  path: "servicios",
+  select: "titulo descripcion imagen slug", // ✅ agregamos slug
+});
         populate: {
           path: "reseñas",   // <-- aquí indicamos que queremos poblar cada reseña
           select: "puntuacion comentario usuario fecha", // los campos que necesites
