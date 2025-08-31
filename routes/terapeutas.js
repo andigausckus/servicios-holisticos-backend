@@ -156,8 +156,7 @@ const Resena = require("../models/Resena");
 router.get("/publico/:id/resenas", async (req, res) => {
 try {
 const { id } = req.params;
-const resenas = await Resena.find({ terapeuta: id, aprobada: true });
-
+const resenas = await Resena.find({ terapeuta: id, aprobado: true });
 if (resenas.length === 0) {  
   return res.json({ promedio: 0, total: 0, resenas: [] });  
 }  
