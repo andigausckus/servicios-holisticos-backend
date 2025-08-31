@@ -205,4 +205,23 @@ router.put('/:id/foto-portada', async (req, res) => {
   }
 });
 
+// Actualizar descripción del terapeuta
+router.put("/:id/descripcion", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { descripcion } = req.body;
+
+    const terapeuta = await Terapeuta.findByIdAndUpdate(
+      id,
+      { descripcion },
+      { new: true }
+    );
+
+    res.json(terapeuta);
+  } catch (err) {
+    console.error("Error al actualizar descripción:", err);
+    res.status(500).json({ message: "Error al actualizar descripción", err });
+  }
+});
+
 module.exports = router;
