@@ -62,10 +62,14 @@ aprobado: { type: Boolean, default: false } // 👈 ahora queda pendiente
 
 // Middleware para generar el slug automáticamente
 servicioSchema.pre("save", function(next) {
-if (this.titulo && !this.slug) {
-this.slug = slugify(this.titulo, { lower: true, strict: true });
-}
-next();
+  if (this.titulo && !this.slug) {
+    this.slug = slugify(this.titulo, {
+      lower: true,   // convierte todo a minúsculas
+      strict: true,  // elimina acentos y caracteres no alfanuméricos
+      locale: "es"   // soporte para español
+    });
+  }
+  next();
 });
 
 module.exports = mongoose.model("Servicio", servicioSchema);
