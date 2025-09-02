@@ -92,7 +92,7 @@ const crearReservaConComprobante = async (req, res) => {
 
     // -------------------------------
     // Enviar email de reseña inmediatamente al usuario
-    await enviarEmailResenaUsuario({
+    await enviarEmailResena({
       nombreCliente: nombreUsuario,
       emailCliente: emailUsuario,
       nombreTerapeuta: terapeuta?.nombreCompleto || "",
