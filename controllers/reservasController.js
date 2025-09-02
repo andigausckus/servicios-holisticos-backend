@@ -10,64 +10,9 @@ enviarEmailResena,
 
 const crearReservaConComprobante = async (req, res) => {
   try {
-    const {
-      servicioId,
-      terapeutaId,
-      fecha,
-      hora,
-      nombreUsuario,
-      emailUsuario,
-      comprobantePago,
-      precio,
-      duracion,
-    } = req.body;
+    const { usuarioId, terapeutaId, servicioId, fecha, hora, duracion, precio, nombreUsuario, emailUsuario, comprobantePago } = req.body;
 
-    if (!nombreUsuario || !emailUsuario || !comprobantePago) {
-      return res.status(400).json({
-        error: "Todos los campos son obligatorios: nombre, email y comprobante.",
-      });
-    }
-
-    // Crear reserva
-    const nuevaReserva = new Reserva({
-      servicioId,
-      terapeutaId,
-      fecha,
-      hora,
-      nombreUsuario,
-      emailUsuario,
-      comprobantePago,
-      precio,
-      duracion,
-      estado: "confirmada",
-      reseñaEnviada: false,
-      emailResenaEnviado: false,
-    });
-
-    // Calcular fechaHoraEnvioResena para enviar reseña después del delay
-    const [h, m] = hora.split(":").map(Number);
-    const fechaParts = fecha.split("-").map(Number); // YYYY-MM-DD
-    const duracionMinutos = duracion || 60;
-    const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
-
-    nuevaReserva.fechaHoraEnvioResena = new Date(
-      fechaParts[0],      // año
-      fechaParts[1] - 1,  // mes (0-indexado)
-      fechaParts[2],      // día
-      h,                  // hora
-      m + duracionMinutos + delayMinutos
-    );
-
-    // Guardar reserva
-    await nuevaReserva.save();
-    console.log("✅ Reserva confirmada:", nuevaReserva);
-
-    // Traer info de terapeuta y servicio
-    const terapeuta = await Terapeuta.findById(terapeutaId);
-    const servicio = await Servicio.findById(servicioId);
-    servicio.duracion = servicio.duracion || duracion;
-
-    // Calcular hora final para email de confirmación
+    // Calcular hora final
     const calcularHoraFinal = (horaInicio, duracionMinutos) => {
       const [h, m] = horaInicio.split(":").map(Number);
       const fecha = new Date();
@@ -79,40 +24,43 @@ const crearReservaConComprobante = async (req, res) => {
     };
     const horaFinal = calcularHoraFinal(hora, duracion);
 
-    // Formatear número de WhatsApp del terapeuta
-    let numeroWhatsApp = terapeuta?.whatsapp || "";
-    numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");
-    if (numeroWhatsApp.startsWith("15")) numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
-    if (numeroWhatsApp.length === 10) numeroWhatsApp = `549${numeroWhatsApp}`;
-    else if (numeroWhatsApp.length === 11 && numeroWhatsApp.startsWith("54"))
-      numeroWhatsApp = `549${numeroWhatsApp.slice(2)}`;
+    // Construir objeto Date para la hora final en Argentina (UTC-3)
+    const fechaHoraFinArgentina = new Date(`${fecha}T${horaFinal}:00-03:00`);
 
-    // Enviar emails de confirmación
-    await enviarEmailsReserva({
-      nombreCliente: nombreUsuario,
-      emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta?.nombreCompleto || "",
-      emailTerapeuta: terapeuta?.email || "",
-      nombreServicio: servicio?.titulo || "",
+    // Guardar en UTC (Mongo lo guarda en UTC automáticamente)
+    const nuevaReserva = new Reserva({
+      usuarioId,
+      terapeutaId,
+      servicioId,
       fecha,
       hora,
-      horaFinal,
       duracion,
       precio,
-      telefonoTerapeuta: numeroWhatsApp,
-      cbuTerapeuta: terapeuta?.cbuCvu || "",
-      bancoTerapeuta: terapeuta?.bancoOBilletera || "",
+      nombreUsuario,
+      emailUsuario,
+      comprobantePago,
+      reseñaEnviada: false,
+      emailResenaEnviado: false,
+      fechaHoraEnvioResena: fechaHoraFinArgentina, // guardamos ya lista para cron
     });
 
-    console.log("✅ Emails de confirmación enviados");
+    await nuevaReserva.save();
 
-    return res.status(201).json({
-      mensaje: "Reserva creada exitosamente",
+    // Logs de control
+    console.log("🆕 Reserva creada:");
+    console.log("➡️ Fecha:", fecha);
+    console.log("➡️ Hora inicio:", hora);
+    console.log("➡️ Hora final:", horaFinal);
+    console.log("➡️ fechaHoraEnvioResena (ARG):", fechaHoraFinArgentina.toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" }));
+    console.log("➡️ fechaHoraEnvioResena (UTC):", fechaHoraFinArgentina.toISOString());
+
+    res.status(201).json({
+      message: "Reserva creada con comprobante exitosamente",
       reserva: nuevaReserva,
     });
   } catch (error) {
-    console.error("❌ Error al crear reserva:", error.message);
-    return res.status(500).json({ error: "Error al crear reserva" });
+    console.error("❌ Error al crear la reserva:", error);
+    res.status(500).json({ error: "Error al crear la reserva" });
   }
 };
 
