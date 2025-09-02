@@ -105,6 +105,15 @@ const crearReservaConComprobante = async (req, res) => {
   }
 };
 
+// Enviar email de reseña al cliente inmediatamente (temporalmente)
+await enviarEmailResenaUsuario({
+  nombreCliente: nombreUsuario,
+  emailCliente: emailUsuario,
+  nombreTerapeuta: terapeuta?.nombreCompleto || "",
+  idReserva: nuevaReserva._id.toString(),
+});
+console.log("✅ Email de reseña enviado al cliente inmediatamente tras la reserva");
+
 const obtenerReservas = async (req, res) => {
 try {
 const reservas = await Reserva.find();
