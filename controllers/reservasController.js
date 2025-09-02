@@ -42,23 +42,16 @@ const crearReservaConComprobante = async (req, res) => {
       estado: "confirmada",
     });
 
-    // --- Calcular fechaHoraEnvioResena ---
-    const fechaHoraInicio = new Date(`${fecha}T${hora}:00Z`); // UTC
-    const duracionMinutos = duracion || 60;
-    const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2; // delay
-    nuevaReserva.fechaHoraEnvioResena = new Date(
-      fechaHoraInicio.getTime() + (duracionMinutos + delayMinutos) * 60000
-    );
-
     // Guardar reserva
     await nuevaReserva.save();
     console.log("✅ Reserva confirmada:", nuevaReserva);
 
+    // Traer info de terapeuta y servicio
     const terapeuta = await Terapeuta.findById(terapeutaId);
     const servicio = await Servicio.findById(servicioId);
     servicio.duracion = servicio.duracion || duracion;
 
-    // Calcular hora final para el email de confirmación
+    // Calcular hora final para email de confirmación
     const calcularHoraFinal = (horaInicio, duracionMinutos) => {
       const [h, m] = horaInicio.split(":").map(Number);
       const fecha = new Date();
@@ -70,7 +63,7 @@ const crearReservaConComprobante = async (req, res) => {
     };
     const horaFinal = calcularHoraFinal(hora, duracion);
 
-    // Formatear número de WhatsApp
+    // Formatear número de WhatsApp del terapeuta
     let numeroWhatsApp = terapeuta?.whatsapp || "";
     numeroWhatsApp = numeroWhatsApp.replace(/\D/g, "");
     if (numeroWhatsApp.startsWith("15")) numeroWhatsApp = "11" + numeroWhatsApp.slice(2);
@@ -95,6 +88,19 @@ const crearReservaConComprobante = async (req, res) => {
       bancoTerapeuta: terapeuta?.bancoOBilletera || "",
     });
 
+    console.log("✅ Emails de confirmación enviados");
+
+    // -------------------------------
+    // Enviar email de reseña inmediatamente al usuario
+    await enviarEmailResenaUsuario({
+      nombreCliente: nombreUsuario,
+      emailCliente: emailUsuario,
+      nombreTerapeuta: terapeuta?.nombreCompleto || "",
+      idReserva: nuevaReserva._id.toString(),
+    });
+    console.log("✅ Email de reseña enviado al cliente inmediatamente tras la reserva");
+    // -------------------------------
+
     return res.status(201).json({
       mensaje: "Reserva creada exitosamente",
       reserva: nuevaReserva,
@@ -104,15 +110,6 @@ const crearReservaConComprobante = async (req, res) => {
     return res.status(500).json({ error: "Error al crear reserva" });
   }
 };
-
-// Enviar email de reseña al cliente inmediatamente (temporalmente)
-await enviarEmailResenaUsuario({
-  nombreCliente: nombreUsuario,
-  emailCliente: emailUsuario,
-  nombreTerapeuta: terapeuta?.nombreCompleto || "",
-  idReserva: nuevaReserva._id.toString(),
-});
-console.log("✅ Email de reseña enviado al cliente inmediatamente tras la reserva");
 
 const obtenerReservas = async (req, res) => {
 try {
