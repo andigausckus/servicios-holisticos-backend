@@ -34,13 +34,14 @@ const crearReservaConComprobante = async (req, res) => {
     const duracionMinutos = duracion || 60;
     const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
 
-    const fechaHoraEnvioResena = new Date(
-      fechaParts[0],      // año
-      fechaParts[1] - 1,  // mes (0-indexado)
-      fechaParts[2],      // día
-      h,                  // hora
-      m + duracionMinutos + delayMinutos
-    );
+    // Fecha y hora de envío de reseña: 2 minutos después de que termine la sesión
+nuevaReserva.fechaHoraEnvioResena = new Date(
+  fechaParts[0],              // año
+  fechaParts[1] - 1,          // mes (0-indexado)
+  fechaParts[2],              // día
+  h,                          // hora inicio
+  m + duracionMinutos + delayMinutos // minutos: duración de la sesión + delay
+);
 
     // Crear reserva
     const nuevaReserva = new Reserva({
