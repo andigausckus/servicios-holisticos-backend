@@ -91,15 +91,14 @@ const crearReservaConComprobante = async (req, res) => {
     console.log("✅ Emails de confirmación enviados");
 
     // -------------------------------
-    // Enviar email de reseña inmediatamente al usuario
-    await enviarEmailResena({
-      nombreCliente: nombreUsuario,
-      emailCliente: emailUsuario,
-      nombreTerapeuta: terapeuta?.nombreCompleto || "",
-      idReserva: nuevaReserva._id.toString(),
-    });
-    console.log("✅ Email de reseña enviado al cliente inmediatamente tras la reserva");
-    // -------------------------------
+    // --- Calcular fechaHoraEnvioResena para enviar reseña después del delay ---
+const fechaHoraInicio = new Date(`${fecha}T${hora}:00Z`); // UTC
+const duracionMinutos = duracion || 60;
+const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2; // delay de producción o desarrollo
+
+nuevaReserva.fechaHoraEnvioResena = new Date(
+  fechaHoraInicio.getTime() + (duracionMinutos + delayMinutos) * 60000
+);
 
     return res.status(201).json({
       mensaje: "Reserva creada exitosamente",
