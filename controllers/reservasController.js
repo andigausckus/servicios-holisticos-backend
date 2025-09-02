@@ -28,16 +28,20 @@ const crearReservaConComprobante = async (req, res) => {
       });
     }
 
-    // Calcular fechaHoraEnvioResena para enviar reseña después del delay
+   // Calcular fechaHoraEnvioResena para enviar reseña después del delay
 const [h, m] = hora.split(":").map(Number);
 const fechaParts = fecha.split("-").map(Number); // YYYY-MM-DD
 const duracionMinutos = duracion || 60;
 const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
 
-// 👇 definir fechaHoraEnvioResena antes de crear la reserva
-const fechaHoraInicio = new Date(fechaParts[0], fechaParts[1] - 1, fechaParts[2], h, m);
-fechaHoraInicio.setMinutes(fechaHoraInicio.getMinutes() + duracionMinutos + delayMinutos);
-const fechaHoraEnvioResena = fechaHoraInicio;
+// 👇 definir fechaHoraEnvioResena en UTC antes de crear la reserva
+const fechaHoraEnvioResena = new Date(Date.UTC(
+  fechaParts[0],
+  fechaParts[1] - 1,
+  fechaParts[2],
+  h,
+  m + duracionMinutos + delayMinutos
+));
 
 // Crear reserva
 const nuevaReserva = new Reserva({
@@ -53,7 +57,7 @@ const nuevaReserva = new Reserva({
   estado: "confirmada",
   reseñaEnviada: false,
   emailResenaEnviado: false,
-  fechaHoraEnvioResena, // ✅ ya definida
+  fechaHoraEnvioResena, // ✅ ya definida en UTC
 });
 
 await nuevaReserva.save();
