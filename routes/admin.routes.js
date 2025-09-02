@@ -205,4 +205,66 @@ router.delete("/rechazar-resena/:id", async (req, res) => {
   }
 });
 
+      // routes/admin.js
+const express = require("express");
+const router = express.Router();
+const Reserva = require("../models/Reserva");
+const { enviarEmailResena } = require("../controllers/emailsController");
+
+// 1️⃣ Obtener reservas pendientes de email de reseña
+router.get("/emails-resenas-pendientes", async (req, res) => {
+  try {
+    const ahora = new Date();
+
+    // Solo reservas confirmadas que ya finalizaron + delay y aún no se les envió email
+    const reservasPendientes = await Reserva.find({
+      estado: "confirmada",
+      emailResenaEnviado: false,
+      fechaHoraEnvioResena: { $lte: ahora },
+    })
+      .populate("terapeutaId", "nombreCompleto email")
+      .populate("servicioId", "titulo duracion")
+      .sort({ fechaHoraEnvioResena: 1 }); // las más antiguas primero
+
+    res.json(reservasPendientes);
+  } catch (error) {
+    console.error("❌ Error al obtener reservas pendientes de reseña:", error);
+    res.status(500).json({ error: "Error al obtener reservas pendientes de reseña" });
+  }
+});
+
+// 2️⃣ Enviar email de reseña manualmente
+router.post("/enviar-email-resena/:id", async (req, res) => {
+  try {
+    const reserva = await Reserva.findById(req.params.id)
+      .populate("terapeutaId", "nombreCompleto email")
+      .populate("servicioId", "titulo");
+
+    if (!reserva) return res.status(404).json({ error: "Reserva no encontrada" });
+
+    // Validar que ya haya pasado el tiempo mínimo
+    const ahora = new Date();
+    if (reserva.fechaHoraEnvioResena > ahora) {
+      return res.status(400).json({ error: "Aún no ha pasado el tiempo mínimo para enviar el email" });
+    }
+
+    // Llamada a la función que envía el email
+    await enviarEmailResena({
+      nombreCliente: reserva.nombreUsuario,
+      emailCliente: reserva.emailUsuario,
+      nombreTerapeuta: reserva.terapeutaId.nombreCompleto,
+      idReserva: reserva._id,
+    });
+
+    // Marcar como enviado
+    reserva.emailResenaEnviado = true;
+    await reserva.save();
+
+    res.json({ mensaje: "Email de reseña enviado correctamente" });
+  } catch (error) {
+    console.error("❌ Error al enviar email de reseña:", error);
+    res.status(500).json({ error: "Error al enviar email de reseña" });
+  }
+});
+
 module.exports = router;
