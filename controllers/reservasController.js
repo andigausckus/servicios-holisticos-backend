@@ -32,7 +32,7 @@ const crearReservaConComprobante = async (req, res) => {
 const [h, m] = hora.split(":").map(Number);
 const fechaParts = fecha.split("-").map(Number); // YYYY-MM-DD
 const duracionMinutos = duracion || 60;
-const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
+const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 1;
 
 // 👇 definir fechaHoraEnvioResena en UTC antes de crear la reserva
 const fechaHoraEnvioResena = new Date(Date.UTC(
