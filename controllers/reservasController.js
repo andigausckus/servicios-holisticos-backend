@@ -40,7 +40,23 @@ const crearReservaConComprobante = async (req, res) => {
       precio,
       duracion,
       estado: "confirmada",
+      reseñaEnviada: false,
+      emailResenaEnviado: false,
     });
+
+    // Calcular fechaHoraEnvioResena para enviar reseña después del delay
+    const [h, m] = hora.split(":").map(Number);
+    const fechaParts = fecha.split("-").map(Number); // YYYY-MM-DD
+    const duracionMinutos = duracion || 60;
+    const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
+
+    nuevaReserva.fechaHoraEnvioResena = new Date(
+      fechaParts[0],      // año
+      fechaParts[1] - 1,  // mes (0-indexado)
+      fechaParts[2],      // día
+      h,                  // hora
+      m + duracionMinutos + delayMinutos
+    );
 
     // Guardar reserva
     await nuevaReserva.save();
@@ -89,23 +105,6 @@ const crearReservaConComprobante = async (req, res) => {
     });
 
     console.log("✅ Emails de confirmación enviados");
-
-    // -------------------------------
-    // -------------------------------
-// Calcular fechaHoraEnvioResena para enviar reseña después del delay
-const [h, m] = hora.split(":").map(Number);
-const fechaParts = fecha.split("-").map(Number); // YYYY-MM-DD
-const duracionMinutos = duracion || 60;
-const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
-
-// Fecha local (Argentina) para enviar reseña
-nuevaReserva.fechaHoraEnvioResena = new Date(
-  fechaParts[0],      // año
-  fechaParts[1] - 1,  // mes 0-index
-  fechaParts[2],      // día
-  h,                  // hora
-  m + duracionMinutos + delayMinutos
-);
 
     return res.status(201).json({
       mensaje: "Reserva creada exitosamente",
