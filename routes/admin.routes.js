@@ -5,7 +5,7 @@ const Servicio = require("../models/Servicio");
 const Resena = require("../models/Resena");
 const Reserva = require("../models/Reserva");
 const { enviarEmailAprobacionTerapeuta } = require("../utils/emailSender");
-
+const { enviarEmailResena } = require("../controllers/emailsController");
 
 
 // --- TERAPEUTAS ---
@@ -205,11 +205,6 @@ router.delete("/rechazar-resena/:id", async (req, res) => {
   }
 });
 
-      // routes/admin.js
-const express = require("express");
-const router = express.Router();
-const Reserva = require("../models/Reserva");
-const { enviarEmailResena } = require("../controllers/emailsController");
 
 // 1️⃣ Obtener reservas pendientes de email de reseña
 router.get("/emails-resenas-pendientes", async (req, res) => {
