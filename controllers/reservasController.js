@@ -35,13 +35,9 @@ const duracionMinutos = duracion || 60;
 const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
 
 // 👇 definir fechaHoraEnvioResena antes de crear la reserva
-const fechaHoraEnvioResena = new Date(
-  fechaParts[0],              // año
-  fechaParts[1] - 1,          // mes (0-indexado)
-  fechaParts[2],              // día
-  h,                          // hora inicio
-  m + duracionMinutos + delayMinutos // minutos: duración de la sesión + delay
-);
+const fechaHoraInicio = new Date(fechaParts[0], fechaParts[1] - 1, fechaParts[2], h, m);
+fechaHoraInicio.setMinutes(fechaHoraInicio.getMinutes() + duracionMinutos + delayMinutos);
+const fechaHoraEnvioResena = fechaHoraInicio;
 
 // Crear reserva
 const nuevaReserva = new Reserva({
