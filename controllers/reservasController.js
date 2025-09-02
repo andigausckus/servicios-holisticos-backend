@@ -29,30 +29,13 @@ const crearReservaConComprobante = async (req, res) => {
     }
 
     // Calcular fechaHoraEnvioResena para enviar reseña después del delay
-    const [h, m] = hora.split(":").map(Number);
-    const fechaParts = fecha.split("-").map(Number); // YYYY-MM-DD
-    const duracionMinutos = duracion || 60;
-    const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
+const [h, m] = hora.split(":").map(Number);
+const fechaParts = fecha.split("-").map(Number); // YYYY-MM-DD
+const duracionMinutos = duracion || 60;
+const delayMinutos = process.env.NODE_ENV === "production" ? 30 : 2;
 
-    // Crear reserva
-    const nuevaReserva = new Reserva({
-      servicioId,
-      terapeutaId,
-      fecha,
-      hora,
-      nombreUsuario,
-      emailUsuario,
-      comprobantePago,
-      precio,
-      duracion,
-      estado: "confirmada",
-      reseñaEnviada: false,
-      emailResenaEnviado: false,
-      fechaHoraEnvioResena,
-    });
-
-    // Fecha y hora de envío de reseña: 2 minutos después de que termine la sesión
-nuevaReserva.fechaHoraEnvioResena = new Date(
+// 👇 definir fechaHoraEnvioResena antes de crear la reserva
+const fechaHoraEnvioResena = new Date(
   fechaParts[0],              // año
   fechaParts[1] - 1,          // mes (0-indexado)
   fechaParts[2],              // día
@@ -60,8 +43,25 @@ nuevaReserva.fechaHoraEnvioResena = new Date(
   m + duracionMinutos + delayMinutos // minutos: duración de la sesión + delay
 );
 
-    await nuevaReserva.save();
-    console.log("✅ Reserva confirmada:", nuevaReserva);
+// Crear reserva
+const nuevaReserva = new Reserva({
+  servicioId,
+  terapeutaId,
+  fecha,
+  hora,
+  nombreUsuario,
+  emailUsuario,
+  comprobantePago,
+  precio,
+  duracion,
+  estado: "confirmada",
+  reseñaEnviada: false,
+  emailResenaEnviado: false,
+  fechaHoraEnvioResena, // ✅ ya definida
+});
+
+await nuevaReserva.save();
+console.log("✅ Reserva confirmada:", nuevaReserva);
 
     // Traer info de terapeuta y servicio
     const terapeuta = await Terapeuta.findById(terapeutaId);
