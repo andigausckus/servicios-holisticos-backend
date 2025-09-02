@@ -5,8 +5,7 @@ const Servicio = require("../models/Servicio");
 const Resena = require("../models/Resena");
 const Reserva = require("../models/Reserva");
 const { enviarEmailAprobacionTerapeuta } = require("../utils/emailSender");
-const { enviarEmailResena } = require("../controllers/emailsController");
-
+const { enviarEmailResena } = require("../utils/emailSender");
 
 // --- TERAPEUTAS ---
 router.get("/terapeutas-pendientes", async (req, res) => {
