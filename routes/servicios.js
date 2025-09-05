@@ -114,19 +114,24 @@ res.status(500).json({ error: "Error al obtener los servicios" });
 });
 
 // ✅ Obtener servicios del terapeuta autenticado
-router.get("/mis-servicios", verificarToken, async (req, res) => {
+export const obtenerMisServicios = async (req, res) => {
   try {
+    const terapeutaId = req.terapeuta._id; // O como tengas el ID del terapeuta desde el token
+    console.log("ID recibido en la ruta:", terapeutaId);
+
+    // Filtramos servicios que no estén rechazados
     const servicios = await Servicio.find({
-  terapeuta: req.terapeutaId,
-  rechazado: false
-});
-console.log("Servicios encontrados para terapeuta:", servicios);
+      terapeuta: terapeutaId,
+      estado: { $ne: "rechazado" } // Excluye rechazados
+    });
+
+    console.log("Servicios encontrados para terapeuta:", servicios);
     res.json(servicios);
-  } catch (err) {
-    console.error("Error al obtener tus servicios:", err);
-    res.status(500).json({ error: "Error al obtener tus servicios" });
+  } catch (error) {
+    console.error("Error al obtener servicios:", error);
+    res.status(500).json({ message: "Error al obtener servicios" });
   }
-});
+};
 
 // GET /api/servicios/publico/:slug
 router.get("/publico/:slug", async (req, res) => {
