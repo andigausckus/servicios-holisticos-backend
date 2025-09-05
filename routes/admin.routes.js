@@ -89,21 +89,38 @@ res.status(500).json({ mensaje: "Error al aprobar servicio", error });
 });
 
 router.put("/rechazar-servicio/:id", async (req, res) => {
-try {
-const terapeuta = await Terapeuta.findOne({ "servicios._id": req.params.id });
-if (!terapeuta) return res.status(404).json({ mensaje: "Servicio no encontrado" });
+  try {
+    // 1. Actualizar en Servicios
+    const servicioActualizado = await Servicio.findByIdAndUpdate(
+      req.params.id,
+      { aprobado: false, rechazado: true },
+      { new: true }
+    );
+    if (!servicioActualizado) {
+      return res.status(404).json({ mensaje: "Servicio no encontrado en colección Servicios" });
+    }
 
-const servicio = terapeuta.servicios.id(req.params.id);  
-servicio.aprobado = false;  
-servicio.rechazado = true; // 👈 clave  
+    // 2. Actualizar también dentro de Terapeuta.servicios
+    const terapeuta = await Terapeuta.findOne({ "servicios._id": req.params.id });
+    if (!terapeuta) {
+      return res.status(404).json({ mensaje: "Servicio no encontrado en el array de Terapeuta" });
+    }
 
-await terapeuta.save();  
-res.json({ mensaje: "❌ Servicio rechazado", servicio });
+    const servicioEnTerapeuta = terapeuta.servicios.id(req.params.id);
+    servicioEnTerapeuta.aprobado = false;
+    servicioEnTerapeuta.rechazado = true;
 
-} catch (error) {
-res.status(500).json({ mensaje: "Error al rechazar servicio", error });
-}
-});
+    await terapeuta.save();
+
+    res.json({
+      mensaje: "❌ Servicio rechazado correctamente",
+      servicio: servicioActualizado
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: "Error al rechazar servicio", error });
+  }
+}); 
 
 router.put("/aprobar-resena/:id", async (req, res) => {
   try {
