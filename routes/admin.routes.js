@@ -90,33 +90,67 @@ res.status(500).json({ mensaje: "Error al aprobar servicio", error });
 
 router.put("/rechazar-servicio/:id", async (req, res) => {
   try {
-    console.log("👉 ID recibido en la ruta:", req.params.id); // 👈 DEBUG
-    // 1. Actualizar en Servicios
-    const servicioActualizado = await Servicio.findByIdAndUpdate(
-      req.params.id,
+    const id = req.params.id;
+    console.log("👉 ID recibido en la ruta:", id);
+
+    let servicioActualizado = null;
+
+    // 1. Intentar actualizar directamente en la colección Servicios
+    servicioActualizado = await Servicio.findByIdAndUpdate(
+      id,
       { aprobado: false, rechazado: true },
       { new: true }
     );
 
     if (!servicioActualizado) {
-      return res.status(404).json({ mensaje: "Servicio no encontrado en colección Servicios" });
-    }
+      console.log("⚠️ No se encontró en Servicios, busco en Terapeuta.servicios");
 
-    // 2. Actualizar también dentro de Terapeuta.servicios
-    const terapeuta = await Terapeuta.findOne({ "servicios._id": req.params.id });
-    if (terapeuta) {
-      const servicioEnTerapeuta = terapeuta.servicios.id(req.params.id);
+      // 2. Buscar si el ID corresponde a un subdocumento en Terapeuta.servicios
+      const terapeuta = await Terapeuta.findOne({ "servicios._id": id });
+      if (!terapeuta) {
+        return res.status(404).json({ mensaje: "Servicio no encontrado" });
+      }
+
+      const servicioEnTerapeuta = terapeuta.servicios.id(id);
       servicioEnTerapeuta.aprobado = false;
       servicioEnTerapeuta.rechazado = true;
       await terapeuta.save();
+
+      // ⚠️ IMPORTANTE: el subdocumento en Terapeuta debería estar sincronizado
+      // con el documento en Servicios. Si no, buscamos el ID real del documento principal:
+      const servicioPrincipal = await Servicio.findOne({
+        titulo: servicioEnTerapeuta.titulo,
+        terapeuta: terapeuta._id,
+      });
+
+      if (servicioPrincipal) {
+        servicioPrincipal.aprobado = false;
+        servicioPrincipal.rechazado = true;
+        await servicioPrincipal.save();
+        servicioActualizado = servicioPrincipal;
+      } else {
+        console.log("⚠️ No encontré coincidencia en Servicios, se actualizó solo en Terapeuta.");
+        servicioActualizado = servicioEnTerapeuta;
+      }
+    } else {
+      // Si lo encontré en Servicios, también actualizo el array en Terapeuta
+      await Terapeuta.updateOne(
+        { "servicios._id": id },
+        {
+          $set: {
+            "servicios.$.aprobado": false,
+            "servicios.$.rechazado": true,
+          },
+        }
+      );
     }
 
     res.json({
       mensaje: "❌ Servicio rechazado correctamente",
-      servicio: servicioActualizado
+      servicio: servicioActualizado,
     });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error en rechazar-servicio:", error);
     res.status(500).json({ mensaje: "Error al rechazar servicio", error });
   }
 }); 
