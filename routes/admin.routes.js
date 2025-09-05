@@ -96,21 +96,19 @@ router.put("/rechazar-servicio/:id", async (req, res) => {
       { aprobado: false, rechazado: true },
       { new: true }
     );
+
     if (!servicioActualizado) {
       return res.status(404).json({ mensaje: "Servicio no encontrado en colección Servicios" });
     }
 
     // 2. Actualizar también dentro de Terapeuta.servicios
     const terapeuta = await Terapeuta.findOne({ "servicios._id": req.params.id });
-    if (!terapeuta) {
-      return res.status(404).json({ mensaje: "Servicio no encontrado en el array de Terapeuta" });
+    if (terapeuta) {
+      const servicioEnTerapeuta = terapeuta.servicios.id(req.params.id);
+      servicioEnTerapeuta.aprobado = false;
+      servicioEnTerapeuta.rechazado = true;
+      await terapeuta.save();
     }
-
-    const servicioEnTerapeuta = terapeuta.servicios.id(req.params.id);
-    servicioEnTerapeuta.aprobado = false;
-    servicioEnTerapeuta.rechazado = true;
-
-    await terapeuta.save();
 
     res.json({
       mensaje: "❌ Servicio rechazado correctamente",
