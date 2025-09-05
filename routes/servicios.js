@@ -117,9 +117,10 @@ res.status(500).json({ error: "Error al obtener los servicios" });
 router.get("/mis-servicios", verificarToken, async (req, res) => {
   try {
     const servicios = await Servicio.find({
-      terapeuta: req.terapeutaId,
-      rechazado: false  // 👈 Mostrar solo los que NO están rechazados
-    });
+  terapeuta: req.terapeutaId,
+  rechazado: false
+});
+console.log("Servicios encontrados para terapeuta:", servicios);
     res.json(servicios);
   } catch (err) {
     console.error("Error al obtener tus servicios:", err);
