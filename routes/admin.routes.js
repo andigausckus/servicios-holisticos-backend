@@ -90,6 +90,7 @@ res.status(500).json({ mensaje: "Error al aprobar servicio", error });
 
 router.put("/rechazar-servicio/:id", async (req, res) => {
   try {
+    console.log("👉 ID recibido en la ruta:", req.params.id); // 👈 DEBUG
     // 1. Actualizar en Servicios
     const servicioActualizado = await Servicio.findByIdAndUpdate(
       req.params.id,
