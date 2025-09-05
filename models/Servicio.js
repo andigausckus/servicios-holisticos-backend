@@ -57,7 +57,8 @@ required: true
 },
 horariosDisponibles: { type: [horarioSchema], default: [] },
 resenas: { type: [resenaSchema], default: [] },
-aprobado: { type: Boolean, default: false } // 👈 ahora queda pendiente
+aprobado: { type: Boolean, default: false },
+rechazado: { type: Boolean, default: false } // 👈 agregar
 }, { timestamps: true });
 
 // Middleware para generar el slug automáticamente
