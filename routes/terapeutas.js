@@ -230,4 +230,31 @@ router.put("/:id/descripcion", async (req, res) => {
   }
 });
 
+// ✅ Actualizar especialidades de un terapeuta
+router.put("/:id/especialidades", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { especialidades } = req.body;
+
+    if (!Array.isArray(especialidades)) {
+      return res.status(400).json({ message: "El campo 'especialidades' debe ser un array." });
+    }
+
+    const terapeuta = await Terapeuta.findByIdAndUpdate(
+      id,
+      { especialidades },
+      { new: true } // devuelve el terapeuta actualizado
+    );
+
+    if (!terapeuta) {
+      return res.status(404).json({ message: "Terapeuta no encontrado" });
+    }
+
+    res.json({ message: "Especialidades actualizadas correctamente", especialidades: terapeuta.especialidades });
+  } catch (err) {
+    console.error("Error al actualizar especialidades:", err);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
 module.exports = router;
